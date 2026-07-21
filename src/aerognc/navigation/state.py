@@ -9,12 +9,17 @@ supply the primitive state.
 """
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from aerognc.dynamics.state import SixDofState
 from aerognc.mathematics.quaternion import normalize_quaternion, quaternion_to_euler321
 from aerognc.mathematics.vectors import FloatArray, as_vector
+
+if TYPE_CHECKING:
+    # Imported only for typing; a runtime import here would create an import
+    # cycle (dynamics -> configuration -> gnc -> guidance -> navigation.state).
+    from aerognc.dynamics.state import SixDofState
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,7 +53,7 @@ class NavigationState:
 
     @classmethod
     def from_six_dof(
-        cls, state: SixDofState, airspeed_mps: float, *, valid: bool = True
+        cls, state: "SixDofState", airspeed_mps: float, *, valid: bool = True
     ) -> "NavigationState":
         """Build a navigation state from a rigid-body truth state and airspeed."""
         return cls(
