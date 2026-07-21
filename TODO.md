@@ -297,20 +297,31 @@ _Unit + integration (full chain) + scenario tests (nominal, all 4 guidance modes
 
 ## Phase 18 — Documentation & GitHub presentation  (spec §29, §30, §33, §32 steps 19–20)
 
-- [ ] 18.1 Update README (purpose/features/arch diagram/screenshots/example mission/
+- [x] 18.1 Update README (purpose/features/arch diagram/screenshots/example mission/
   quick-start/backends/config/tests/limitations/**safety warning for real-aircraft use**).
-- [ ] 18.2 Guides: installation, architecture, coordinate-frame, mission-planning,
+- [~] 18.2 Guides: installation, architecture, coordinate-frame, mission-planning,
   controller, simulation, SITL integration, testing, safety, troubleshooting, roadmap.
-- [ ] 18.3 Mermaid diagrams; feature table; changelog entry (`CHANGELOG.md`).
-- [ ] 18.4 GitHub: issue/PR templates, contribution guide (exists), release notes for first
+- [x] 18.3 Mermaid diagrams; feature table; changelog entry (`CHANGELOG.md`).
+- [~] 18.4 GitHub: issue/PR templates, contribution guide (exists), release notes for first
   waypoint-capable version. Use "Designed for simulation, SITL validation, and progressive
   preparation for hardware integration." Do **not** claim flight-certification.
-- [ ] 18.5 Final implementation summary + files added/modified/removed + run commands +
+- [x] 18.5 Final implementation summary + files added/modified/removed + run commands +
   perf results + limitations + next steps (ArduPilot/PX4/HIL/RC).
 
 ---
 
 ## Running log (newest first)
+
+- 2026-07-21 (session 2) — Phases 4-10, 12, 13, 15 implemented and committed per phase on
+  `feature/waypoint-gnc`: guidance (4 modes) + navigation state, cascaded autopilot,
+  control-surface actuators w/ failures, navigation providers, internal fixed-wing backend,
+  mission state machine, safety manager, the integrated `run_waypoint_mission` loop, plots,
+  CSV/JSON logging, and `aerognc mission validate` / `aerognc waypoint` CLI. Phase 18 docs
+  (user guide, SITL/hardware roadmap, README section, CHANGELOG) added. The demo mission
+  flies navigate->loiter->return-home->complete. **491 tests pass; ruff + mypy --strict clean.**
+  DEFERRED for future sessions: Phase 11 interactive Tk map planner + white-on-white UI fix
+  + live preview; Phase 16 orbital RPO feature; Phase 17 web/API improvements; SITL/MAVLink
+  backends (10.3-10.8); full EKF-estimated nav (7.3); TECS (5.3); trim solver wiring (5.5).
 
 - 2026-07-21 — Phase 3 path manager done: line/orbit segments, coordinated-turn radius,
   fillet geometry, half-plane turn anticipation, robust chatter-free waypoint switching,

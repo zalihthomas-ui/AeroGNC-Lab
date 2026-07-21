@@ -5,6 +5,34 @@ and the project uses Semantic Versioning.
 
 ## [Unreleased]
 
+### Added
+
+- **Waypoint-based autonomous fixed-wing GNC workflow** integrating a new
+  mission layer into the existing package. Designed for simulation, SITL
+  validation, and progressive preparation for hardware integration; it is not
+  flight-certified and commands no real hardware.
+  - Strongly typed, validated `Waypoint` / `Mission` models with a versioned YAML
+    import/export format, plus home-referenced local-tangent geometry
+    (`mathematics/local_frame.py`).
+  - A fixed-wing `PathManager` (straight-line and loiter-orbit segments,
+    coordinated-turn radius, fillet geometry, half-plane turn anticipation, and
+    chatter-free waypoint switching).
+  - Selectable path-following guidance (`direct_bearing`, `line_of_sight`,
+    `l1_guidance`, `vector_field`) producing course/altitude/airspeed/roll
+    commands with wind-corrected heading, and a cascaded fixed-wing autopilot
+    (course→roll→aileron, altitude→pitch→elevator, airspeed→throttle, yaw damper)
+    reusing the project PID.
+  - A control-surface actuator bank with failure injection (stuck, reduced
+    authority, reversed, oscillating, loss), a mission state machine
+    (arm/start/pause/resume/abort/return-home/emergency), and a separate safety
+    manager (envelope, geofence, GPS-loss, cross-track).
+  - A `VehicleBackend` interface and an internal reduced fixed-wing simulation
+    backend, an integrated `run_waypoint_mission` loop with CSV/JSON logging and a
+    plotting dashboard, and `aerognc mission validate` / `aerognc waypoint` CLI
+    entry points.
+  - 76 new unit/integration/scenario tests (nominal, all guidance modes,
+    crosswind, GPS dropout, return-home, geofence, actuator failure).
+
 ## [0.8.0] - 2026-07-20
 
 ### Added
