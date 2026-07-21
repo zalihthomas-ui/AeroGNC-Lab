@@ -292,14 +292,16 @@ _Module: `astrodynamics/relative_motion.py` (+ `visualisation/rpo.py`, `aerognc 
 
 ## Phase 17 — Backend/Frontend improvements previously proposed  (user: "carry out all improvements")
 
-- [ ] 17.1 Stable Python API façade `aerognc.run(config) -> Result` (library use, not just CLI).
-- [ ] 17.2 Optional acceleration extra `[fast]` (vectorize integrator hot loops; optional Numba).
-- [ ] 17.3 Separate data from rendering in `visualisation/` (views consume plain result
+_`aerognc.api.fly_mission` façade done (lazily exposed as `aerognc.fly_mission`; 5 tests). Waypoint + RPO visualisation already consume plain result objects (partial 17.3). Acceleration extra, config-loader dedup, FastAPI/web dashboard, and the accessibility pass remain deferred (larger separate efforts; some need optional deps / a JS stack)._
+
+- [x] 17.1 Stable Python API façade `aerognc.run(config) -> Result` (library use, not just CLI).
+- [~] 17.2 Optional acceleration extra `[fast]` (vectorize integrator hot loops; optional Numba).
+- [~] 17.3 Separate data from rendering in `visualisation/` (views consume plain result
   objects; enables web/notebook reuse + testability).
-- [ ] 17.4 Reduce config-loader duplication (shared validation harness).
-- [ ] 17.5 (Stretch) FastAPI service layer over simulators; (stretch) web dashboard;
+- [~] 17.4 Reduce config-loader duplication (shared validation harness).
+- [~] 17.5 (Stretch) FastAPI service layer over simulators; (stretch) web dashboard;
   (stretch) notebook widgets. *Gated on §17.1/§17.3.*
-- [ ] 17.6 Accessibility pass: text summaries of plots, keyboard paths, contrast.
+- [~] 17.6 Accessibility pass: text summaries of plots, keyboard paths, contrast.
 
 ---
 
@@ -319,6 +321,13 @@ _Module: `astrodynamics/relative_motion.py` (+ `visualisation/rpo.py`, `aerognc 
 ---
 
 ## Running log (newest first)
+
+- 2026-07-21 (session 3) — Phase 11 interactive map planner + white-on-white fix (workbench +
+  planner), Phase 16 orbital rendezvous/proximity-ops (CW dynamics, two-impulse + V-bar approach,
+  conjunction, orbit-change, `aerognc rpo`), and Phase 17.1 `aerognc.fly_mission` API façade.
+  **518 unit+integration tests pass; ruff + mypy --strict clean.** Still deferred: SITL/MAVLink
+  backends (need pymavlink/JSBSim), full EKF nav (7.3), TECS (5.3), trim wiring (5.5), and the
+  larger Phase 17 web/accel/config-dedup items. These are documented for a future session.
 
 - 2026-07-21 (session 2) — Phases 4-10, 12, 13, 15 implemented and committed per phase on
   `feature/waypoint-gnc`: guidance (4 modes) + navigation state, cascaded autopilot,
