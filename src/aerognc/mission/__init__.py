@@ -21,14 +21,13 @@ from aerognc.mission.mission_io import (
     mission_to_dict,
     save_mission,
 )
-from aerognc.mission.mission_manager import (
-    MissionManager,
-    MissionManagerStatus,
-    MissionState,
-    SafetyResponse,
-    StateTransition,
-)
-from aerognc.mission.safety import SafetyEvent, SafetyLimits, SafetyManager, SafetyVerdict
+
+# NOTE: MissionManager (mission_manager.py) and SafetyManager (safety.py) are the
+# *orchestration* layer and depend on aerognc.gnc, which in turn imports these
+# pure data models. Importing them here would create a package-init import cycle,
+# so import them from their submodules directly:
+#     from aerognc.mission.mission_manager import MissionManager, MissionState
+#     from aerognc.mission.safety import SafetyManager, SafetyLimits
 from aerognc.mission.waypoint import (
     AltitudeReference,
     LoiterDirection,
@@ -46,16 +45,7 @@ __all__ = [
     "Mission",
     "MissionDefaults",
     "MissionLimits",
-    "MissionManager",
-    "MissionManagerStatus",
-    "MissionState",
     "MissionValidationError",
-    "SafetyEvent",
-    "SafetyLimits",
-    "SafetyManager",
-    "SafetyResponse",
-    "SafetyVerdict",
-    "StateTransition",
     "TurnType",
     "Waypoint",
     "WaypointAction",
