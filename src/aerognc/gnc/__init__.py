@@ -17,6 +17,13 @@ from aerognc.gnc.error_state_ekf import (
     ErrorStateNavigationEKF,
     NavigationNominalState,
 )
+from aerognc.gnc.fixedwing_autopilot import (
+    ActuatorCommand,
+    AutopilotGains,
+    AutopilotOutput,
+    ControlCommand,
+    FixedWingAutopilot,
+)
 from aerognc.gnc.flight_analysis import (
     DynamicMode,
     LinearModel,
@@ -80,11 +87,15 @@ from aerognc.gnc.waypoint_guidance import (
 )
 
 __all__ = [
+    "ActuatorCommand",
     "AscentGuidanceCommand",
     "AscentGuidanceDecision",
     "AscentGuidanceInputs",
     "AttitudeReferenceSchedule",
+    "AutopilotGains",
+    "AutopilotOutput",
     "ConstraintAwareAscentGuidance",
+    "ControlCommand",
     "DelayedRotatingNavigationESKF",
     "DynamicMode",
     "EnvelopeOperatingPoint",
@@ -92,6 +103,7 @@ __all__ = [
     "ErrorStateFilterTuning",
     "ErrorStateNavigationEKF",
     "FilletGeometry",
+    "FixedWingAutopilot",
     "FlightEnvelopeResult",
     "GuidanceCommand",
     "GuidanceGains",

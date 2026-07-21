@@ -109,26 +109,36 @@ _Modules: `navigation/state.py` (NavigationState + FlightEnvironment, also Phase
 
 ## Phase 5 — Flight control (cascaded autopilot)  (spec §10, §11, §12, §32 steps 10–11)
 
-- [ ] 5.1 Lateral-directional: course→roll→aileron; roll-rate damping; yaw damper; rudder
-  coordination; bank limit. **Reuse `gnc/pid.PIDController`, `gnc/control_loops`.**
-- [ ] 5.2 Longitudinal: altitude→pitch→elevator; airspeed→throttle. Reuse PID.
-- [ ] 5.3 Optional TECS-style total-energy mode (energy→throttle, balance→pitch).
-- [ ] 5.4 Anti-windup, derivative filtering, saturation, rate limit, integrator reset,
-  bumpless transfer, gain-scheduling hooks, trim feedforward. *(PID already has most.)*
-- [ ] 5.5 Trim integration: reuse `gnc/flight_analysis.solve_trim`; init near trim.
-- [ ] 5.6 Actuator command normalization; consistent signs/units into `vehicle/actuators`.
-- [ ] 5.7 Controller selection via config (retain existing LQR/state-feedback as backends).
-- [ ] 5.8 Unit tests: closed-loop roll/pitch/alt/airspeed tracking, saturation, bumpless.
+_Module: `gnc/fixedwing_autopilot.py`. 10 tests; ruff + mypy strict clean._
+
+- [x] 5.1 Lateral: course→roll (PI, bank-limited, + guidance roll feedforward)→aileron
+  (roll error + roll-rate damping); yaw damper→rudder. Reuses `gnc/pid.PIDController`.
+- [x] 5.2 Longitudinal: altitude→pitch (PI, pitch-limited)→elevator (+pitch-rate damping);
+  airspeed→throttle (PI about trim). Reuses PID.
+- [~] 5.3 TECS-style total-energy mode — deferred (standard altitude/airspeed loops in place).
+- [x] 5.4 Anti-windup, output/integral limits (PID), integrator reset / bumpless re-engage
+  (`reset()`), trim feedforward; gain-scheduling hook = injectable `AutopilotGains`.
+- [~] 5.5 Trim integration with `flight_analysis.solve_trim` — deferred; trim throttle/
+  elevator provided as gains for now.
+- [x] 5.6 Normalized surface commands ([-1,1]) + throttle ([0,1]); documented sign
+  convention shared with the internal backend and `vehicle/control_surfaces.py`.
+- [~] 5.7 Config-selectable controllers — deferred; existing LQR/state-feedback untouched
+  (this is an added autopilot, not a replacement).
+- [x] 5.8 Unit tests: course→roll sign & bank limit, roll-rate damping, altitude→pitch &
+  limit, airspeed→throttle bounds, yaw damper, output clipping, reset.
 
 ---
 
 ## Phase 6 — Actuator model extension  (spec §12)
 
-- [ ] 6.1 Extend `vehicle/actuators.py` (or wrap) for aileron/elevator/rudder/throttle/
-  flaps/spoilers with min/max, rate, first-order lag, delay, neutral, trim offset.
-  **`FirstOrderActuator` already covers lag/rate/limit/delay — add channel set + trim/neutral + failures.**
-- [ ] 6.2 Failure modes: stuck, reduced authority, reversed, delayed, oscillating, total loss.
-- [ ] 6.3 Unit tests for each failure mode and normalization.
+_Module: `vehicle/control_surfaces.py`. 12 tests; ruff + mypy strict clean._
+
+- [x] 6.1 `ControlSurfaceSet` for aileron/elevator/rudder + first-order throttle, wrapping
+  `FirstOrderActuator` (min/max, rate, lag, delay) with neutral + trim offsets and
+  normalized-command mapping. (Flaps/spoilers slots addable the same way.)
+- [x] 6.2 Failure modes: stuck, reduced authority, reversed, oscillating, total loss
+  (delayed handled via the actuator `command_delay_s`).
+- [x] 6.3 Unit tests for each failure mode, limits, rate limit, trim, throttle settling.
 
 ---
 
