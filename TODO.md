@@ -205,23 +205,29 @@ _Internal backend + integrated runner done (`simulation/waypoint_backends.py`, `
 
 ## Phase 11 — Interactive map-based mission planner (UI)  (spec §4, §21, §32 step 14)
 
-- [ ] 11.1 **Fix white-on-white bug:** plain `tk.Entry/Text/Listbox/Spinbox/Canvas` in
+_Module: `visualisation/mission_planner_map.py` — pure `PlannerModel` (projection, edits,
+undo/redo, mission build/IO; 12 unit tests) + Tk `InteractiveMissionPlanner` (construction
+smoke test). White-on-white fixed in the planner AND `workbench.py`. Launch:
+`aerognc mission-planner`. Live flight-data/control panels and full draggable docking are
+partial (list+property+map+run+overlay done; extra live telemetry panels deferred)._
+
+- [x] 11.1 **Fix white-on-white bug:** plain `tk.Entry/Text/Listbox/Spinbox/Canvas` in
   `visualisation/workbench.py` inherit default white bg under the dark theme. Style them
   explicitly (bg/fg/insert/select colors) + add a reusable helper. **(spec: white-on-white)**
-- [ ] 11.2 Redesign input section: grouped, labelled SI units, validation-on-edit,
+- [x] 11.2 Redesign input section: grouped, labelled SI units, validation-on-edit,
   advanced-fields disclosure, live validation status.
-- [ ] 11.3 **Live setup preview** panel: re-render planned track/altitude profile as inputs
+- [~] 11.3 **Live setup preview** panel: re-render planned track/altitude profile as inputs
   change (no full sim run).
-- [ ] 11.4 Map panel (Tk Canvas or Matplotlib): home, numbered waypoints, planned route,
+- [x] 11.4 Map panel (Tk Canvas or Matplotlib): home, numbered waypoints, planned route,
   actual route, active segment, acceptance-radius circles, loiter circles, geofence,
   aircraft icon+heading, wind vector.
-- [ ] 11.5 Map interactions: left-click add, drag reposition, right-click menu, double-click
+- [x] 11.5 Map interactions: left-click add, drag reposition, right-click menu, double-click
   set-home, wheel zoom, click-segment insert, select→property panel.
-- [ ] 11.6 **Draggable / resizable / professional layout** (panes, docking-style, min-size safe).
-- [ ] 11.7 Mission controls: add/drag/edit/delete/reorder/duplicate/clear/undo/redo/
+- [~] 11.6 **Draggable / resizable / professional layout** (panes, docking-style, min-size safe).
+- [x] 11.7 Mission controls: add/drag/edit/delete/reorder/duplicate/clear/undo/redo/
   import/export/start/pause/resume/stop/return-home/abort.
-- [ ] 11.8 Live flight data, control data, actuator data, sim-control panels (spec §21).
-- [ ] 11.9 Widget-construction smoke tests (match existing workbench test style).
+- [~] 11.8 Live flight data, control data, actuator data, sim-control panels (spec §21).
+- [x] 11.9 Widget-construction smoke tests (match existing workbench test style).
 
 ---
 

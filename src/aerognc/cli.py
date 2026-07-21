@@ -604,6 +604,14 @@ def _parser() -> argparse.ArgumentParser:
     )
     waypoint.add_argument("--output", type=Path, help="output directory for log + plot")
     waypoint.add_argument("--no-plots", action="store_true", help="skip PNG generation")
+
+    mission_planner = subparsers.add_parser(
+        "mission-planner",
+        help="open the interactive map-based waypoint mission planner (Tk)",
+    )
+    mission_planner.add_argument(
+        "--mission", type=Path, help="optional mission YAML to open on launch"
+    )
     return parser
 
 
@@ -1819,6 +1827,14 @@ def _run_waypoint_command(arguments: argparse.Namespace) -> int:
     return 0 if result.completed else 1
 
 
+def _run_mission_planner_command(arguments: argparse.Namespace) -> int:  # pragma: no cover - UI
+    from aerognc.visualisation.mission_planner_map import launch_mission_planner
+
+    mission_path = str(arguments.mission) if arguments.mission else None
+    launch_mission_planner(mission_path)
+    return 0
+
+
 def _run_project_command(arguments: argparse.Namespace) -> int:
     from aerognc.project import create_empty_project, load_project
     from aerognc.project.comparison import compare_datasets, write_comparison_json
@@ -2181,6 +2197,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_mission_command(arguments)
         if arguments.command == "waypoint":
             return _run_waypoint_command(arguments)
+        if arguments.command == "mission-planner":
+            return _run_mission_planner_command(arguments)
     except (ConfigurationError, ValueError, FloatingPointError, OSError, RuntimeError) as error:
         LOGGER.error("%s", error)
         return 2

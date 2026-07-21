@@ -293,6 +293,60 @@ class AeroGNCWorkbenchApp:
         style.map("Treeview", background=[("selected", "#21506D")])
         style.configure("Treeview.Heading", background="#1A3850", foreground="#FFFFFF")
 
+        # White-on-white fix: the "." style above makes the default foreground
+        # near-white, but ttk entry/combobox/spinbox fields and classic tk widgets
+        # keep a WHITE field background by default -> invisible text. Give every
+        # editable field an explicit dark field background with light text/caret.
+        field_background = "#0A1724"
+        style.configure(
+            "TEntry", fieldbackground=field_background, foreground=TEXT, insertcolor=TEXT
+        )
+        style.map(
+            "TEntry",
+            fieldbackground=[("readonly", CARD), ("disabled", PANEL)],
+            foreground=[("disabled", MUTED)],
+        )
+        style.configure(
+            "TSpinbox",
+            fieldbackground=field_background,
+            foreground=TEXT,
+            insertcolor=TEXT,
+            arrowcolor=TEXT,
+            background=CARD,
+        )
+        style.configure(
+            "TCombobox",
+            fieldbackground=field_background,
+            foreground=TEXT,
+            background=CARD,
+            arrowcolor=TEXT,
+        )
+        style.map(
+            "TCombobox",
+            fieldbackground=[("readonly", field_background)],
+            foreground=[("readonly", TEXT), ("disabled", MUTED)],
+        )
+        style.configure("TCheckbutton", background=PANEL, foreground=TEXT)
+        style.map("TCheckbutton", background=[("active", PANEL)])
+        style.configure("TRadiobutton", background=PANEL, foreground=TEXT)
+        # Classic (non-ttk) tk widgets ignore ttk styles; set their defaults too.
+        for option, value in (
+            ("*Entry.background", field_background),
+            ("*Entry.foreground", TEXT),
+            ("*Entry.insertBackground", TEXT),
+            ("*Text.background", field_background),
+            ("*Text.foreground", TEXT),
+            ("*Text.insertBackground", TEXT),
+            ("*Listbox.background", field_background),
+            ("*Listbox.foreground", TEXT),
+            ("*Listbox.selectBackground", "#21506D"),
+            ("*Listbox.selectForeground", "#FFFFFF"),
+            ("*Spinbox.background", field_background),
+            ("*Spinbox.foreground", TEXT),
+            ("*Spinbox.insertBackground", TEXT),
+        ):
+            self.root.option_add(option, value)
+
     def _create_variables(self) -> None:
         self.status_var = tk.StringVar(
             value="Ready - choose one of the four green examples on the Start page."
