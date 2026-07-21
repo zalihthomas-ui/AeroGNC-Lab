@@ -1,0 +1,53 @@
+# Example autonomous fixed-wing waypoint mission (schema version 1).
+# Fictional civilian research aircraft; simulation only. Coordinates are illustrative.
+# Validate with:  python -m aerognc.cli mission validate missions/waypoint_demo.mission.yaml
+mission_version: 1
+
+mission:
+  name: waypoint_demo
+  description: Basic autonomous fixed-wing mission - climb, loiter, return home.
+
+home:
+  latitude_deg: 39.925
+  longitude_deg: 32.8369
+  altitude_m: 0.0
+
+defaults:
+  airspeed_mps: 20.0
+  acceptance_radius_m: 30.0
+  altitude_tolerance_m: 10.0
+
+limits:
+  min_altitude_m: 0.0
+  max_altitude_m: 3000.0
+  min_airspeed_mps: 12.0
+  max_airspeed_mps: 45.0
+  max_bank_deg: 45.0
+  gravity_mps2: 9.80665
+
+waypoints:
+  - id: 1
+    name: WP1
+    latitude_deg: 39.927
+    longitude_deg: 32.840
+    altitude_m: 120.0
+    altitude_reference: relative_home
+    action: fly_through
+
+  - id: 2
+    name: WP2
+    latitude_deg: 39.930
+    longitude_deg: 32.847
+    altitude_m: 180.0
+    airspeed_mps: 22.0
+    action: loiter
+    loiter_radius_m: 100.0
+    loiter_duration_s: 60.0
+    loiter_direction: clockwise
+
+  - id: 3
+    name: HOME_RETURN
+    latitude_deg: 39.925
+    longitude_deg: 32.8369
+    altitude_m: 100.0
+    action: return_home
