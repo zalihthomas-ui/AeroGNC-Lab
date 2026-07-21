@@ -99,3 +99,61 @@ def plot_waypoint_mission(result: WaypointMissionResult, output_path: str | Path
         figure.savefig(file_path, dpi=110)
         plt.close(figure)
     return file_path
+
+
+def save_mission_replay_gif(
+    result: WaypointMissionResult,
+    output_path: str | Path,
+    *,
+    max_frames: int = 90,
+    fps: int = 15,
+) -> Path:
+    """Render an animated 3D replay of the flown mission to a GIF.
+
+    The full planned route and flown track are drawn faintly for context while a
+    marker advances along the trajectory. Samples are subsampled to ``max_frames``
+    so the file stays small. Uses the Pillow writer (a project dependency) and the
+    Agg backend, so it runs headless.
+    """
+    from matplotlib.animation import FuncAnimation
+    from matplotlib.artist import Artist
+
+    if not result.samples:
+        raise ValueError("cannot animate a mission with no samples")
+    file_path = Path(output_path)
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    samples = list(result.samples)
+    stride = max(1, len(samples) // max(1, max_frames))
+    frames = samples[::stride]
+    east = np.array([s.east_m for s in frames])
+    north = np.array([s.north_m for s in frames])
+    altitude = np.array([s.altitude_m for s in frames])
+    planned = np.asarray(result.planned_path_ned_m)
+
+    with engineering_style():
+        figure = plt.figure(figsize=(8, 6.5))
+        axis = figure.add_subplot(projection="3d")
+        axis.plot(planned[:, 1], planned[:, 0], -planned[:, 2], "--o", color=ORANGE, alpha=0.6)
+        axis.plot(east, north, altitude, color=BLUE, alpha=0.25)
+        axis.set_xlabel("East [m]")
+        axis.set_ylabel("North [m]")
+        axis.set_zlabel("Altitude [m]")
+        axis.set_xlim(float(east.min()), float(east.max()) + 1.0)
+        axis.set_ylim(float(north.min()), float(north.max()) + 1.0)
+        axis.set_zlim(0.0, float(altitude.max()) + 1.0)
+        (trail,) = axis.plot([], [], [], color=BLUE, linewidth=2.0)
+        (marker,) = axis.plot([], [], [], "o", color=GREEN, markersize=7)
+
+        def update(index: int) -> tuple[Artist, ...]:
+            trail.set_data_3d(east[: index + 1], north[: index + 1], altitude[: index + 1])
+            marker.set_data_3d([east[index]], [north[index]], [altitude[index]])
+            axis.set_title(
+                f"Mission replay - {result.outcome}  (t = {frames[index].time_s:5.1f} s)"
+            )
+            return trail, marker
+
+        animation = FuncAnimation(figure, update, frames=len(frames), interval=1000.0 / fps)
+        animation.save(file_path, writer="pillow", fps=fps)
+        plt.close(figure)
+    return file_path

@@ -212,6 +212,15 @@ def test_waypoint_mission_3d_dashboard_renders(tmp_path) -> None:
     assert out.is_file() and out.stat().st_size > 0
 
 
+def test_waypoint_mission_replay_gif_renders(tmp_path) -> None:
+    from aerognc.simulation.waypoint_mission import run_waypoint_mission
+    from aerognc.visualisation.waypoint_mission import save_mission_replay_gif
+
+    result = run_waypoint_mission(_short_mission_model().build_mission())
+    out = save_mission_replay_gif(result, tmp_path / "replay.gif", max_frames=12, fps=8)
+    assert out.is_file() and out.stat().st_size > 0
+
+
 def test_planner_window_constructs_and_draws() -> None:
     tk = pytest.importorskip("tkinter")
     try:

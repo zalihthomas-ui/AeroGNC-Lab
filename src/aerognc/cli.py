@@ -605,6 +605,9 @@ def _parser() -> argparse.ArgumentParser:
     )
     waypoint.add_argument("--output", type=Path, help="output directory for log + plot")
     waypoint.add_argument("--no-plots", action="store_true", help="skip PNG generation")
+    waypoint.add_argument(
+        "--gif", action="store_true", help="also render an animated 3D mission replay GIF"
+    )
 
     mission_planner = subparsers.add_parser(
         "mission-planner",
@@ -1841,6 +1844,10 @@ def _run_waypoint_command(arguments: argparse.Namespace) -> int:
         from aerognc.visualisation.waypoint_mission import plot_waypoint_mission
 
         plot_waypoint_mission(result, output_directory / "mission_dashboard.png")
+    if arguments.gif:
+        from aerognc.visualisation.waypoint_mission import save_mission_replay_gif
+
+        save_mission_replay_gif(result, output_directory / "mission_replay.gif")
     LOGGER.info("wrote mission log and artifacts to %s", output_directory)
     return 0 if result.completed else 1
 
