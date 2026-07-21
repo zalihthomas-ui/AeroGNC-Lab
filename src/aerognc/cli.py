@@ -571,6 +571,39 @@ def _parser() -> argparse.ArgumentParser:
     project_report.add_argument("project", type=Path, help="project YAML path")
     project_report.add_argument("run_id", help="stored run identifier")
     project_report.add_argument("--output", type=Path, help="HTML report path")
+
+    mission = subparsers.add_parser(
+        "mission", help="validate a waypoint mission file"
+    )
+    mission_commands = mission.add_subparsers(dest="mission_command", required=True)
+    mission_validate = mission_commands.add_parser(
+        "validate", help="load and validate a waypoint mission (schema + flight envelope)"
+    )
+    mission_validate.add_argument("mission", type=Path, help="mission YAML path")
+
+    waypoint = subparsers.add_parser(
+        "waypoint",
+        help="fly a waypoint mission in the internal fixed-wing simulator",
+    )
+    waypoint.add_argument("--mission", type=Path, required=True, help="mission YAML path")
+    waypoint.add_argument(
+        "--guidance",
+        choices=("direct_bearing", "line_of_sight", "l1_guidance", "vector_field"),
+        default="vector_field",
+        help="lateral guidance mode (default: vector_field)",
+    )
+    waypoint.add_argument(
+        "--wind-north-mps", type=float, default=0.0, help="steady north wind [m/s]"
+    )
+    waypoint.add_argument(
+        "--wind-east-mps", type=float, default=0.0, help="steady east wind [m/s]"
+    )
+    waypoint.add_argument("--dt-s", type=float, default=0.05, help="integration step [s]")
+    waypoint.add_argument(
+        "--max-time-s", type=float, default=900.0, help="simulation time limit [s]"
+    )
+    waypoint.add_argument("--output", type=Path, help="output directory for log + plot")
+    waypoint.add_argument("--no-plots", action="store_true", help="skip PNG generation")
     return parser
 
 
@@ -1739,6 +1772,53 @@ def _run_diagnostic_command(
     return 0 if report.passed else 2
 
 
+def _run_mission_command(arguments: argparse.Namespace) -> int:
+    from aerognc.mission import load_mission
+
+    if arguments.mission_command == "validate":
+        mission = load_mission(arguments.mission).validate()
+        LOGGER.info(
+            "mission %r valid: %d waypoints, home (%.5f, %.5f)",
+            mission.name,
+            len(mission.waypoints),
+            mission.home.latitude_deg,
+            mission.home.longitude_deg,
+        )
+        return 0
+    return 2
+
+
+def _run_waypoint_command(arguments: argparse.Namespace) -> int:
+    from aerognc.gnc.waypoint_guidance import GuidanceMode
+    from aerognc.mission import load_mission
+    from aerognc.simulation.waypoint_mission import (
+        WaypointMissionConfig,
+        run_waypoint_mission,
+    )
+
+    mission = load_mission(arguments.mission)
+    config = WaypointMissionConfig(
+        dt_s=arguments.dt_s,
+        max_time_s=arguments.max_time_s,
+        guidance_mode=GuidanceMode(arguments.guidance),
+        wind_ned_mps=(arguments.wind_north_mps, arguments.wind_east_mps, 0.0),
+    )
+    result = run_waypoint_mission(mission, config)
+    summary = result.summary()
+    LOGGER.info("waypoint mission outcome: %s", summary)
+
+    output_directory = arguments.output or Path("results") / "waypoint_gnc"
+    output_directory.mkdir(parents=True, exist_ok=True)
+    result.to_csv(output_directory / "mission_log.csv")
+    result.to_json(output_directory / "mission_log.json")
+    if not arguments.no_plots:
+        from aerognc.visualisation.waypoint_mission import plot_waypoint_mission
+
+        plot_waypoint_mission(result, output_directory / "mission_dashboard.png")
+    LOGGER.info("wrote mission log and artifacts to %s", output_directory)
+    return 0 if result.completed else 1
+
+
 def _run_project_command(arguments: argparse.Namespace) -> int:
     from aerognc.project import create_empty_project, load_project
     from aerognc.project.comparison import compare_datasets, write_comparison_json
@@ -2097,6 +2177,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         if arguments.command == "project":
             return _run_project_command(arguments)
+        if arguments.command == "mission":
+            return _run_mission_command(arguments)
+        if arguments.command == "waypoint":
+            return _run_waypoint_command(arguments)
     except (ConfigurationError, ValueError, FloatingPointError, OSError, RuntimeError) as error:
         LOGGER.error("%s", error)
         return 2
