@@ -472,6 +472,32 @@ vehicle marker, flight phase/events, and live telemetry. See the
 
 ![Synthetic flight-test evaluation](results/reference/flight_test_summary.png)
 
+## Waypoint fixed-wing autonomous GNC
+
+A waypoint-based autonomous fixed-wing workflow demonstrates the full chain from
+mission planning to actuator commands. Define a mission as an ordered list of
+waypoints (home, fly-through, loiter, return-home) in a versioned YAML file, then
+fly it in the internal simulator; the GNC system computes desired course, heading,
+altitude, airspeed, roll/pitch, and the aileron/elevator/rudder/throttle commands,
+sequences the waypoints, holds loiter patterns, returns home, and enforces a safety
+envelope (airspeed/bank/pitch/altitude/geofence/GPS-loss).
+
+```bash
+python -m aerognc.cli mission validate missions/waypoint_demo.mission.yaml
+python -m aerognc.cli waypoint --mission missions/waypoint_demo.mission.yaml \
+    --guidance vector_field --output results/waypoint_gnc
+```
+
+Selectable guidance (`direct_bearing`, `line_of_sight`, `l1_guidance`,
+`vector_field`) feeds a cascaded autopilot; a `VehicleBackend` interface and a
+`NavigationProvider` abstraction let the same GNC logic later drive JSBSim,
+ArduPilot/PX4 SITL, or hardware without rewrites. It is **designed for simulation,
+SITL validation, and progressive preparation for hardware integration** — it is not
+flight-certified, commands no real hardware by default, and autonomous landing is
+disabled. See the [waypoint GNC user & developer guide](docs/waypoint_gnc/user_guide.md),
+the [SITL/hardware roadmap](docs/waypoint_gnc/sitl_hardware_roadmap.md), and the
+task tracker in [`TODO.md`](TODO.md).
+
 ## Mathematical model summary
 
 The baseline point-mass equations propagate NED position/velocity with explicit

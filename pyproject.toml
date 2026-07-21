@@ -60,6 +60,9 @@ source = ["aerognc"]
 omit = [
   "*/aerognc/visualisation/mission_designer.py",
   "*/aerognc/visualisation/workbench.py",
+  # Tk event-loop view; its pure PlannerModel logic is covered by unit tests and
+  # the window is exercised by a widget-construction smoke check.
+  "*/aerognc/visualisation/mission_planner_map.py",
 ]
 
 [tool.coverage.report]

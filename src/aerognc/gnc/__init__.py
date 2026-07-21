@@ -17,6 +17,13 @@ from aerognc.gnc.error_state_ekf import (
     ErrorStateNavigationEKF,
     NavigationNominalState,
 )
+from aerognc.gnc.fixedwing_autopilot import (
+    ActuatorCommand,
+    AutopilotGains,
+    AutopilotOutput,
+    ControlCommand,
+    FixedWingAutopilot,
+)
 from aerognc.gnc.flight_analysis import (
     DynamicMode,
     LinearModel,
@@ -49,6 +56,19 @@ from aerognc.gnc.flight_envelope import (
     make_operating_point,
 )
 from aerognc.gnc.guidance import AttitudeReferenceSchedule
+from aerognc.gnc.path_manager import (
+    FilletGeometry,
+    LineSegment,
+    MissionPhase,
+    OrbitSegment,
+    PathManager,
+    PathManagerConfig,
+    PathManagerStatus,
+    PathSegment,
+    SegmentKind,
+    coordinated_turn_radius_m,
+    fillet_geometry,
+)
 from aerognc.gnc.pid import PIDController, PIDGains
 from aerognc.gnc.rts_smoother import RtsSmootherResult, rts_smooth
 from aerognc.gnc.strapdown_ins import (
@@ -57,34 +77,61 @@ from aerognc.gnc.strapdown_ins import (
     compensate_two_sample_imu,
     propagate_rotating_strapdown,
 )
+from aerognc.gnc.waypoint_guidance import (
+    GuidanceCommand,
+    GuidanceGains,
+    GuidanceLaw,
+    GuidanceMode,
+    PathFollowingGuidance,
+    wind_corrected_heading_rad,
+)
 
 __all__ = [
+    "ActuatorCommand",
     "AscentGuidanceCommand",
     "AscentGuidanceDecision",
     "AscentGuidanceInputs",
     "AttitudeReferenceSchedule",
+    "AutopilotGains",
+    "AutopilotOutput",
     "ConstraintAwareAscentGuidance",
+    "ControlCommand",
     "DelayedRotatingNavigationESKF",
     "DynamicMode",
     "EnvelopeOperatingPoint",
     "EnvelopePointAnalysis",
     "ErrorStateFilterTuning",
     "ErrorStateNavigationEKF",
+    "FilletGeometry",
+    "FixedWingAutopilot",
     "FlightEnvelopeResult",
+    "GuidanceCommand",
+    "GuidanceGains",
+    "GuidanceLaw",
+    "GuidanceMode",
     "ImuIncrement",
     "InnovationGateConfiguration",
     "LQRDesign",
+    "LineSegment",
     "LinearModel",
     "MeasurementUpdateResult",
+    "MissionPhase",
     "NavigationNominalState",
+    "OrbitSegment",
     "PIDController",
     "PIDGains",
+    "PathFollowingGuidance",
+    "PathManager",
+    "PathManagerConfig",
+    "PathManagerStatus",
+    "PathSegment",
     "RobustnessVerification",
     "RotatingNavigationState",
     "RtsSmootherResult",
     "SILTimingResult",
     "ScheduleVerification",
     "ScheduledStateFeedback",
+    "SegmentKind",
     "SensorIntegritySummary",
     "StabilityMargins",
     "SystemIdentificationResult",
@@ -96,6 +143,8 @@ __all__ = [
     "compensate_two_sample_imu",
     "continuous_lqr",
     "controllability_matrix",
+    "coordinated_turn_radius_m",
+    "fillet_geometry",
     "finite_difference_jacobian",
     "frequency_response",
     "identify_linear_state_space",
@@ -106,4 +155,5 @@ __all__ = [
     "rts_smooth",
     "solve_trim",
     "stability_margins_siso",
+    "wind_corrected_heading_rad",
 ]
