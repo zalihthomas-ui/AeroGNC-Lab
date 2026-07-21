@@ -7,6 +7,11 @@ and the project uses Semantic Versioning.
 
 ### Added
 
+- Mission-planner **flight simulation playback** (Simulate/Play/Pause/Reset) that
+  animates the aircraft flying the mission with a heading glyph and a live HUD,
+  a steady-wind input, and a **3D** planned-vs-actual dashboard (the waypoint
+  dashboard trajectory is now 3D: East/North/altitude).
+
 - **Rendezvous & proximity-operations (RPO)** relative-orbit tools: Clohessy-
   Wiltshire dynamics, two-impulse and multi-leg V-bar approach-to-hold-point
   planning, closest-approach (conjunction) reporting, and an orbit-change-from-

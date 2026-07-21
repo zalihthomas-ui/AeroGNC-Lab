@@ -139,7 +139,77 @@ def test_validation_issues_reports_problems() -> None:
     assert any("envelope" in issue for issue in model.validation_issues())
 
 
-# --- Tk construction smoke ---------------------------------------------------
+# --- playback controller (pure) ---------------------------------------------
+
+
+def test_playback_controller_advances_and_finishes() -> None:
+    from aerognc.visualisation.mission_planner_map import PlaybackController
+
+    samples = list(range(10))
+    playback = PlaybackController(samples, speed=3.0)
+    assert playback.current() == 0
+    assert not playback.finished
+    playback.advance(3)
+    assert playback.index == 3
+    playback.advance(100)  # clamps to the last sample
+    assert playback.index == 9
+    assert playback.finished
+    assert playback.progress() == pytest.approx(1.0)
+    playback.reset()
+    assert playback.index == 0 and not playback.playing
+
+
+def test_playback_controller_handles_empty_and_speed_floor() -> None:
+    from aerognc.visualisation.mission_planner_map import PlaybackController
+
+    empty = PlaybackController([])
+    assert empty.finished
+    assert empty.current() is None
+    assert empty.progress() == pytest.approx(1.0)
+    assert PlaybackController([1, 2], speed=0.1).speed >= 1.0
+
+
+# --- animation + 3D dashboard ------------------------------------------------
+
+
+def _short_mission_model() -> PlannerModel:
+    model = _model()
+    model.add_waypoint_geo(39.928, 32.838)
+    model.add_waypoint_geo(39.925, 32.8369)
+    model.update_waypoint_fields(1, action=WaypointAction.RETURN_HOME, altitude_m=100.0)
+    return model
+
+
+def test_planner_simulation_playback_moves_aircraft() -> None:
+    tk = pytest.importorskip("tkinter")
+    try:
+        root = tk.Tk()
+    except tk.TclError:
+        pytest.skip("no display available for Tk")
+    try:
+        root.withdraw()
+        from aerognc.visualisation.mission_planner_map import InteractiveMissionPlanner
+
+        planner = InteractiveMissionPlanner(root, _short_mission_model())
+        planner._run()  # runs the internal simulation synchronously
+        assert planner._playback is not None and len(planner._playback) > 0
+        assert planner.view.actual_track_px  # flown track projected to pixels
+        planner._playback.playing = True
+        planner._animate()  # advance one animation step
+        planner._stop_animation()
+        assert planner.canvas.find_withtag("aircraft")  # moving glyph drawn
+        assert planner.hud_var.get()  # live HUD populated
+    finally:
+        root.destroy()
+
+
+def test_waypoint_mission_3d_dashboard_renders(tmp_path) -> None:
+    from aerognc.simulation.waypoint_mission import run_waypoint_mission
+    from aerognc.visualisation.waypoint_mission import plot_waypoint_mission
+
+    result = run_waypoint_mission(_short_mission_model().build_mission())
+    out = plot_waypoint_mission(result, tmp_path / "dash.png")
+    assert out.is_file() and out.stat().st_size > 0
 
 
 def test_planner_window_constructs_and_draws() -> None:

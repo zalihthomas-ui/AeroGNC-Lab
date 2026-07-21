@@ -79,6 +79,15 @@ waypoints:
     action: return_home
 ```
 
+### Interactive planner playback
+
+In the planner (`aerognc mission-planner` / `run_mission_planner.bat`), **Simulate**
+runs the mission on the internal simulator and overlays the flown track; **Play /
+Pause / Reset** then animate the aircraft flying it (moving glyph with a heading
+tick and a live HUD showing time, altitude, airspeed, groundspeed, active waypoint,
+mission state, and cross-track error). Enter a steady **Wind N/E** before Simulate
+to see the wind's effect, and **3D plot** saves the 3D dashboard for the last run.
+
 **Actions:** `fly_through`, `turn`, `loiter`, `hold`, `change_altitude`,
 `change_airspeed`, `takeoff`, `land`, `return_home`, `mission_end`.
 (Takeoff and land are reserved and disabled by default.)

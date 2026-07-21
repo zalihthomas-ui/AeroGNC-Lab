@@ -313,6 +313,47 @@ class PlannerModel:
 _ACTIONS = [action.value for action in WaypointAction]
 
 
+class PlaybackController:
+    """Tk-free playback cursor over a flown mission's samples.
+
+    Advances an index through the recorded samples at a frame multiplier so the
+    view can animate the aircraft flying the mission. Pure and unit-testable.
+    """
+
+    def __init__(self, samples: Any, *, speed: float = 8.0) -> None:
+        self._samples = list(samples)
+        self.speed = max(1.0, float(speed))
+        self.index = 0
+        self.playing = False
+
+    def __len__(self) -> int:
+        return len(self._samples)
+
+    @property
+    def finished(self) -> bool:
+        return not self._samples or self.index >= len(self._samples) - 1
+
+    def reset(self) -> None:
+        self.index = 0
+        self.playing = False
+
+    def current(self) -> Any:
+        if not self._samples:
+            return None
+        return self._samples[min(self.index, len(self._samples) - 1)]
+
+    def advance(self, frames: int) -> Any:
+        """Advance by ``frames`` samples (clamped to the end) and return the sample."""
+        if self._samples:
+            self.index = min(self.index + max(1, int(frames)), len(self._samples) - 1)
+        return self.current()
+
+    def progress(self) -> float:
+        if len(self._samples) <= 1:
+            return 1.0
+        return self.index / (len(self._samples) - 1)
+
+
 @dataclass
 class _ViewState:
     selected_index: int | None = None
@@ -331,6 +372,9 @@ class InteractiveMissionPlanner:
         self._tk = tk
         self.model = model or PlannerModel()
         self.view = _ViewState()
+        self._result: Any = None
+        self._playback: PlaybackController | None = None
+        self._animation_job: Any = None
         self.master = master
         master.title("AeroGNC-Lab - Waypoint Mission Planner")
         master.configure(background=BACKGROUND)
@@ -434,6 +478,14 @@ class InteractiveMissionPlanner:
         action_box.pack(side="left")
         action_box.bind("<<ComboboxSelected>>", self._apply_fields)
 
+        wind_row = ttk.Frame(side, style="TFrame")
+        wind_row.pack(fill="x", pady=(8, 1))
+        ttk.Label(wind_row, text="Wind N/E [m/s]", width=16).pack(side="left")
+        self._wind_north = tk.StringVar(value="0")
+        self._wind_east = tk.StringVar(value="0")
+        ttk.Entry(wind_row, textvariable=self._wind_north, width=5).pack(side="left")
+        ttk.Entry(wind_row, textvariable=self._wind_east, width=5).pack(side="left", padx=(2, 0))
+
         ttk.Label(side, text="Mission", font=("Segoe UI Semibold", 11)).pack(
             anchor="w", pady=(10, 2)
         )
@@ -443,13 +495,31 @@ class InteractiveMissionPlanner:
             ("Import", self._import),
             ("Export", self._export),
             ("Validate", self._validate),
-            ("Run", self._run),
+            ("Simulate", self._run),
         ):
             ttk.Button(mission_buttons, text=label, command=command).pack(side="left", padx=1)
 
+        ttk.Label(side, text="Playback", font=("Segoe UI Semibold", 11)).pack(
+            anchor="w", pady=(10, 2)
+        )
+        playback_buttons = ttk.Frame(side, style="TFrame")
+        playback_buttons.pack(fill="x")
+        for label, command in (
+            ("Play", self._play),
+            ("Pause", self._pause),
+            ("Reset", self._reset_playback),
+            ("3D plot", self._save_3d_plot),
+        ):
+            ttk.Button(playback_buttons, text=label, command=command).pack(side="left", padx=1)
+
+        self.hud_var = tk.StringVar(value="")
+        ttk.Label(
+            side, textvariable=self.hud_var, style="Muted.TLabel", font=("Consolas", 9)
+        ).pack(anchor="w", pady=(6, 0))
+
         self.status_var = tk.StringVar(value=self.view.status)
         ttk.Label(side, textvariable=self.status_var, style="Muted.TLabel", wraplength=240).pack(
-            anchor="w", pady=(10, 0)
+            anchor="w", pady=(8, 0)
         )
 
     # -- canvas bindings ------------------------------------------------------
@@ -599,25 +669,126 @@ class InteractiveMissionPlanner:
         self._set_status("Mission valid." if not issues else "Invalid:\n" + "\n".join(issues))
 
     def _run(self) -> None:
-        from aerognc.simulation.waypoint_mission import run_waypoint_mission
+        from aerognc.simulation.waypoint_mission import (
+            WaypointMissionConfig,
+            run_waypoint_mission,
+        )
 
         issues = self.model.validation_issues()
         if issues:
             self._set_status("Cannot run - invalid:\n" + "\n".join(issues))
             return
-        self._set_status("Running mission...")
+        self._stop_animation()
+        self._set_status("Simulating mission...")
         self.master.update_idletasks()
-        result = run_waypoint_mission(self.model.build_mission())
-        # Sample positions are in the home NED frame -> project straight to pixels.
-        track: list[tuple[float, float]] = []
-        for sample in result.samples:
-            px = self.model.center_px[0] + sample.east_m / self.model.meters_per_pixel
-            py = self.model.center_px[1] - sample.north_m / self.model.meters_per_pixel
-            track.append((px, py))
-        self.view.actual_track_px = track
+        wind = (self._wind_value("n"), self._wind_value("e"), 0.0)
+        config = WaypointMissionConfig(wind_ned_mps=wind)
+        result = run_waypoint_mission(self.model.build_mission(), config)
+        self._result = result
+        self._playback = PlaybackController(result.samples)
+        self.view.actual_track_px = [self._sample_pixel(s) for s in result.samples]
         final_xte = result.summary().get("final_cross_track_m")
-        self._set_status(f"Run {result.outcome}: final cross-track {final_xte} m")
+        self._set_status(
+            f"Simulated: {result.outcome}, final cross-track {final_xte} m. Press Play."
+        )
+        self._update_hud(self._playback.current())
         self.redraw()
+
+    def _wind_value(self, axis: str) -> float:
+        var = self._wind_north if axis == "n" else self._wind_east
+        try:
+            return float(var.get().strip() or 0.0)
+        except ValueError:
+            return 0.0
+
+    def _sample_pixel(self, sample: Any) -> tuple[float, float]:
+        """Project a mission sample (home NED frame) to canvas pixels."""
+        px = self.model.center_px[0] + sample.east_m / self.model.meters_per_pixel
+        py = self.model.center_px[1] - sample.north_m / self.model.meters_per_pixel
+        return px, py
+
+    # -- playback -------------------------------------------------------------
+    def _play(self) -> None:
+        if self._playback is None:
+            self._set_status("Run a simulation first (Simulate).")
+            return
+        if self._playback.finished:
+            self._playback.reset()
+        self._playback.playing = True
+        self._animate()
+
+    def _pause(self) -> None:
+        if self._playback is not None:
+            self._playback.playing = False
+        self._stop_animation()
+
+    def _reset_playback(self) -> None:
+        self._stop_animation()
+        if self._playback is not None:
+            self._playback.reset()
+            self._update_hud(self._playback.current())
+        self.redraw()
+
+    def _stop_animation(self) -> None:
+        if self._animation_job is not None:
+            self.master.after_cancel(self._animation_job)
+            self._animation_job = None
+
+    def _animate(self) -> None:
+        if self._playback is None or not self._playback.playing:
+            return
+        sample = self._playback.advance(int(self._playback.speed))
+        self._update_hud(sample)
+        self._draw_aircraft_glyph(sample)
+        if self._playback.finished:
+            self._playback.playing = False
+            self._set_status(f"Playback complete ({self._result.outcome}).")
+            return
+        self._animation_job = self.master.after(40, self._animate)
+
+    def _update_hud(self, sample: Any) -> None:
+        if sample is None:
+            self.hud_var.set("")
+            return
+        self.hud_var.set(
+            f"t {sample.time_s:6.1f}s  alt {sample.altitude_m:6.1f}m\n"
+            f"TAS {sample.airspeed_mps:5.1f}  GS {sample.groundspeed_mps:5.1f} m/s\n"
+            f"WP {sample.active_waypoint_id}  {sample.mission_state}\n"
+            f"XTE {sample.cross_track_error_m:+6.1f}m"
+        )
+
+    def _draw_aircraft_glyph(self, sample: Any) -> None:
+        """Draw the moving aircraft marker + heading tick (tagged for redraw)."""
+        self.canvas.delete("aircraft")
+        if sample is None:
+            return
+        px, py = self._sample_pixel(sample)
+        heading = sample.yaw_rad
+        nose = (px + 14.0 * np.sin(heading), py - 14.0 * np.cos(heading))
+        self.canvas.create_line(px, py, nose[0], nose[1], fill=CYAN, width=2, tags="aircraft")
+        self.canvas.create_oval(
+            px - 5, py - 5, px + 5, py + 5, fill=CYAN, outline=BACKGROUND, tags="aircraft"
+        )
+
+    def _save_3d_plot(self) -> None:
+        if self._result is None:
+            self._set_status("Run a simulation first (Simulate).")
+            return
+        from tkinter import filedialog
+
+        from aerognc.visualisation.waypoint_mission import plot_waypoint_mission
+
+        path = filedialog.asksaveasfilename(defaultextension=".png", initialfile="mission_3d.png")
+        if not path:
+            return
+        plot_waypoint_mission(self._result, path)
+        self._set_status(f"Saved 3D dashboard to {path}")
+        try:  # best-effort open on Windows
+            import os
+
+            os.startfile(path)  # type: ignore[attr-defined]
+        except (AttributeError, OSError):
+            pass
 
     # -- rendering ------------------------------------------------------------
     def _refresh(self) -> None:
