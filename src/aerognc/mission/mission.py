@@ -14,6 +14,7 @@ import numpy as np
 
 from aerognc.mathematics.geodesy import GeodeticPosition, ReferenceEllipsoid
 from aerognc.mathematics.local_frame import WGS84, LocalTangentFrame
+from aerognc.mathematics.vectors import FloatArray
 from aerognc.mission.waypoint import AltitudeReference, Waypoint, WaypointAction
 
 
@@ -157,7 +158,7 @@ class Mission:
     def _waypoint_envelope_issues(self, waypoint: Waypoint) -> list[str]:
         issues: list[str] = []
         label = f"waypoint {waypoint.name!r}"
-        absolute_altitude_m = self._absolute_altitude_m(waypoint)
+        absolute_altitude_m = self.absolute_altitude_m(waypoint)
         if not self.limits.min_altitude_m <= absolute_altitude_m <= self.limits.max_altitude_m:
             issues.append(
                 f"{label} altitude {absolute_altitude_m:.1f} m (MSL) is outside "
@@ -178,14 +179,33 @@ class Mission:
                 )
         return issues
 
-    def _absolute_altitude_m(self, waypoint: Waypoint) -> float:
-        """Return waypoint altitude referenced to MSL for envelope comparison."""
+    def absolute_altitude_m(self, waypoint: Waypoint) -> float:
+        """Return the waypoint altitude referenced to MSL.
+
+        ``relative_home`` and ``agl`` are treated as heights above the home datum
+        (this build has no terrain model, so AGL collapses to relative-home);
+        ``msl`` is passed through unchanged.
+        """
         if waypoint.altitude_reference in (
             AltitudeReference.RELATIVE_HOME,
             AltitudeReference.ABOVE_GROUND,
         ):
             return self.home.altitude_m + waypoint.altitude_m
         return waypoint.altitude_m
+
+    def waypoint_ned_m(self, waypoint: Waypoint, frame: LocalTangentFrame) -> FloatArray:
+        """Return the waypoint position in home-referenced local NED [m].
+
+        The altitude reference is resolved to MSL before the geodetic-to-NED
+        conversion, so the returned Down component is consistent with the
+        vehicle state produced by the simulator.
+        """
+        geodetic = GeodeticPosition(
+            latitude_rad=float(np.deg2rad(waypoint.latitude_deg)),
+            longitude_rad=float(np.deg2rad(waypoint.longitude_deg)),
+            altitude_m=self.absolute_altitude_m(waypoint),
+        )
+        return frame.geodetic_to_ned(geodetic)
 
     def validate(self) -> "Mission":
         """Return ``self`` if valid, else raise :class:`MissionValidationError`."""

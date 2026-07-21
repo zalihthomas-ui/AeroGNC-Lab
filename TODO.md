@@ -68,14 +68,23 @@
 
 ## Phase 3 — Path manager & waypoint switching  (spec §7, §14, §32 step 8)
 
-- [ ] 3.1 `PathSegment` types: straight line, fillet transition, loiter circle, RTH, (Dubins later).
-- [ ] 3.2 `PathManager`: determines active segment, sequences waypoints, detects completion.
-- [ ] 3.3 Turn anticipation from groundspeed, max bank, wind, in/out course
-  (`turn_radius = v² / (g·tan φ)`, guard φ→0).
-- [ ] 3.4 Robust waypoint completion: acceptance radius + altitude tolerance + switching
-  plane (fly-through) vs proximity (fly-over) + min dwell + anti-chatter.
-- [ ] 3.5 Fillet path geometry; architecture hook for Dubins / L1-compatible segments.
-- [ ] 3.6 Unit tests: path transitions, completion logic, no rapid switching under noise.
+_Module: `src/aerognc/gnc/path_manager.py` (exported via `aerognc.gnc`). 18 tests in
+`tests/unit/test_path_manager.py`. Full suite 415 unit tests pass; ruff + mypy --strict clean._
+
+- [x] 3.1 `PathSegment` types: `LineSegment` (with altitude ramp), `OrbitSegment` (loiter
+  circle), RTH handled in `PathManager.from_mission` (targets home horizontal). Dubins later.
+- [x] 3.2 `PathManager`: builds legs from a mission, tracks the active segment, sequences
+  waypoints, detects completion, exposes `PathManagerStatus` + `planned_path_ned` + `loiter_circles`.
+- [x] 3.3 Turn anticipation: `coordinated_turn_radius_m` (`v²/(g·tan φ)`, φ→0 ⇒ inf) plus
+  half-plane bisector switching for fly-through legs. *(wind-aware anticipation refined in Phase 4.)*
+- [x] 3.4 Robust completion: acceptance radius + altitude tolerance + half-plane switching
+  (fly-through) vs proximity (fly-over) + min-dwell + monotonic advance (no chatter; verified
+  under seeded position noise).
+- [~] 3.5 Fillet geometry done & tested (`fillet_geometry` → tangent points, centre, turn
+  angle, direction). Wiring fillet arcs into the switcher as inserted `OrbitSegment`s and
+  Dubins paths are the next refinement (deferred, noted in module docstring).
+- [x] 3.6 Unit tests: turn geometry, line/orbit geometry, fillet, segment layout, turn
+  anticipation, fly-over proximity, march-to-completion without chatter, loiter dwell.
 
 ---
 
@@ -274,6 +283,12 @@
 
 ## Running log (newest first)
 
+- 2026-07-21 — Phase 3 path manager done: line/orbit segments, coordinated-turn radius,
+  fillet geometry, half-plane turn anticipation, robust chatter-free waypoint switching,
+  18 new tests (415 unit tests pass overall). Committed on `feature/waypoint-gnc`.
+  Fillet arc-following + Dubins deferred (3.5). Next: Phase 4 guidance (L1/vector-field).
+- 2026-07-21 — Git set up: baseline commit on `main`, work isolated on branch
+  `feature/waypoint-gnc`, committing per phase (user request).
 - 2026-07-21 — Phase 1 inspection complete; Phase 2 foundations (waypoint/mission models,
-  local-frame geometry, mission I/O) implemented with 41 passing unit tests. Boundary on
-  weaponization recorded. Next: Phase 3 path manager, then guidance (Phase 4).
+  local-frame geometry, mission I/O) implemented with 38 passing unit tests. Boundary on
+  weaponization recorded.
