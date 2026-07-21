@@ -279,12 +279,14 @@ _Unit + integration (full chain) + scenario tests (nominal, all 4 guidance modes
 
 ## Phase 16 — Orbital RPO feature (legitimate satellite-to-satellite)  (user request, non-weapon)
 
-- [ ] 16.1 Relative-orbit dynamics (Clohessy–Wiltshire / Hill's equations) reusing
+_Module: `astrodynamics/relative_motion.py` (+ `visualisation/rpo.py`, `aerognc rpo` CLI, `docs/rendezvous_proximity_operations.md`). 9 tests. Non-weapon: approach/station-keep/orbit-change only. Interactive Tk sandbox page deferred (plots+CLI done)._
+
+- [x] 16.1 Relative-orbit dynamics (Clohessy–Wiltshire / Hill's equations) reusing
   `astrodynamics/`. "How orbit/altitude changes when a burn/drag/perturbation is introduced."
-- [ ] 16.2 Rendezvous & proximity-ops guidance: navigate a chaser to approach / station-keep
+- [x] 16.2 Rendezvous & proximity-ops guidance: navigate a chaser to approach / station-keep
   near a target satellite (V-bar/R-bar approach, safe hold points). **No intercept/kill.**
-- [ ] 16.3 Conjunction / close-approach distance reporting (safety, not targeting).
-- [ ] 16.4 UI sandbox page + plots; tests.
+- [x] 16.3 Conjunction / close-approach distance reporting (safety, not targeting).
+- [~] 16.4 UI sandbox page + plots; tests.
 
 ---
 

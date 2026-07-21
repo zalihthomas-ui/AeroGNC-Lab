@@ -7,6 +7,12 @@ and the project uses Semantic Versioning.
 
 ### Added
 
+- **Rendezvous & proximity-operations (RPO)** relative-orbit tools: Clohessy-
+  Wiltshire dynamics, two-impulse and multi-leg V-bar approach-to-hold-point
+  planning, closest-approach (conjunction) reporting, and an orbit-change-from-
+  impulse helper, with an `aerognc rpo` CLI and plot. Cooperative approach/
+  station-keeping only (no interception/engagement).
+
 - **Waypoint-based autonomous fixed-wing GNC workflow** integrating a new
   mission layer into the existing package. Designed for simulation, SITL
   validation, and progressive preparation for hardware integration; it is not

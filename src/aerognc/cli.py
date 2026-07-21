@@ -612,6 +612,23 @@ def _parser() -> argparse.ArgumentParser:
     mission_planner.add_argument(
         "--mission", type=Path, help="optional mission YAML to open on launch"
     )
+
+    rpo = subparsers.add_parser(
+        "rpo",
+        help="plan a satellite rendezvous / proximity-operations approach (non-weapon)",
+    )
+    rpo.add_argument(
+        "--altitude-km", type=float, default=500.0, help="target circular-orbit altitude [km]"
+    )
+    rpo.add_argument(
+        "--start-behind-m", type=float, default=800.0,
+        help="chaser initial along-track offset behind the target [m]",
+    )
+    rpo.add_argument(
+        "--leg-time-s", type=float, default=500.0, help="coast time per approach leg [s]"
+    )
+    rpo.add_argument("--output", type=Path, help="output directory for plot + JSON")
+    rpo.add_argument("--no-plots", action="store_true", help="skip PNG generation")
     return parser
 
 
@@ -1827,6 +1844,47 @@ def _run_waypoint_command(arguments: argparse.Namespace) -> int:
     return 0 if result.completed else 1
 
 
+def _run_rpo_command(arguments: argparse.Namespace) -> int:
+    import json
+
+    import numpy as np
+
+    from aerognc.astrodynamics.relative_motion import ClohessyWiltshireModel, simulate_rendezvous
+
+    radius_m = 6_378_137.0 + arguments.altitude_km * 1000.0
+    model = ClohessyWiltshireModel.from_orbit(radius_m)
+    start = float(arguments.start_behind_m)
+    initial_state = np.array([0.3 * start, -start, 0.0, 0.0, 0.0, 0.0])
+    # A safe stepped V-bar approach toward the target (station-keep at each hold).
+    hold_points = [
+        np.array([0.0, -0.5 * start, 0.0]),
+        np.array([0.0, -0.15 * start, 0.0]),
+        np.array([0.0, -30.0, 0.0]),
+    ]
+    trajectory = simulate_rendezvous(
+        model, initial_state, hold_points, leg_time_s=arguments.leg_time_s
+    )
+    summary = {
+        "target_altitude_km": arguments.altitude_km,
+        "total_delta_v_mps": round(trajectory.total_delta_v_mps, 4),
+        "closest_approach_m": round(trajectory.closest_approach_m, 3),
+        "closest_approach_time_s": round(trajectory.closest_approach_time_s, 1),
+        "final_hold_point_m": [0.0, -30.0, 0.0],
+    }
+    LOGGER.info("rendezvous (approach / station-keep, non-weapon): %s", summary)
+
+    output_directory = arguments.output or Path("results") / "rpo"
+    output_directory.mkdir(parents=True, exist_ok=True)
+    with (output_directory / "rendezvous.json").open("w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2)
+    if not arguments.no_plots:
+        from aerognc.visualisation.rpo import plot_rendezvous
+
+        plot_rendezvous(trajectory, output_directory / "rendezvous.png")
+    LOGGER.info("wrote rendezvous artifacts to %s", output_directory)
+    return 0
+
+
 def _run_mission_planner_command(arguments: argparse.Namespace) -> int:  # pragma: no cover - UI
     from aerognc.visualisation.mission_planner_map import launch_mission_planner
 
@@ -2199,6 +2257,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_waypoint_command(arguments)
         if arguments.command == "mission-planner":
             return _run_mission_planner_command(arguments)
+        if arguments.command == "rpo":
+            return _run_rpo_command(arguments)
     except (ConfigurationError, ValueError, FloatingPointError, OSError, RuntimeError) as error:
         LOGGER.error("%s", error)
         return 2
