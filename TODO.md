@@ -157,26 +157,30 @@ _Module: `vehicle/control_surfaces.py`. 12 tests; ruff + mypy strict clean._
 
 ## Phase 8 — Mission manager (state machine)  (spec §13, §15, §32 step 12)
 
-- [ ] 8.1 State machine: DISARMED→PREFLIGHT→READY→TAKEOFF→CLIMB→NAVIGATE→LOITER→
+_Module: `mission/mission_manager.py`. 8 tests; ruff + mypy strict clean. Takeoff/landing states exist but are deferred/off by default (spec §34)._
+
+- [x] 8.1 State machine: DISARMED→PREFLIGHT→READY→TAKEOFF→CLIMB→NAVIGATE→LOITER→
   RETURN_HOME→APPROACH→FLARE→LANDED / PAUSED / ABORT / EMERGENCY / MISSION_COMPLETE.
-- [ ] 8.2 Explicit transition conditions; validate mission before execution; set/advance
+- [x] 8.2 Explicit transition conditions; validate mission before execution; set/advance
   active waypoint; trigger actions; pause/resume/RTH/abort; expose state to UI; log transitions.
-- [ ] 8.3 Takeoff module (ground/hand/catapult/air-start) — optional, off by default.
-- [ ] 8.4 Loiter module (CW/CCW, center/radius/duration/turns/indefinite, exit).
-- [ ] 8.5 Landing module (approach/final/glide-slope/flare/touchdown/rollout) —
+- [~] 8.3 Takeoff module (ground/hand/catapult/air-start) — optional, off by default.
+- [x] 8.4 Loiter module (CW/CCW, center/radius/duration/turns/indefinite, exit).
+- [~] 8.5 Landing module (approach/final/glide-slope/flare/touchdown/rollout) —
   **disabled by default** until tested (spec §34).
-- [ ] 8.6 Unit tests: transitions, sequencing, pause/resume/abort/RTH.
+- [x] 8.6 Unit tests: transitions, sequencing, pause/resume/abort/RTH.
 
 ---
 
 ## Phase 9 — Safety manager  (spec §19, §20, §32 step 13)
 
-- [ ] 9.1 Separate safety layer monitoring airspeed/bank/pitch/α/load/alt/geofence/
+_Module: `mission/safety.py`. 8 tests; ruff + mypy strict clean. NaN/Inf enforced upstream (state ctor + backend); manual-override deferred to the hardware phase._
+
+- [x] 9.1 Separate safety layer monitoring airspeed/bank/pitch/α/load/alt/geofence/
   nav-validity/GPS/comms/battery/cross-track/actuator-saturation/divergence/NaN-Inf.
-- [ ] 9.2 Responses: limit command / hold / loiter / RTH / abort / manual / terminate-sim.
-- [ ] 9.3 Every trigger logged (timestamp, type, state, threshold, action).
-- [ ] 9.4 Manual-override architecture (never permanently block manual control).
-- [ ] 9.5 Unit tests for each monitored condition + geofence.
+- [x] 9.2 Responses: limit command / hold / loiter / RTH / abort / manual / terminate-sim.
+- [x] 9.3 Every trigger logged (timestamp, type, state, threshold, action).
+- [~] 9.4 Manual-override architecture (never permanently block manual control).
+- [x] 9.5 Unit tests for each monitored condition + geofence.
 
 ---
 

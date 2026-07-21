@@ -466,6 +466,22 @@ class PathManager:
             mission_complete=self._complete,
         )
 
+    def index_of_waypoint(self, waypoint_id: int) -> int | None:
+        """Return the first leg index terminating at the given waypoint id."""
+        for index, leg in enumerate(self._legs):
+            if leg.segment.waypoint_id == waypoint_id:
+                return index
+        return None
+
+    def force_active_index(self, index: int) -> None:
+        """Jump the active leg (e.g. for return-to-home); clears timers."""
+        if not 0 <= index < len(self._legs):
+            raise ValueError(f"leg index {index} out of range [0, {len(self._legs)})")
+        self._active = index
+        self._dwell_s = 0.0
+        self._loiter_elapsed_s = 0.0
+        self._complete = False
+
     def planned_path_ned(self) -> FloatArray:
         """Return the planned polyline vertices (home + leg terminals) in NED."""
         vertices: list[FloatArray] = [np.zeros(3, dtype=np.float64)]
