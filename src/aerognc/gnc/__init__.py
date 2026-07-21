@@ -70,6 +70,14 @@ from aerognc.gnc.strapdown_ins import (
     compensate_two_sample_imu,
     propagate_rotating_strapdown,
 )
+from aerognc.gnc.waypoint_guidance import (
+    GuidanceCommand,
+    GuidanceGains,
+    GuidanceLaw,
+    GuidanceMode,
+    PathFollowingGuidance,
+    wind_corrected_heading_rad,
+)
 
 __all__ = [
     "AscentGuidanceCommand",
@@ -85,6 +93,10 @@ __all__ = [
     "ErrorStateNavigationEKF",
     "FilletGeometry",
     "FlightEnvelopeResult",
+    "GuidanceCommand",
+    "GuidanceGains",
+    "GuidanceLaw",
+    "GuidanceMode",
     "ImuIncrement",
     "InnovationGateConfiguration",
     "LQRDesign",
@@ -96,6 +108,7 @@ __all__ = [
     "OrbitSegment",
     "PIDController",
     "PIDGains",
+    "PathFollowingGuidance",
     "PathManager",
     "PathManagerConfig",
     "PathManagerStatus",
@@ -130,4 +143,5 @@ __all__ = [
     "rts_smooth",
     "solve_trim",
     "stability_margins_siso",
+    "wind_corrected_heading_rad",
 ]

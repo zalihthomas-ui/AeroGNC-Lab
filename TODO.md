@@ -90,13 +90,20 @@ _Module: `src/aerognc/gnc/path_manager.py` (exported via `aerognc.gnc`). 18 test
 
 ## Phase 4 — Guidance layer  (spec §8, §16, §32 step 9)
 
-- [ ] 4.1 `GuidanceLaw` ABC + structured `GuidanceCommand` (course/heading/alt/airspeed/
-  climb-rate/roll/cross-track/along-track/dist-to-wp).
-- [ ] 4.2 Backends: `direct_bearing`, `line_of_sight`, `l1_guidance`, `vector_field`
-  (prefer L1 / vector-field for fixed-wing). Selectable via config.
-- [ ] 4.3 Loiter-circle following; altitude interpolation between waypoints; airspeed command.
-- [ ] 4.4 Wind-aware heading vs ground-course correction (never conflate the two).
-- [ ] 4.5 Unit + scenario tests (straight-line convergence, loiter hold, crosswind crab).
+_Modules: `navigation/state.py` (NavigationState + FlightEnvironment, also Phase 7.1),
+`gnc/waypoint_guidance.py`. 17 tests in `test_waypoint_guidance.py`; ruff + mypy strict clean._
+
+- [x] 4.1 `GuidanceLaw` ABC + structured `GuidanceCommand` (course/heading/altitude/
+  airspeed/climb-rate/roll-feedforward/cross-track/dist-to-wp/along-track).
+- [x] 4.2 Backends `direct_bearing`, `line_of_sight`, `l1_guidance`, `vector_field`
+  (`PathFollowingGuidance`, mode-selectable; vector-field default).
+- [x] 4.3 Loiter-circle vector-field following (used for orbit legs in every mode);
+  altitude interpolation via `PathSegment.commanded_down_m`; airspeed command from segment.
+- [x] 4.4 Wind-aware `heading_command` (crab) kept strictly separate from ground
+  `course_command` (`wind_corrected_heading_rad`); verified sign + calm-air fallback.
+- [x] 4.5 Unit tests: line convergence (all modes), on-path course, saturation, orbit
+  tangent/roll-feedforward sign, altitude/airspeed/climb commands, crosswind crab.
+  (Closed-loop convergence scenario lands in Phase 15 with the integrated loop.)
 
 ---
 
