@@ -1,0 +1,113 @@
+{
+  "assist_orbit": {
+    "alignment_angle_deg": 111.662905629371,
+    "departure_oberth_energy_gain_jpkg": 67224010.32356389,
+    "incoming_excess_speed_mps": 3483.2480415304876,
+    "outgoing_excess_speed_mps": 8151.5655335112015,
+    "period_s": 5714.611033859644,
+    "radius_m": 7500000.0,
+    "revolutions": 2
+  },
+  "burns": [
+    {
+      "delta_v_mps": 3963.987251973286,
+      "epoch_day": 0.0,
+      "mass_after_kg": 92822.51956220937,
+      "mass_before_kg": 130000.0,
+      "name": "departure_parking_orbit_injection",
+      "propellant_used_kg": 37177.480437790626
+    },
+    {
+      "delta_v_mps": 3924.779543224511,
+      "epoch_day": 240.0,
+      "mass_after_kg": 66498.26344200772,
+      "mass_before_kg": 92822.51956220937,
+      "name": "assist_orbit_capture",
+      "propellant_used_kg": 26324.25612020165
+    },
+    {
+      "delta_v_mps": 13645.649097417816,
+      "epoch_day": 240.06614133141042,
+      "mass_after_kg": 20855.513823078596,
+      "mass_before_kg": 66498.26344200772,
+      "name": "assist_orbit_alignment",
+      "propellant_used_kg": 45642.74961892913
+    },
+    {
+      "delta_v_mps": 5982.211734012473,
+      "epoch_day": 240.1322826628208,
+      "mass_after_kg": 12544.368511359435,
+      "mass_before_kg": 20855.513823078596,
+      "name": "assist_periapsis_departure",
+      "propellant_used_kg": 8311.145311719161
+    },
+    {
+      "delta_v_mps": 3939.4140313849584,
+      "epoch_day": 2035.4,
+      "mass_after_kg": 8975.645114913532,
+      "mass_before_kg": 12544.368511359435,
+      "name": "destination_orbit_capture",
+      "propellant_used_kg": 3568.723396445903
+    }
+  ],
+  "limitations": [
+    "All bodies, vehicle values, and epochs are fictional and synthetic.",
+    "Lambert arcs patch at body centres; finite SOI transit times are reported separately.",
+    "Burns are ideal impulses and the parking-orbit alignment is conservative.",
+    "No launch, atmosphere, low-thrust spiral, entry, landing, or operational navigation is modeled."
+  ],
+  "model": "preliminary two-body patched conics with impulsive burns",
+  "requirements": {
+    "all_pass": true,
+    "delta_v_pass": true,
+    "dry_mass_pass": true,
+    "final_mass_pass": true,
+    "lambert_endpoint_pass": true,
+    "ordered_events_pass": true,
+    "parking_revolutions_pass": true,
+    "sphere_of_influence_pass": true
+  },
+  "route": {
+    "assist_arrival_day": 240.0,
+    "assist_departure_day": 240.1322826628208,
+    "departure": "Asteria",
+    "departure_day": 0.0,
+    "destination": "Caelus",
+    "destination_arrival_day": 2035.4,
+    "orbit_assist": "Neria"
+  },
+  "safety_scope": "Fictional civilian research spacecraft, synthetic worlds, and synthetic epochs for education and portfolio verification only; not an operational mission design.",
+  "scenario": "selene_orbit_assisted_civilian_tour",
+  "sphere_of_influence_patches": {
+    "assist_arrival": {
+      "eccentricity": 1.1784267193944997,
+      "periapsis_radius_m": 7500000.0,
+      "soi_radius_m": 1555243030.4660847,
+      "time_periapsis_to_soi_s": 408062.31350302335
+    },
+    "assist_departure": {
+      "eccentricity": 1.977176774222467,
+      "periapsis_radius_m": 7500000.0,
+      "soi_radius_m": 1555243030.4660847,
+      "time_periapsis_to_soi_s": 186706.82930122982
+    },
+    "departure": {
+      "eccentricity": 1.2886024813339478,
+      "periapsis_radius_m": 6671000.0,
+      "soi_radius_m": 924659954.3865818,
+      "time_periapsis_to_soi_s": 205005.1815849244
+    },
+    "destination": {
+      "eccentricity": 1.4569530703977376,
+      "periapsis_radius_m": 8300000.0,
+      "soi_radius_m": 6684718114.693621,
+      "time_periapsis_to_soi_s": 1404234.6011469935
+    }
+  },
+  "summary": {
+    "dry_mass_kg": 8000.0,
+    "final_mass_kg": 8975.645114913532,
+    "initial_mass_kg": 130000.0,
+    "total_delta_v_mps": 31456.041658013044
+  }
+}

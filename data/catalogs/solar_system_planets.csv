@@ -1,0 +1,9 @@
+order_from_sun,name,category,semimajor_axis_au,sidereal_orbit_period_days,mean_radius_km,source_url
+1,Mercury,terrestrial,0.38709927,87.9691,2439.7,https://science.nasa.gov/mercury/facts/
+2,Venus,terrestrial,0.72333566,224.701,6051.8,https://science.nasa.gov/venus/venus-facts/
+3,Earth,terrestrial,1.00000261,365.256,6371.0,https://science.nasa.gov/earth/facts/
+4,Mars,terrestrial,1.52371034,686.980,3389.5,https://science.nasa.gov/mars/facts/
+5,Jupiter,gas giant,5.20288700,4332.589,69911.0,https://science.nasa.gov/jupiter/facts/
+6,Saturn,gas giant,9.53667594,10759.22,58232.0,https://science.nasa.gov/saturn/facts/
+7,Uranus,ice giant,19.18916464,30688.5,25362.0,https://science.nasa.gov/uranus/facts/
+8,Neptune,ice giant,30.06992276,60182.0,24622.0,https://science.nasa.gov/neptune/neptune-facts/

@@ -1,0 +1,11 @@
+{
+  "case_name": "constant_force_ned_translation",
+  "duration_s": 8.0,
+  "time_step_s": 0.02,
+  "mass_kg": 15.0,
+  "initial_position_ned_m": [10.0, -5.0, -100.0],
+  "initial_velocity_ned_mps": [40.0, 3.0, -12.0],
+  "force_ned_N": [30.0, -15.0, -75.0],
+  "gravity_ned_mps2": [0.0, 0.0, 9.80665],
+  "absolute_tolerance": 1.0e-10
+}

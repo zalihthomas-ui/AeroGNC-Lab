@@ -1,0 +1,26 @@
+# Example only: fictional civilian research-flight telemetry mapping.
+schema_version: "1.0"
+timestamp:
+  source_name: sensor_clock_ms
+  source_unit: ms
+  scale_to_s: 0.001
+  offset_s: 0.0
+quality:
+  source_name: quality
+  accepted_values: [VALID]
+  invalid_policy: keep_nan
+channels:
+  - source_name: altitude_ft
+    destination_name: altitude_m
+    source_unit: ft
+    destination_unit: m
+    scale: 0.3048
+    offset: 0.0
+    missing_policy: keep_nan
+  - source_name: vertical_speed_fps
+    destination_name: vertical_speed_mps
+    source_unit: ft/s
+    destination_unit: m/s
+    scale: 0.3048
+    offset: 0.0
+    missing_policy: keep_nan

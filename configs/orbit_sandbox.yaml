@@ -1,0 +1,63 @@
+metadata:
+  name: Orbis-A Civilian Satellite Sandbox
+  fictional: true
+  safety_scope: >-
+    Fictional civilian satellite and wholly synthetic mission parameters for education,
+    numerical verification, and portfolio demonstration; not operational navigation.
+
+model: perturbed_decay
+
+primary:
+  name: Orbis-A
+  gravitational_parameter_m3_s2: 3.9860044e+14
+  radius_m: 6.371e+6
+  j2: 1.08263e-3
+  rotation_rate_radps: 7.292115e-5
+  color: "#4C8FD8"
+
+secondaries:
+  - name: Luma
+    gravitational_parameter_m3_s2: 4.90487e+12
+    radius_m: 1.737e+6
+    orbital_radius_m: 3.844e+8
+    phase_at_epoch_deg: 30.0
+    inclination_deg: 5.1
+    color: "#C8CDD3"
+  - name: Vesper
+    gravitational_parameter_m3_s2: 3.20e+11
+    radius_m: 5.20e+5
+    orbital_radius_m: 1.50e+8
+    phase_at_epoch_deg: 210.0
+    inclination_deg: 12.0
+    color: "#B58CFF"
+
+satellite:
+  name: Meridian-1
+  initial_mass_kg: 500.0
+  dry_mass_kg: 450.0
+  drag_area_m2: 4.0
+  drag_coefficient: 2.2
+  correction_specific_impulse_s: 220.0
+
+initial_condition:
+  altitude_km: 200.0
+  speed_mode: circular
+  custom_speed_mps: 7800.0
+  inclination_deg: 51.6
+  ascending_node_deg: 25.0
+  phase_deg: 10.0
+
+correction:
+  enabled: false
+  trigger_altitude_km: 170.0
+  maximum_burns: 3
+
+simulation:
+  duration_days: 3.0
+  integration_step_s: 10.0
+  output_step_s: 60.0
+  reentry_altitude_km: 120.0
+  escape_radius_multiplier: 50.0
+  atmosphere_density_scale: 1.0
+
+output_directory: results/orbit_sandbox

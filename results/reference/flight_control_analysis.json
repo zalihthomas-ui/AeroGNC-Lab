@@ -1,0 +1,90 @@
+{
+  "closed_loop_modes": [
+    {
+      "damping_ratio": 0.731421812656635,
+      "imaginary_radps": 0.6373226156704195,
+      "natural_frequency_radps": 0.9345929882507602,
+      "real_radps": -0.6835816975625522,
+      "stable": true,
+      "time_constant_s": 1.4628829349376977
+    },
+    {
+      "damping_ratio": 0.731421812656635,
+      "imaginary_radps": -0.6373226156704195,
+      "natural_frequency_radps": 0.9345929882507602,
+      "real_radps": -0.6835816975625522,
+      "stable": true,
+      "time_constant_s": 1.4628829349376977
+    }
+  ],
+  "gain_schedule": {
+    "gains": [
+      [
+        11.18033988749897,
+        15.096276852662847
+      ],
+      [
+        11.180339887498953,
+        17.349691458065532
+      ],
+      [
+        11.180339887498965,
+        19.286907583496532
+      ]
+    ],
+    "inertia_kgm2": [
+      9.5,
+      12.8,
+      16.0
+    ],
+    "scheduling_points": [
+      0.0,
+      0.5,
+      1.0
+    ]
+  },
+  "lqr_gain": [
+    [
+      11.180339887498953,
+      17.349691458065532
+    ]
+  ],
+  "nominal_input_matrix": [
+    [
+      0.0
+    ],
+    [
+      0.07812499999790973
+    ]
+  ],
+  "nominal_system_matrix": [
+    [
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      -0.011718749999999998
+    ]
+  ],
+  "riccati_residual_norm": 2.161031364628563e-14,
+  "scenario": "fictional_pitch_linear_analysis",
+  "sil_timing": {
+    "deadline_s": 0.001,
+    "missed_deadline_count": 0,
+    "output_checksum": 4181.848053871018,
+    "sample_count": 10000
+  },
+  "stability_margins": {
+    "gain_crossover_radps": 1.4785443980342323,
+    "gain_margin": null,
+    "phase_crossover_radps": null,
+    "phase_margin_deg": 66.90451663263741
+  },
+  "trim": {
+    "command_moment_nm": -0.3499999999999999,
+    "converged": true,
+    "iterations": 3,
+    "residual_nm": 5.551115123125783e-17
+  }
+}

@@ -1,0 +1,334 @@
+{
+  "milky_way_context": {
+    "disk_diameter_light_year_approx": 100000.0,
+    "morphology": "barred spiral galaxy",
+    "name": "Milky Way",
+    "scope_note": "These are approximate public astronomy context values, not a complete mass model, star catalog, navigation ephemeris, or assertion that all Galactic planets are known. Humanity has observed only a minute subset of the Milky Way's planetary systems.",
+    "solar_arm": "Orion Arm (Orion Spur)",
+    "solar_galactic_orbit_period_year_approx": 230000000.0,
+    "source_urls": [
+      "https://science.nasa.gov/universe/galaxies/",
+      "https://science.nasa.gov/universe/exoplanets/our-milky-way-galaxy-how-big-is-space/",
+      "https://science.nasa.gov/solar-system/solar-system-facts/",
+      "https://science.nasa.gov/resource/the-milky-way-galaxy/"
+    ],
+    "star_count_lower_estimate": 100000000000,
+    "star_count_upper_estimate": 400000000000
+  },
+  "provenance": {
+    "query": "select pl_name,hostname,sy_pnum,discoverymethod,disc_year,pl_orbper,pl_orbsmax,pl_rade,pl_bmasse,sy_dist,ra,dec,st_spectype,st_teff,st_mass,st_rad from pscomppars order by pl_name",
+    "retrieved_utc": "2026-07-19T22:05:28+00:00",
+    "row_count": 6324,
+    "scope_note": "Point-in-time confirmed-planet snapshot. Blank values mean not reported in the selected composite fields. This is not a census of all Milky Way planets and does not provide complete dynamical ephemerides.",
+    "sha256": "9024b5cd53c121bdd2e71866a27c3bf0615a107a083724ba62db9297d3ceba83",
+    "source_name": "NASA Exoplanet Archive",
+    "source_table": "pscomppars",
+    "source_url": "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
+  },
+  "scope": {
+    "complete_milky_way_census": false,
+    "note": "Point-in-time confirmed-planet snapshot. Blank values mean not reported in the selected composite fields. This is not a census of all Milky Way planets and does not provide complete dynamical ephemerides.",
+    "observational_data": true,
+    "simulation_ephemeris": false
+  },
+  "selection_preview": [
+    {
+      "discovery_method": "Radial Velocity",
+      "discovery_year": 2007,
+      "distance_pc": 93.1846,
+      "host_name": "11 Com",
+      "name": "11 Com b",
+      "orbital_period_days": 323.21
+    },
+    {
+      "discovery_method": "Radial Velocity",
+      "discovery_year": 2009,
+      "distance_pc": 125.321,
+      "host_name": "11 UMi",
+      "name": "11 UMi b",
+      "orbital_period_days": 516.21997
+    },
+    {
+      "discovery_method": "Radial Velocity",
+      "discovery_year": 2008,
+      "distance_pc": 75.4392,
+      "host_name": "14 And",
+      "name": "14 And b",
+      "orbital_period_days": 186.76
+    },
+    {
+      "discovery_method": "Radial Velocity",
+      "discovery_year": 2002,
+      "distance_pc": 17.9323,
+      "host_name": "14 Her",
+      "name": "14 Her b",
+      "orbital_period_days": 1766.41
+    },
+    {
+      "discovery_method": "Radial Velocity",
+      "discovery_year": 1996,
+      "distance_pc": 21.1397,
+      "host_name": "16 Cyg B",
+      "name": "16 Cyg B b",
+      "orbital_period_days": 798.5
+    },
+    {
+      "discovery_method": "Radial Velocity",
+      "discovery_year": 2020,
+      "distance_pc": 124.953,
+      "host_name": "17 Sco",
+      "name": "17 Sco b",
+      "orbital_period_days": 578.38
+    },
+    {
+      "discovery_method": "Radial Velocity",
+      "discovery_year": 2008,
+      "distance_pc": 76.222,
+      "host_name": "18 Del",
+      "name": "18 Del b",
+      "orbital_period_days": 982.85
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2008,
+      "distance_pc": 139.135,
+      "host_name": "1RXS J160929.1-210524",
+      "name": "1RXS J160929.1-210524 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Radial Velocity",
+      "discovery_year": 2018,
+      "distance_pc": 95.9863,
+      "host_name": "24 Boo",
+      "name": "24 Boo b",
+      "orbital_period_days": 30.33
+    },
+    {
+      "discovery_method": "Radial Velocity",
+      "discovery_year": 2010,
+      "distance_pc": 72.0691,
+      "host_name": "24 Sex",
+      "name": "24 Sex b",
+      "orbital_period_days": 452.8
+    },
+    {
+      "discovery_method": "Radial Velocity",
+      "discovery_year": 2010,
+      "distance_pc": 72.0691,
+      "host_name": "24 Sex",
+      "name": "24 Sex c",
+      "orbital_period_days": 883.0
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2021,
+      "distance_pc": 128.484,
+      "host_name": "2MASS J04372171+2651014",
+      "name": "2M0437 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2013,
+      "distance_pc": 47.2,
+      "host_name": "2MASS J01033563-5515561 A",
+      "name": "2MASS J01033563-5515561 AB b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2013,
+      "distance_pc": 33.8281,
+      "host_name": "2MASS J01225093-2439505",
+      "name": "2MASS J01225093-2439505 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2015,
+      "distance_pc": 40.08964117,
+      "host_name": "2MASS J02192210-3925225",
+      "name": "2MASS J02192210-3925225 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2018,
+      "distance_pc": 66.0613,
+      "host_name": "2MASS J0249-0557 A",
+      "name": "2MASS J0249-0557 c",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2024,
+      "distance_pc": 117.435,
+      "host_name": "2MASS J03590986+2009361",
+      "name": "2MASS J03590986+2009361 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2010,
+      "distance_pc": 120.42398696,
+      "host_name": "2MASS J04414489+2301513",
+      "name": "2MASS J04414489+2301513 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2024,
+      "distance_pc": null,
+      "host_name": "2MASS J11011926-7732383",
+      "name": "2MASS J11011926-7732383 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2024,
+      "distance_pc": 100.862,
+      "host_name": "2MASS J11550485-7919108",
+      "name": "2MASS J11550485-7919108 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2004,
+      "distance_pc": 64.308,
+      "host_name": "2MASS J12073346-3932539",
+      "name": "2MASS J12073346-3932539 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Eclipse Timing Variations",
+      "discovery_year": 2015,
+      "distance_pc": 396.332,
+      "host_name": "2MASS J19383260+4603591",
+      "name": "2MASS J19383260+4603591 b",
+      "orbital_period_days": 406.0
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2024,
+      "distance_pc": 34.1154,
+      "host_name": "2MASS J21252752-8138278",
+      "name": "2MASS J21252752-8138278 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2016,
+      "distance_pc": 69.5737,
+      "host_name": "2MASS J22362452+4751425",
+      "name": "2MASS J22362452+4751425 b",
+      "orbital_period_days": null
+    },
+    {
+      "discovery_method": "Imaging",
+      "discovery_year": 2018,
+      "distance_pc": 57.2309,
+      "host_name": "2MASS J22501512+2325342",
+      "name": "2MASS J22501512+2325342 b",
+      "orbital_period_days": null
+    }
+  ],
+  "selection_summary": {
+    "discovery_year_max": 2026,
+    "discovery_year_min": 1992,
+    "farthest_reported_distance_pc": 8500.0,
+    "host_count": 4738,
+    "nearest_reported_distance_pc": 1.30119,
+    "planet_count": 6324,
+    "planets_with_mass": 6293,
+    "planets_with_orbital_period": 5981,
+    "planets_with_radius": 6274,
+    "positioned_planet_count": 6297
+  },
+  "snapshot_summary": {
+    "discovery_year_max": 2026,
+    "discovery_year_min": 1992,
+    "farthest_reported_distance_pc": 8500.0,
+    "host_count": 4738,
+    "nearest_reported_distance_pc": 1.30119,
+    "planet_count": 6324,
+    "planets_with_mass": 6293,
+    "planets_with_orbital_period": 5981,
+    "planets_with_radius": 6274,
+    "positioned_planet_count": 6297
+  },
+  "solar_system_planets": [
+    {
+      "category": "terrestrial",
+      "mean_radius_km": 2439.7,
+      "name": "Mercury",
+      "order_from_sun": 1,
+      "semimajor_axis_au": 0.38709927,
+      "sidereal_orbit_period_days": 87.9691,
+      "source_url": "https://science.nasa.gov/mercury/facts/"
+    },
+    {
+      "category": "terrestrial",
+      "mean_radius_km": 6051.8,
+      "name": "Venus",
+      "order_from_sun": 2,
+      "semimajor_axis_au": 0.72333566,
+      "sidereal_orbit_period_days": 224.701,
+      "source_url": "https://science.nasa.gov/venus/venus-facts/"
+    },
+    {
+      "category": "terrestrial",
+      "mean_radius_km": 6371.0,
+      "name": "Earth",
+      "order_from_sun": 3,
+      "semimajor_axis_au": 1.00000261,
+      "sidereal_orbit_period_days": 365.256,
+      "source_url": "https://science.nasa.gov/earth/facts/"
+    },
+    {
+      "category": "terrestrial",
+      "mean_radius_km": 3389.5,
+      "name": "Mars",
+      "order_from_sun": 4,
+      "semimajor_axis_au": 1.52371034,
+      "sidereal_orbit_period_days": 686.98,
+      "source_url": "https://science.nasa.gov/mars/facts/"
+    },
+    {
+      "category": "gas giant",
+      "mean_radius_km": 69911.0,
+      "name": "Jupiter",
+      "order_from_sun": 5,
+      "semimajor_axis_au": 5.202887,
+      "sidereal_orbit_period_days": 4332.589,
+      "source_url": "https://science.nasa.gov/jupiter/facts/"
+    },
+    {
+      "category": "gas giant",
+      "mean_radius_km": 58232.0,
+      "name": "Saturn",
+      "order_from_sun": 6,
+      "semimajor_axis_au": 9.53667594,
+      "sidereal_orbit_period_days": 10759.22,
+      "source_url": "https://science.nasa.gov/saturn/facts/"
+    },
+    {
+      "category": "ice giant",
+      "mean_radius_km": 25362.0,
+      "name": "Uranus",
+      "order_from_sun": 7,
+      "semimajor_axis_au": 19.18916464,
+      "sidereal_orbit_period_days": 30688.5,
+      "source_url": "https://science.nasa.gov/uranus/facts/"
+    },
+    {
+      "category": "ice giant",
+      "mean_radius_km": 24622.0,
+      "name": "Neptune",
+      "order_from_sun": 8,
+      "semimajor_axis_au": 30.06992276,
+      "sidereal_orbit_period_days": 60182.0,
+      "source_url": "https://science.nasa.gov/neptune/neptune-facts/"
+    }
+  ]
+}

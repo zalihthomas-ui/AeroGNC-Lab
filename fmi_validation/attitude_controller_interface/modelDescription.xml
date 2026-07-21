@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription fmiVersion="3.0" modelName="AeroGNC.FictionalAttitudeController" instantiationToken="{703c160d-f564-4adc-9c7f-d7eddb09521d}" description="Public-safe fictional research-rocket quaternion attitude controller interface" version="0.8.0" generationTool="AeroGNC-Lab" variableNamingConvention="structured">
+  <CoSimulation modelIdentifier="aerognc_attitude_controller" canHandleVariableCommunicationStepSize="false" fixedInternalStepSize="0.01" />
+  <UnitDefinitions>
+    <Unit name="s">
+      <BaseUnit s="1" />
+    </Unit>
+    <Unit name="rad/s">
+      <BaseUnit s="-1" rad="1" />
+    </Unit>
+    <Unit name="N.m">
+      <BaseUnit kg="1" m="2" s="-2" />
+    </Unit>
+    <Unit name="N.m.s">
+      <BaseUnit kg="1" m="2" s="-1" />
+    </Unit>
+  </UnitDefinitions>
+  <DefaultExperiment startTime="0" stopTime="8" stepSize="0.01" />
+  <ModelVariables>
+    <Float64 name="time" valueReference="0" causality="independent" variability="continuous" description="Importer communication time" unit="s" />
+    <Float64 name="referenceQuaternionNb.q0" valueReference="1" causality="input" variability="discrete" description="Scalar-first body-to-NED reference quaternion component" start="1" />
+    <Float64 name="referenceQuaternionNb.q1" valueReference="2" causality="input" variability="discrete" description="Scalar-first body-to-NED reference quaternion component" start="0" />
+    <Float64 name="referenceQuaternionNb.q2" valueReference="3" causality="input" variability="discrete" description="Scalar-first body-to-NED reference quaternion component" start="0" />
+    <Float64 name="referenceQuaternionNb.q3" valueReference="4" causality="input" variability="discrete" description="Scalar-first body-to-NED reference quaternion component" start="0" />
+    <Float64 name="measuredQuaternionNb.q0" valueReference="5" causality="input" variability="discrete" description="Scalar-first body-to-NED measured quaternion component" start="1" />
+    <Float64 name="measuredQuaternionNb.q1" valueReference="6" causality="input" variability="discrete" description="Scalar-first body-to-NED measured quaternion component" start="0" />
+    <Float64 name="measuredQuaternionNb.q2" valueReference="7" causality="input" variability="discrete" description="Scalar-first body-to-NED measured quaternion component" start="0" />
+    <Float64 name="measuredQuaternionNb.q3" valueReference="8" causality="input" variability="discrete" description="Scalar-first body-to-NED measured quaternion component" start="0" />
+    <Float64 name="angularRateBody.x" valueReference="9" causality="input" variability="discrete" description="FRD body angular rate about x" unit="rad/s" start="0" />
+    <Float64 name="angularRateBody.y" valueReference="10" causality="input" variability="discrete" description="FRD body angular rate about y" unit="rad/s" start="0" />
+    <Float64 name="angularRateBody.z" valueReference="11" causality="input" variability="discrete" description="FRD body angular rate about z" unit="rad/s" start="0" />
+    <Float64 name="proportionalGain.x" valueReference="12" causality="parameter" variability="fixed" description="Synthetic controller proportionalGain about body x" unit="N.m" start="8" />
+    <Float64 name="proportionalGain.y" valueReference="13" causality="parameter" variability="fixed" description="Synthetic controller proportionalGain about body y" unit="N.m" start="45" />
+    <Float64 name="proportionalGain.z" valueReference="14" causality="parameter" variability="fixed" description="Synthetic controller proportionalGain about body z" unit="N.m" start="45" />
+    <Float64 name="rateDamping.x" valueReference="15" causality="parameter" variability="fixed" description="Synthetic controller rateDamping about body x" unit="N.m.s" start="2.5" />
+    <Float64 name="rateDamping.y" valueReference="16" causality="parameter" variability="fixed" description="Synthetic controller rateDamping about body y" unit="N.m.s" start="14" />
+    <Float64 name="rateDamping.z" valueReference="17" causality="parameter" variability="fixed" description="Synthetic controller rateDamping about body z" unit="N.m.s" start="14" />
+    <Float64 name="momentLimit.x" valueReference="18" causality="parameter" variability="fixed" description="Synthetic controller momentLimit about body x" unit="N.m" start="15" />
+    <Float64 name="momentLimit.y" valueReference="19" causality="parameter" variability="fixed" description="Synthetic controller momentLimit about body y" unit="N.m" start="50" />
+    <Float64 name="momentLimit.z" valueReference="20" causality="parameter" variability="fixed" description="Synthetic controller momentLimit about body z" unit="N.m" start="50" />
+    <Float64 name="momentCommandBody.x" valueReference="21" causality="output" variability="discrete" description="Limited commanded moment about FRD body x" unit="N.m" />
+    <Float64 name="momentCommandBody.y" valueReference="22" causality="output" variability="discrete" description="Limited commanded moment about FRD body y" unit="N.m" />
+    <Float64 name="momentCommandBody.z" valueReference="23" causality="output" variability="discrete" description="Limited commanded moment about FRD body z" unit="N.m" />
+  </ModelVariables>
+  <ModelStructure>
+    <Output valueReference="21" dependencies="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20" />
+    <InitialUnknown valueReference="21" dependencies="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20" />
+    <Output valueReference="22" dependencies="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20" />
+    <InitialUnknown valueReference="22" dependencies="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20" />
+    <Output valueReference="23" dependencies="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20" />
+    <InitialUnknown valueReference="23" dependencies="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20" />
+  </ModelStructure>
+</fmiModelDescription>

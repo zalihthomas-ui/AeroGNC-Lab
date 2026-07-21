@@ -1,0 +1,29 @@
+{
+  "applied_command_checksum": -35.0501233757652,
+  "command_endpoint": {
+    "datagrams_received": 100,
+    "datagrams_sent": 100,
+    "invalid_packets": 0,
+    "packets_accepted": 100,
+    "receive_timeouts": 0,
+    "source_rejections": 0,
+    "stale_packets": 0,
+    "wrong_type_packets": 0
+  },
+  "localhost_only": true,
+  "model": "operating-system UDP localhost loopback; no physical HIL",
+  "physical_hil_executed": false,
+  "real_time_guarantee": false,
+  "sample_count": 100,
+  "state_endpoint": {
+    "datagrams_received": 100,
+    "datagrams_sent": 100,
+    "invalid_packets": 0,
+    "packets_accepted": 100,
+    "receive_timeouts": 0,
+    "source_rejections": 0,
+    "stale_packets": 0,
+    "wrong_type_packets": 0
+  },
+  "watchdog_activations": 0
+}

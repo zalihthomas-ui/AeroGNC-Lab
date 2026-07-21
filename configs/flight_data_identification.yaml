@@ -1,0 +1,63 @@
+metadata:
+  name: synthetic_pitch_flight_data_identification
+  safety_scope: >-
+    Fictional civilian research-flight data analysis using a synthetic pitch plant,
+    synthetic clocks, and synthetic measurements only.
+  fictional: true
+
+simulation:
+  output_directory: results/flight_data_identification
+  duration_s: 36.0
+  integration_step_s: 0.0025
+  command_sample_rate_hz: 50.0
+  sensor_sample_rate_hz: 47.0
+  random_seed: 20260722
+
+plant:
+  inertia_kgm2: 12.8
+  damping_nms_per_rad: 1.15
+  stiffness_nm_per_rad: 4.20
+  disturbance_moment_nm: 0.18
+
+excitation:
+  frequencies_hz: [0.11, 0.23, 0.41, 0.67]
+  amplitudes_nm: [1.50, 1.20, 0.90, 0.55]
+  phases_deg: [0.0, 47.0, 113.0, 201.0]
+  limit_nm: 3.2
+
+clock:
+  sensor_offset_s: 0.370
+  sensor_drift_ppm: 85.0
+  marker_times_s: [2.0, 7.0, 13.0, 19.0, 26.0, 33.0]
+  marker_width_s: 0.080
+
+sensors:
+  pitch_noise_std_deg: 0.050
+  rate_noise_std_degps: 0.080
+  pitch_quantisation_deg: 0.005
+  rate_quantisation_degps: 0.010
+  sync_noise_std: 0.004
+  dropout_intervals_s: [[15.0, 15.45], [29.0, 29.30]]
+
+outliers:
+  - {time_s: 6.2, pitch_offset_deg: 3.0, rate_offset_degps: -5.0}
+  - {time_s: 12.4, pitch_offset_deg: -4.0, rate_offset_degps: 6.0}
+  - {time_s: 21.1, pitch_offset_deg: 3.5, rate_offset_degps: 5.5}
+  - {time_s: 30.2, pitch_offset_deg: -3.2, rate_offset_degps: -5.0}
+
+analysis:
+  marker_threshold: 0.20
+  maximum_interpolation_gap_s: 0.080
+  hampel_half_window: 7
+  hampel_threshold_sigma: 10.0
+  derivative_window: 21
+  derivative_polynomial_order: 3
+  huber_threshold_sigma: 1.5
+  huber_maximum_iterations: 30
+  validation_fraction: 0.30
+  clock_offset_tolerance_s: 0.010
+  clock_drift_tolerance_ppm: 250.0
+  parameter_relative_tolerance: 0.10
+  validation_pitch_rms_limit_deg: 0.35
+  validation_rate_rms_limit_degps: 0.50
+  maximum_residual_autocorrelation: 0.30

@@ -1,0 +1,41 @@
+metadata:
+  safety_scope: >-
+    Fictional civilian research-rocket ascent using synthetic parameters for
+    education, verification, and portfolio demonstration only.
+
+vehicle_file: vehicle_asteria_sr1.yaml
+
+simulation:
+  name: three_dof_nominal
+  step_s: 0.02
+  maximum_time_s: 180.0
+  random_seed: 20260719
+  output_directory: results/three_dof_nominal
+
+launch:
+  position_ned_m: [0.0, 0.0, 0.0]
+  initial_speed_mps: 1.0
+  elevation_deg: 86.0
+  azimuth_deg: 15.0
+  thrust_alignment: velocity
+
+environment:
+  atmosphere:
+    minimum_altitude_m: -500.0
+    maximum_altitude_m: 47000.0
+  gravity:
+    model: inverse_square
+    sea_level_mps2: 9.80665
+    earth_radius_m: 6371000.0
+  wind:
+    altitudes_m: [0.0, 1000.0, 5000.0, 15000.0, 47000.0]
+    velocities_ned_mps:
+      - [2.0, 0.0, 0.0]
+      - [4.0, 1.0, 0.0]
+      - [8.0, 3.0, 0.0]
+      - [12.0, -2.0, 0.0]
+      - [18.0, 1.0, 0.0]
+    gust_std_ned_mps: [0.7, 0.7, 0.15]
+    correlation_time_s: 2.5
+    sample_step_s: 0.1
+

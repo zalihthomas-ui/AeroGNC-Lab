@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install package and development tools
+        run: python -m pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check .
+      - name: Format check
+        run: ruff format --check .
+      - name: Type check
+        run: mypy src
+      - name: Test with branch-aware coverage
+        run: pytest --cov=aerognc --cov-report=term-missing --cov-report=xml
+      - name: Smoke-test documented CLI
+        run: >-
+          python -m aerognc.cli run
+          --config configs/three_dof_nominal.yaml
+          --output results/ci-smoke
+          --no-plots
+      - name: Retain coverage record
+        if: matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-python-3.13
+          path: coverage.xml

@@ -1,0 +1,106 @@
+metadata:
+  name: Aquila-X1 Civilian Research Aircraft
+  fictional: true
+  safety_scope: >-
+    Fictional civilian research aircraft with wholly synthetic coefficients and mass
+    properties for education, numerical verification, and portfolio demonstration.
+
+planet:
+  name: Orbis-A
+  gravitational_parameter_m3_s2: 3.9860044e+14
+  radius_m: 6.371e+6
+  j2: 1.08263e-3
+  rotation_rate_radps: 7.292115e-5
+  atmosphere_density_scale: 1.0
+
+geometry:
+  wing_area_m2: 27.0
+  wingspan_m: 12.0
+  mean_chord_m: 2.4
+  aileron_limit_deg: 22.0
+  elevator_limit_deg: 25.0
+  rudder_limit_deg: 28.0
+  control_time_constant_s: 0.12
+  control_rate_limit_degps: 80.0
+  throttle_time_constant_s: 0.6
+
+mass:
+  initial_mass_kg: 4200.0
+  dry_mass_kg: 2000.0
+  inertia_xx_kgm2: 6800.0
+  inertia_yy_kgm2: 19500.0
+  inertia_zz_kgm2: 23500.0
+  maximum_fuel_flow_kgps: 0.58
+
+aerodynamics:
+  backend: analytic
+  cl_zero: 0.18
+  cl_alpha_per_rad: 5.15
+  cl_elevator_per_rad: 0.32
+  cl_pitch_rate: 4.0
+  cl_maximum: 1.42
+  stall_angle_deg: 15.0
+  post_stall_lift_fraction: 0.38
+  cd_zero: 0.026
+  induced_drag_factor: 0.052
+  stall_drag_increment: 0.85
+  side_force_beta_per_rad: -0.72
+  side_force_aileron_per_rad: 0.02
+  side_force_rudder_per_rad: 0.20
+  roll_beta_per_rad: -0.11
+  roll_rate: -0.48
+  roll_yaw_rate: 0.14
+  roll_aileron_per_rad: 0.17
+  roll_rudder_per_rad: 0.04
+  pitch_zero: 0.035
+  pitch_alpha_per_rad: -1.05
+  pitch_rate: -12.5
+  pitch_elevator_per_rad: -1.35
+  yaw_beta_per_rad: 0.16
+  yaw_roll_rate: -0.06
+  yaw_rate: -0.20
+  yaw_aileron_per_rad: 0.015
+  yaw_rudder_per_rad: -0.11
+
+propulsion:
+  maximum_thrust_n: 14500.0
+  thrust_density_exponent: 0.75
+  maximum_operating_mach: 0.92
+  maximum_operating_altitude_m: 16000.0
+  rocket_assist_available: true
+  rocket_thrust_n: 120000.0
+  rocket_specific_impulse_s: 320.0
+
+initial_condition:
+  latitude_deg: 0.0
+  longitude_deg: 0.0
+  altitude_m: 1500.0
+  true_airspeed_mps: 82.0
+  heading_deg: 90.0
+  flight_path_angle_deg: 0.0
+  bank_angle_deg: 0.0
+  angle_of_attack_deg: 2.8
+  throttle: 0.28
+
+environment:
+  wind_north_mps: 2.0
+  wind_east_mps: 4.0
+  # Seeded, query-order-independent Gauss-Markov turbulence [NED].
+  turbulence_std_north_mps: 0.7
+  turbulence_std_east_mps: 0.5
+  turbulence_std_down_mps: 0.35
+  turbulence_correlation_time_s: 3.0
+  random_seed: 218
+  # Smooth synthetic crosswind pulse; zero values disable individual axes.
+  gust_start_time_s: 24.0
+  gust_duration_s: 8.0
+  gust_north_mps: 0.0
+  gust_east_mps: 4.0
+  gust_down_mps: 0.0
+
+simulation:
+  duration_s: 90.0
+  integration_step_s: 0.02
+  output_step_s: 0.1
+
+output_directory: ../results/aircraft_sandbox

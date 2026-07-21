@@ -1,0 +1,31 @@
+metadata:
+  name: fictional_pitch_linear_analysis
+  safety_scope: >-
+    Fictional civilian research-rocket pitch-channel analysis using synthetic
+    inertia, damping, weights, disturbances, and software timing inputs.
+
+plant:
+  nominal_inertia_kgm2: 12.8
+  passive_damping_nms: 0.15
+  trim_disturbance_moment_nm: 0.35
+
+lqr:
+  state_weight_diagonal: [25.0, 4.0]
+  input_weight: 0.20
+
+gain_schedule:
+  scheduling_points: [0.0, 0.5, 1.0]
+  inertia_kgm2: [9.5, 12.8, 16.0]
+
+frequency_analysis:
+  minimum_radps: 0.001
+  maximum_radps: 1000.0
+  sample_count: 6000
+
+sil_timing:
+  sample_count: 2000
+  repeat_count: 5
+  deadline_s: 0.001
+  random_seed: 218
+
+output_directory: results/flight_control_analysis

@@ -1,0 +1,108 @@
+{
+  "clock_alignment": {
+    "estimated_drift_ppm": 78.1874498807511,
+    "estimated_offset_s": 0.3700853216076245,
+    "marker_count": 6,
+    "marker_fit_rms_s": 0.000111986472537903,
+    "true_drift_ppm": 85.0,
+    "true_offset_s": 0.37
+  },
+  "data_quality": {
+    "configured_outlier_count": 4,
+    "detected_outlier_count": 5,
+    "measurement_missing_fraction": 0.023320377568017768
+  },
+  "held_out_validation": {
+    "pitch_rms_deg": 0.0763047026372838,
+    "rate_rms_degps": 0.07194026212663926,
+    "start_time_s": 25.2
+  },
+  "identification": {
+    "design_condition_number": 5.253780006736444,
+    "huber_iterations": 10,
+    "model": "theta_dot=q; q_dot=a_theta*theta+a_q*q+b*u+d",
+    "parameters": {
+      "damping": {
+        "confidence_interval_95": [
+          1.1361918766779537,
+          1.1663353713014015
+        ],
+        "estimate": 1.1512636239896776,
+        "relative_error": 0.0010988034692849741,
+        "standard_deviation": 0.007689666995777543,
+        "truth": 1.15,
+        "truth_inside_interval": true,
+        "unit": "N m s/rad"
+      },
+      "disturbance_moment": {
+        "confidence_interval_95": [
+          0.17324419582200978,
+          0.18413625477010281
+        ],
+        "estimate": 0.1786902252960563,
+        "relative_error": 0.007276526133020526,
+        "standard_deviation": 0.002778586466350257,
+        "truth": 0.18,
+        "truth_inside_interval": true,
+        "unit": "N m"
+      },
+      "inertia": {
+        "confidence_interval_95": [
+          12.73713080410276,
+          12.856312022234045
+        ],
+        "estimate": 12.796721413168402,
+        "relative_error": 0.0002561395962186186,
+        "standard_deviation": 0.03040337197226669,
+        "truth": 12.8,
+        "truth_inside_interval": true,
+        "unit": "kg m^2"
+      },
+      "stiffness": {
+        "confidence_interval_95": [
+          4.177614520746566,
+          4.230745912195934
+        ],
+        "estimate": 4.20418021647125,
+        "relative_error": 0.000995289636011825,
+        "standard_deviation": 0.01355392639014469,
+        "truth": 4.2,
+        "truth_inside_interval": true,
+        "unit": "N m/rad"
+      }
+    },
+    "r_squared": 0.9982712059378459
+  },
+  "limitations": [
+    "All truth, clock errors, dropouts, outliers, and measurements are synthetic.",
+    "The identified plant is a rigid, linear, single-axis educational model.",
+    "Approximate confidence intervals assume the local weighted regression model.",
+    "Residual tests diagnose this record and do not certify a physical vehicle."
+  ],
+  "requirements": {
+    "all_pass": true,
+    "clock_drift_pass": true,
+    "clock_offset_pass": true,
+    "identification_fit_pass": true,
+    "marker_fit_pass": true,
+    "missing_data_policy_pass": true,
+    "outlier_detection_pass": true,
+    "parameter_accuracy_pass": true,
+    "parameter_interval_pass": true,
+    "residual_autocorrelation_pass": true,
+    "validation_pitch_pass": true,
+    "validation_rate_pass": true
+  },
+  "residuals": {
+    "durbin_watson": 1.755104126745816,
+    "ljung_box_p_value": 0.8961101172563978,
+    "ljung_box_q": 4.9253260154550915,
+    "maximum_absolute_autocorrelation": 0.14120648451445814,
+    "maximum_input_residual_correlation": 0.2058596338689327,
+    "mean_radps2": -0.0014958953365376163,
+    "rms_radps2": 0.010374539061916445,
+    "sampling_basis": "one sample per non-overlapping derivative window"
+  },
+  "safety_scope": "Fictional civilian research-flight data analysis using a synthetic pitch plant, synthetic clocks, and synthetic measurements only.",
+  "scenario": "synthetic_pitch_flight_data_identification"
+}

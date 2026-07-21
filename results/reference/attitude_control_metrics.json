@@ -1,0 +1,22 @@
+{
+  "cascaded_pid": {
+    "actuator_saturation_duration_s": 0.355,
+    "control_effort_nm2s": 15.308297496335861,
+    "disturbance_recovery_s": 0.9400000000000004,
+    "maximum_tracking_error_rad": 0.13962634015954636,
+    "overshoot_percent": 7.855407253830547,
+    "rise_time_s": 0.7550000000000001,
+    "rms_tracking_error_rad": 0.038540118788796374,
+    "settling_time_s": 2.495
+  },
+  "state_feedback": {
+    "actuator_saturation_duration_s": 0.28,
+    "control_effort_nm2s": 9.599605217270346,
+    "disturbance_recovery_s": 0.4850000000000003,
+    "maximum_tracking_error_rad": 0.13962634015954636,
+    "overshoot_percent": 0.0,
+    "rise_time_s": 1.4100000000000001,
+    "rms_tracking_error_rad": 0.04060110903017561,
+    "settling_time_s": 2.74
+  }
+}

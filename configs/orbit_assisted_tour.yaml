@@ -1,0 +1,38 @@
+metadata:
+  name: selene_orbit_assisted_civilian_tour
+  safety_scope: >-
+    Fictional civilian research spacecraft, synthetic worlds, and synthetic epochs
+    for education and portfolio verification only; not an operational mission design.
+  fictional: true
+
+catalog_path: fictional_planetary_system.yaml
+
+route:
+  departure_body: Asteria
+  assist_body: Neria
+  destination_body: Caelus
+  departure_day: 0.0
+  assist_arrival_day: 240.0
+  destination_arrival_day: 2035.4
+
+parking_orbits:
+  departure_altitude_m: 300000.0
+  assist_altitude_m: 300000.0
+  assist_dwell_revolutions: 2
+  destination_altitude_m: 300000.0
+
+spacecraft:
+  name: Selene Deep-Space Research Stage
+  initial_mass_kg: 130000.0
+  dry_mass_kg: 8000.0
+  specific_impulse_s: 1200.0
+
+constraints:
+  maximum_total_delta_v_mps: 32000.0
+  minimum_final_mass_kg: 8500.0
+
+simulation:
+  first_leg_samples: 320
+  parking_orbit_samples: 240
+  second_leg_samples: 520
+  output_directory: results/orbit_assisted_tour

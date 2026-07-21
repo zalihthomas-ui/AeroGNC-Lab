@@ -1,0 +1,145 @@
+Requirement,Category,Implementation,Verification evidence,Method,Status
+SYS-DYN-001,Dynamics,src/aerognc/dynamics/three_dof.py,tests/integration/test_three_dof.py,T/C,Verified
+SYS-DYN-002,Dynamics,src/aerognc/dynamics/six_dof.py,tests/validation/test_six_dof_benchmarks.py,T/C,Verified
+SYS-DYN-003,Dynamics,src/aerognc/dynamics/six_dof.py,tests/unit/test_six_dof.py,T,Verified
+SYS-DYN-004,Dynamics,src/aerognc/dynamics/six_dof.py,tests/validation/test_six_dof_benchmarks.py,T/C,Verified
+SYS-DYN-005,Dynamics,src/aerognc/dynamics/three_dof.py; src/aerognc/dynamics/six_dof.py,tests/validation/test_cross_model.py,T/C,Verified
+SYS-ENV-001,Environment,src/aerognc/environment/atmosphere.py,tests/unit/test_atmosphere.py,T/C,Verified
+SYS-ENV-002,Environment,src/aerognc/environment/atmosphere.py,tests/unit/test_atmosphere.py,T,Verified
+SYS-ENV-003,Environment,src/aerognc/environment/gravity.py,tests/unit/test_environment.py,T,Verified
+SYS-ENV-004,Environment,src/aerognc/environment/wind.py,tests/unit/test_environment.py,T,Verified
+SYS-ENV-005,Environment,src/aerognc/environment/atmosphere.py,tests/unit/test_atmosphere.py,T,Verified
+SYS-VEH-001,Vehicle,src/aerognc/vehicle/propulsion.py,tests/unit/test_propulsion.py,T,Verified
+SYS-VEH-002,Vehicle,src/aerognc/vehicle/propulsion.py,tests/unit/test_propulsion.py,T,Verified
+SYS-VEH-003,Vehicle,src/aerognc/vehicle/mass_properties.py,tests/unit/test_mass_properties.py,T,Verified
+SYS-VEH-004,Vehicle,src/aerognc/vehicle/aerodynamics.py,tests/unit/test_aerodynamics.py,T,Verified
+SYS-VEH-005,Vehicle,src/aerognc/vehicle/aerodynamics.py,tests/unit/test_aerodynamics.py,T/A,Verified
+SYS-VEH-006,Vehicle,src/aerognc/vehicle/actuators.py,tests/unit/test_actuators.py,T,Verified
+SYS-VEH-007,Vehicle,configs/vehicle_asteria_sr1.yaml,tests/unit/test_configuration.py,A,Verified
+SYS-GUI-001,Guidance,src/aerognc/gnc/guidance.py,tests/unit/test_guidance.py,T,Verified
+SYS-GUI-002,Guidance,src/aerognc/gnc/guidance.py; docs/public_safety.md,tests/unit/test_public_scope.py,T/A,Verified
+SYS-NAV-001,Navigation,src/aerognc/vehicle/sensors.py,tests/unit/test_sensors.py,T,Verified
+SYS-NAV-002,Navigation,src/aerognc/vehicle/sensors.py,tests/unit/test_sensors.py,T,Verified
+SYS-NAV-003,Navigation,src/aerognc/gnc/ekf.py,tests/validation/test_navigation_filter.py; tests/integration/test_navigation_demo.py,T/C,Verified
+SYS-NAV-004,Navigation,docs/navigation_filter.md,tests/unit/test_documentation.py,T/A,Verified
+SYS-CTL-001,Control,src/aerognc/gnc/pid.py,tests/unit/test_pid.py,T,Verified
+SYS-CTL-002,Control,src/aerognc/gnc/control_loops.py,tests/integration/test_attitude_control.py,T/D,Verified
+SYS-CTL-003,Control,src/aerognc/gnc/state_feedback.py,tests/unit/test_state_feedback.py,T,Verified
+SYS-CTL-004,Control,src/aerognc/verification/metrics.py,tests/integration/test_attitude_control.py,T/D,Verified
+SYS-CTL-005,Control,src/aerognc/vehicle/actuators.py,tests/unit/test_actuators.py,T,Verified
+SYS-SIM-001,Simulation,src/aerognc/cli.py; src/aerognc/simulation/simulator.py,tests/integration/test_cli.py,T/D,Verified
+SYS-SIM-002,Simulation,src/aerognc/simulation/events.py,tests/integration/test_three_dof.py,T,Verified
+SYS-SIM-003,Simulation,src/aerognc/configuration/loader.py,tests/unit/test_configuration.py,T,Verified
+SYS-SIM-004,Simulation,src/aerognc/simulation/logging.py,tests/unit/test_logging.py,T,Verified
+SYS-SIM-005,Simulation,src/aerognc/simulation/six_dof_simulator.py,tests/integration/test_six_dof_simulation.py,T/D,Verified
+SYS-SIM-006,Simulation,src/aerognc/mathematics/integrators.py,tests/unit/test_integrators.py,T,Verified
+SYS-SIM-007,Simulation,src/aerognc/simulation/hil.py; docs/future_hil.md,tests/unit/test_hil.py,T/A,Verified
+SYS-SIM-008,Simulation,src/aerognc/visualisation/playback.py; src/aerognc/cli.py,tests/unit/test_playback.py; tests/integration/test_cli.py,T/D,Verified
+SYS-SIM-009,Simulation,src/aerognc/visualisation/playback_3d.py; src/aerognc/cli.py,tests/unit/test_playback_3d.py; tests/integration/test_cli.py,T/D,Verified
+SYS-AST-001,Astrodynamics,src/aerognc/astrodynamics/bodies.py,tests/unit/test_astrodynamics.py,T/C,Verified
+SYS-AST-002,Astrodynamics,src/aerognc/astrodynamics/dynamics.py; src/aerognc/simulation/interplanetary.py,tests/unit/test_astrodynamics.py; tests/integration/test_interplanetary.py,T/A,Verified
+SYS-AST-003,Astrodynamics,src/aerognc/astrodynamics/transfers.py,tests/unit/test_astrodynamics.py,T/C,Verified
+SYS-AST-004,Astrodynamics,src/aerognc/simulation/interplanetary.py; configs/interplanetary_gravity_assist.yaml,tests/integration/test_interplanetary.py,T/D,Verified
+SYS-AST-005,Astrodynamics,src/aerognc/visualisation/mission_control.py; src/aerognc/cli.py,tests/unit/test_mission_control.py; tests/integration/test_cli.py,T/D,Verified
+SYS-AST-006,Astrodynamics,configs/interplanetary_gravity_assist.yaml; docs/interplanetary_mission.md,tests/unit/test_interplanetary_configuration.py; tests/unit/test_public_scope.py,T/A,Verified
+SYS-PER-001,Performance,src/aerognc/simulation/monte_carlo.py,tests/integration/test_monte_carlo.py,T/D,Verified
+SYS-PER-002,Performance,src/aerognc/simulation/monte_carlo.py,tests/unit/test_monte_carlo.py,T,Verified
+SYS-PER-003,Performance,src/aerognc/simulation/monte_carlo.py,tests/integration/test_monte_carlo.py,T/D,Verified
+SYS-PER-004,Performance,src/aerognc/simulation/simulator.py,tests/integration/test_three_dof.py,T/D,Verified
+SYS-VER-001,Verification,src/aerognc/mathematics/integrators.py,tests/validation/test_rk4_reference.py,T/C,Verified
+SYS-VER-002,Verification,src/aerognc/mathematics/integrators.py,tests/validation/test_rk4_reference.py,T/C,Verified
+SYS-VER-003,Verification,src/aerognc/mathematics/quaternion.py,tests/unit/test_quaternion.py,T/C,Verified
+SYS-VER-004,Verification,src/aerognc/verification/flight_test.py,tests/integration/test_flight_test.py,T/D,Verified
+SYS-VER-005,Verification,src/aerognc/verification/cross_language.py; matlab_validation/validate_constant_acceleration.m,docs/matlab_validation.md,C,Verified
+SYS-VER-006,Verification,requirements/traceability_matrix.csv,tests/unit/test_traceability.py,T/A,Verified
+SYS-SWQ-001,Software quality,pyproject.toml; requirements/lock-py313-windows.txt,docs/validation_report.md,T/D,Verified
+SYS-SWQ-002,Software quality,pyproject.toml; .github/workflows/ci.yml,docs/validation_report.md,T,Verified
+SYS-SWQ-003,Software quality,src/aerognc,ruff check .; mypy src; pytest,T/A,Verified
+SYS-SWQ-004,Software quality,.github/workflows/ci.yml,.github/workflows/ci.yml,A,Implemented
+SYS-SWQ-005,Software quality,README.md; docs,tests/unit/test_documentation.py,T/A,Verified
+SYS-SWQ-006,Software quality,scripts/generate_reference_results.py; .gitignore,tests/integration/test_reference_generation.py,T/A,Verified
+SYS-NAV-005,Navigation,src/aerognc/gnc/error_state_ekf.py; docs/error_state_navigation.md,tests/unit/test_error_state_ekf.py,T/A,Verified
+SYS-CTL-006,Control,src/aerognc/gnc/flight_analysis.py,tests/unit/test_flight_analysis.py,T/C,Verified
+SYS-CTL-007,Control,src/aerognc/gnc/flight_analysis.py; configs/flight_control_analysis.yaml,tests/unit/test_flight_analysis.py; tests/integration/test_flight_control_analysis.py,T/C,Verified
+SYS-CTL-008,Control,src/aerognc/gnc/flight_analysis.py; src/aerognc/verification/flight_control_analysis.py,tests/unit/test_flight_analysis.py; tests/integration/test_flight_control_analysis.py,T/D,Verified
+SYS-SIM-010,Simulation,src/aerognc/visualisation/mission_designer.py; src/aerognc/cli.py; run_aerognc.bat,tests/integration/test_cli.py; docs/mission_designer.md,T/D,Verified
+SYS-AST-007,Astrodynamics,src/aerognc/astrodynamics/kepler.py; src/aerognc/astrodynamics/orbital_elements.py; matlab_validation/validate_two_body_case.m,tests/unit/test_orbit_design.py; matlab_validation/two_body_matlab_result.json,T/C,Verified
+SYS-AST-008,Astrodynamics,src/aerognc/astrodynamics/lambert.py; src/aerognc/astrodynamics/mission_design.py,tests/unit/test_orbit_design.py; tests/unit/test_mission_planner.py,T/C,Verified
+SYS-AST-009,Astrodynamics,src/aerognc/astrodynamics/bplane.py; src/aerognc/astrodynamics/mission_design.py,tests/unit/test_orbit_design.py; docs/advanced_astrodynamics.md,T/A,Verified
+SYS-AST-010,Astrodynamics,src/aerognc/astrodynamics/maneuvers.py; src/aerognc/simulation/interplanetary.py,tests/unit/test_maneuvers.py; tests/unit/test_mission_planner.py,T/D,Verified
+SYS-AST-011,Astrodynamics,src/aerognc/astrodynamics/perturbations.py; src/aerognc/configuration/interplanetary_loader.py,tests/unit/test_advanced_astrodynamics.py,T/A,Verified
+SYS-AST-012,Astrodynamics,src/aerognc/astrodynamics/full_n_body.py,tests/unit/test_advanced_astrodynamics.py,T/C,Verified
+SYS-AST-013,Astrodynamics,src/aerognc/astrodynamics/ephemeris.py,tests/unit/test_advanced_astrodynamics.py,T/A,Verified
+SYS-AST-014,Astrodynamics,src/aerognc/simulation/mission_planner.py; src/aerognc/visualisation/mission_designer.py,tests/unit/test_mission_planner.py; tests/integration/test_cli.py,T/D,Verified
+SYS-PER-005,Performance,src/aerognc/simulation/mission_uncertainty.py,tests/unit/test_mission_uncertainty.py,T/D,Verified
+SYS-VER-007,Verification,matlab_validation/validate_two_body_case.m; matlab_validation/two_body_matlab_result.json,docs/matlab_validation.md,C,Verified
+SYS-DYN-006,Dynamics,src/aerognc/dynamics/rotating_planet.py; src/aerognc/simulation/rotating_ascent.py,tests/unit/test_rotating_planet.py; tests/integration/test_rotating_ascent.py,T/C,Verified
+SYS-ENV-006,Environment,src/aerognc/mathematics/geodesy.py; src/aerognc/environment/rotating_planet.py,tests/unit/test_geodesy.py; tests/unit/test_rotating_planet.py,T/C,Verified
+SYS-VEH-008,Vehicle,src/aerognc/mathematics/interpolation.py; src/aerognc/vehicle/aero_database.py; configs/aero_database_synthetic.csv,tests/unit/test_interpolation.py; tests/unit/test_aero_database.py; tests/integration/test_aero_database_analysis.py,T/D,Verified
+SYS-GUI-003,Guidance,src/aerognc/gnc/ascent_guidance.py; src/aerognc/simulation/guided_ascent.py; configs/constrained_ascent_guidance.yaml,tests/unit/test_ascent_guidance.py; tests/integration/test_ascent_guidance.py,T/D,Verified
+SYS-CTL-009,Control,src/aerognc/gnc/flight_envelope.py; configs/flight_envelope.yaml,tests/unit/test_flight_envelope.py; tests/integration/test_flight_envelope.py,T/C/D,Verified
+SYS-SIM-011,Simulation,src/aerognc/cli.py; src/aerognc/simulation/rotating_ascent.py; src/aerognc/simulation/guided_ascent.py,tests/integration/test_rotating_ascent.py; tests/integration/test_aero_database_analysis.py; tests/integration/test_flight_envelope.py; tests/integration/test_ascent_guidance.py,T/D,Verified
+SYS-PER-006,Performance,src/aerognc/gnc/flight_envelope.py; src/aerognc/verification/flight_envelope.py,tests/unit/test_flight_envelope.py; tests/integration/test_flight_envelope.py,T/D,Verified
+SYS-VER-008,Verification,src/aerognc/verification/aero_database.py; src/aerognc/verification/flight_envelope.py; src/aerognc/verification/ascent_guidance.py; docs/geodesy_rotating_planet.md; docs/aerodynamic_database.md; docs/flight_envelope.md; docs/constrained_ascent_guidance.md,tests/integration/test_aero_database_analysis.py; tests/integration/test_flight_envelope.py; tests/integration/test_ascent_guidance.py,T/A,Verified
+SYS-VEH-009,Vehicle,src/aerognc/vehicle/sensor_faults.py,tests/unit/test_sensor_faults.py,T,Verified
+SYS-NAV-006,Navigation,src/aerognc/gnc/strapdown_ins.py; docs/advanced_navigation.md,tests/unit/test_strapdown_ins.py,T/C,Verified
+SYS-NAV-007,Navigation,src/aerognc/gnc/delayed_error_state_ekf.py; src/aerognc/simulation/advanced_navigation.py,tests/unit/test_delayed_error_state_ekf.py; tests/integration/test_advanced_navigation.py,T/D,Verified
+SYS-SIM-012,Simulation,src/aerognc/cli.py; src/aerognc/simulation/advanced_navigation.py; src/aerognc/verification/flight_data_identification.py,tests/integration/test_advanced_navigation.py; tests/integration/test_flight_data_identification.py,T/D,Verified
+SYS-AST-015,Astrodynamics,src/aerognc/astrodynamics/patched_conics.py; src/aerognc/simulation/orbit_assisted_tour.py,tests/unit/test_patched_conics.py; tests/integration/test_orbit_assisted_tour.py,T/C/D,Verified
+SYS-AST-016,Astrodynamics,src/aerognc/astrodynamics/launch_window.py; src/aerognc/verification/launch_window.py,tests/unit/test_launch_window.py; tests/integration/test_launch_window_optimization.py,T/C/D,Verified
+SYS-AST-017,Astrodynamics,src/aerognc/astrodynamics/time_systems.py; src/aerognc/astrodynamics/reference_frames.py,tests/unit/test_time_and_reference_frames.py,T/C/A,Verified
+SYS-AST-018,Astrodynamics,src/aerognc/interoperability/ccsds_oem.py; src/aerognc/verification/astrodynamics_interop.py,tests/unit/test_ccsds_oem.py,T/D,Verified
+SYS-AST-019,Astrodynamics,src/aerognc/interoperability/external_tools.py; gmat_validation/two_body_validation.script,tests/unit/test_external_astrodynamics_interfaces.py,T/A,Verified
+SYS-DAT-001,Astronomy data,data/catalogs/milky_way_metadata.yaml; data/catalogs/solar_system_planets.csv; docs/galaxy_catalog.md,tests/unit/test_catalogs.py,T/A,Verified
+SYS-DAT-002,Astronomy data,data/catalogs/nasa_confirmed_exoplanets.csv; src/aerognc/catalogs/exoplanets.py; scripts/update_exoplanet_catalog.py,tests/unit/test_catalogs.py,T/D,Verified
+SYS-DAT-003,Astronomy data,src/aerognc/catalogs/galactic.py; src/aerognc/catalogs/exoplanets.py,tests/unit/test_catalogs.py,T/C,Verified
+SYS-DAT-004,Astronomy data,src/aerognc/verification/galaxy_catalog.py; src/aerognc/visualisation/galaxy_catalog.py; src/aerognc/cli.py,tests/integration/test_galaxy_catalog.py; tests/integration/test_cli.py,T/D/A,Verified
+SYS-VER-009,Verification,src/aerognc/simulation/advanced_navigation.py; src/aerognc/verification/advanced_navigation.py; docs/advanced_navigation.md,tests/unit/test_advanced_navigation.py; tests/integration/test_advanced_navigation.py,T/C,Verified
+SYS-VER-010,Verification,src/aerognc/mathematics/signal_processing.py; src/aerognc/verification/robust_identification.py; src/aerognc/verification/flight_data_identification.py; docs/flight_data_identification.md,tests/unit/test_signal_processing.py; tests/unit/test_robust_identification.py; tests/integration/test_flight_data_identification.py,T/C/D,Verified
+SYS-SIM-013,Simulation,src/aerognc/simulation/workbench.py; src/aerognc/visualisation/workbench.py; src/aerognc/visualisation/galaxy_explorer.py; run_aerognc.bat; run_simulation.bat,tests/unit/test_workbench.py; tests/unit/test_galaxy_explorer.py; tests/integration/test_cli.py; docs/simulation_workbench.md,T/D/A,Verified
+SYS-SIM-014,Simulation,src/aerognc/simulation/hil.py; src/aerognc/simulation/software_loopback.py,tests/unit/test_hil.py; tests/unit/test_software_loopback.py; tests/integration/test_cli.py,T/D,Verified
+SYS-SWQ-007,Software quality,src/aerognc/interoperability/fmi_interface.py; fmi_validation/attitude_controller_interface/modelDescription.xml; fmi_validation/attitude_controller_interface/STATUS.json; docs/fmi_interoperability.md,tests/unit/test_fmi_interface.py; tests/integration/test_cli.py,T/A,Verified
+SYS-PRJ-001,Project workflow,src/aerognc/project/models.py; src/aerognc/project/workspace.py; projects/portfolio_demo.aerognc.yaml,tests/unit/test_project_workspace.py,T/D,Verified
+SYS-PRJ-002,Project workflow,src/aerognc/project/manifest.py,tests/unit/test_run_manifest.py,T/A,Verified
+SYS-PRJ-003,Project workflow,src/aerognc/project/result_store.py,tests/unit/test_result_store.py; tests/integration/test_project_workflow.py,T/D,Verified
+SYS-PRJ-004,Project workflow,src/aerognc/project/comparison.py,tests/unit/test_run_comparison.py,T/D,Verified
+SYS-PRJ-005,Project workflow,src/aerognc/project/report.py,tests/unit/test_engineering_report.py,T/D,Verified
+SYS-PRJ-006,Project workflow,src/aerognc/project/registry.py,tests/unit/test_workflow_registry.py,T/A,Verified
+SYS-PRJ-007,Project workflow,src/aerognc/project/runner.py; src/aerognc/cli.py,tests/integration/test_project_workflow.py; tests/integration/test_cli.py,T/D,Verified
+SYS-NUM-001,Numerical methods,src/aerognc/mathematics/adaptive_integrators.py,tests/unit/test_adaptive_integrators.py; tests/validation/test_adaptive_reference.py,T/C,Verified
+SYS-NUM-002,Numerical methods,src/aerognc/mathematics/adaptive_integrators.py,tests/unit/test_adaptive_integrators.py; tests/validation/test_adaptive_reference.py,T/C,Verified
+SYS-NUM-003,Numerical methods,src/aerognc/simulation/checkpoints.py,tests/unit/test_checkpoints.py,T/C,Verified
+SYS-NUM-004,Numerical methods,src/aerognc/simulation/scheduler.py,tests/unit/test_scheduler.py,T,Verified
+SYS-NUM-005,Numerical methods,src/aerognc/mathematics/variational.py,tests/unit/test_variational.py,T/C,Verified
+SYS-DYN-007,Dynamics,src/aerognc/dynamics/rotating_six_dof.py; src/aerognc/simulation/rotating_six_dof.py,tests/unit/test_rotating_six_dof.py; tests/integration/test_rotating_six_dof.py,T/C/D,Verified
+SYS-VEH-010,Vehicle,src/aerognc/vehicle/staging.py,tests/unit/test_staging.py; tests/integration/test_multistage_recovery.py,T/D,Verified
+SYS-VEH-011,Vehicle,src/aerognc/vehicle/recovery.py,tests/unit/test_recovery.py; tests/integration/test_multistage_recovery.py,T/D,Verified
+SYS-VEH-012,Vehicle,src/aerognc/vehicle/engineering_data.py,tests/unit/test_engineering_data.py,T/A,Verified
+SYS-AST-020,Astrodynamics,src/aerognc/astrodynamics/ephemeris_provider.py; docs/mission_analysis.md,tests/unit/test_ephemeris_providers.py; tests/integration/test_mission_analysis.py,T/A,Verified
+SYS-AST-021,Astrodynamics,src/aerognc/astrodynamics/multirevolution.py; docs/mission_analysis.md,tests/unit/test_multirevolution.py; tests/integration/test_mission_analysis.py,T/C/D,Verified
+SYS-AST-022,Astrodynamics,src/aerognc/astrodynamics/geometry.py; docs/mission_analysis.md,tests/unit/test_astrodynamics_geometry.py; tests/integration/test_mission_analysis.py,T/C,Verified
+SYS-AST-023,Astrodynamics,src/aerognc/interoperability/ccsds_aem.py; src/aerognc/interoperability/ccsds_opm.py; src/aerognc/interoperability/ccsds_tdm.py; docs/mission_analysis.md,tests/unit/test_ccsds_extended.py,T/D,Verified
+SYS-NAV-008,Navigation,src/aerognc/gnc/rts_smoother.py; docs/telemetry_analysis.md,tests/unit/test_rts_smoother.py; tests/integration/test_telemetry_analysis.py,T/C/D,Verified
+SYS-DAT-005,Data,src/aerognc/data/telemetry.py; configs/telemetry_mapping_example.yaml; docs/telemetry_analysis.md,tests/unit/test_telemetry.py; tests/integration/test_telemetry_analysis.py,T/D,Verified
+SYS-DAT-006,Data,src/aerognc/data/analysis.py; docs/telemetry_analysis.md,tests/unit/test_telemetry_analysis.py; tests/integration/test_telemetry_analysis.py,T/C/D,Verified
+SYS-PER-007,Performance,src/aerognc/verification/design_of_experiments.py; docs/robust_experiments.md,tests/unit/test_design_of_experiments.py; tests/integration/test_robust_ensemble.py,T/C/D,Verified
+SYS-PER-008,Performance,src/aerognc/simulation/resumable_ensemble.py; docs/robust_experiments.md,tests/unit/test_resumable_ensemble.py; tests/integration/test_robust_ensemble.py,T/D,Verified
+SYS-PER-009,Performance,src/aerognc/verification/benchmark.py; src/aerognc/cli.py; docs/robust_experiments.md,tests/unit/test_benchmark.py; tests/integration/test_cli.py,T/D,Verified
+SYS-SIM-015,Simulation,src/aerognc/visualisation/workbench.py; src/aerognc/simulation/workbench_project.py; src/aerognc/project; docs/simulation_workbench.md,tests/unit/test_workbench_project.py; tests/unit/test_workbench.py; tests/integration/test_cli.py,T/D/A,Verified
+SYS-SIM-016,Simulation,src/aerognc/simulation/udp_transport.py; src/aerognc/cli.py; docs/future_hil.md,tests/unit/test_udp_transport.py; tests/integration/test_cli.py,T/D,Verified
+SYS-SWQ-008,Software quality,src/aerognc/project/registry.py; docs/plugin_api.md,tests/unit/test_workflow_registry.py,T/A,Verified
+SYS-SWQ-009,Software quality,src/aerognc/diagnostics.py; src/aerognc/cli.py; scripts/diagnose_environment.py; diagnose_aerognc.bat,tests/unit/test_diagnostics.py; tests/unit/test_windows_launchers.py; tests/integration/test_cli.py,T/D,Verified
+SYS-SWQ-010,Software quality,docs/ui_architecture_decision.md; docs/prototypes/workbench_local_web.html; scripts/ui_capability_probe.py,tests/unit/test_documentation.py; tests/unit/test_ui_capability_probe.py,T/A,Verified
+SYS-DYN-008,Dynamics,src/aerognc/vehicle/fixed_wing.py; src/aerognc/simulation/aircraft_sandbox.py; docs/aircraft_simulation.md,tests/unit/test_fixed_wing.py; tests/integration/test_aircraft_sandbox.py,T/C/D,Verified
+SYS-ENV-007,Environment,src/aerognc/environment/orbital_atmosphere.py; docs/orbit_sandbox.md,tests/unit/test_orbital_atmosphere.py,T/C/A,Verified
+SYS-VEH-013,Vehicle,src/aerognc/vehicle/fixed_wing.py; configs/aircraft_sandbox.yaml; docs/aircraft_simulation.md,tests/unit/test_fixed_wing.py; tests/integration/test_aircraft_sandbox.py,T/C/D,Verified
+SYS-VEH-014,Vehicle,src/aerognc/visualisation/mesh.py; assets/models/aquila_x1.obj; docs/aircraft_simulation.md,tests/unit/test_mesh_import.py,T/A,Verified
+SYS-CTL-010,Control,src/aerognc/vehicle/fixed_wing.py; src/aerognc/visualisation/pilot_input.py; src/aerognc/visualisation/aircraft_live.py,tests/unit/test_pilot_input.py; tests/unit/test_aircraft_live.py,T/D,Verified
+SYS-SIM-017,Simulation,src/aerognc/simulation/orbit_sandbox.py; src/aerognc/configuration/orbit_sandbox_loader.py; src/aerognc/visualisation/orbit_sandbox.py,tests/integration/test_orbit_sandbox.py; tests/integration/test_sandbox_cli.py,T/C/D,Verified
+SYS-SIM-018,Simulation,src/aerognc/simulation/orbit_sandbox.py; configs/orbit_sandbox.yaml; docs/orbit_sandbox.md,tests/unit/test_orbit_sandbox_configuration.py; tests/integration/test_orbit_sandbox.py,T/D/A,Verified
+SYS-SIM-019,Simulation,src/aerognc/visualisation/workbench.py; src/aerognc/visualisation/aircraft_live.py; run_solver.bat,tests/unit/test_aircraft_live.py; scripts/ui_capability_probe.py; tests/integration/test_cli.py,T/D/A,Verified
+SYS-SIM-020,Simulation,src/aerognc/visualisation/aircraft_live.py; src/aerognc/simulation/aircraft_sandbox.py; docs/aircraft_simulation.md,tests/integration/test_aircraft_sandbox.py,T/C/A,Verified
+SYS-AST-024,Astrodynamics,src/aerognc/simulation/orbit_sandbox.py; src/aerognc/visualisation/workbench.py; docs/orbit_sandbox.md,tests/integration/test_orbit_sandbox.py,T/C,Verified
+SYS-AST-025,Astrodynamics,src/aerognc/astrodynamics/dynamics.py; src/aerognc/astrodynamics/full_n_body.py; src/aerognc/simulation/orbit_sandbox.py,tests/integration/test_orbit_sandbox.py,T/C,Verified
+SYS-AST-026,Astrodynamics,src/aerognc/simulation/orbit_sandbox.py; src/aerognc/environment/orbital_atmosphere.py; docs/orbit_sandbox.md,tests/unit/test_orbital_atmosphere.py; tests/integration/test_orbit_sandbox.py,T/D/A,Verified
+SYS-SWQ-011,Software quality,run_solver.bat; run_aerognc.bat; docs/simulation_workbench.md,tests/unit/test_windows_launchers.py; tests/integration/test_cli.py,T/D,Verified

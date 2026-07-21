@@ -1,0 +1,74 @@
+metadata:
+  name: helios_pathfinder_gravity_assist
+  description: >-
+    Synthetic civilian pathfinder transfer from Asteria past the gas giant Brontes
+    to the outer research world Caelus.
+  safety_scope: >-
+    Fictional civilian research spacecraft and synthetic planetary scenario for
+    education and portfolio verification; no operational or targeting application.
+
+primary:
+  name: Helios
+  gravitational_parameter_m3_s2: 1.32712440018e+20
+  radius_m: 6.957e+8
+  color: "#FDB813"
+
+bodies:
+  - name: Asteria
+    role: departure
+    gravitational_parameter_m3_s2: 3.9860044e+14
+    radius_m: 6.371e+6
+    color: "#3E8ED0"
+    orbit:
+      semi_major_axis_m: 1.496e+11
+      phase_at_epoch_deg: 0.0
+      inclination_deg: 0.0
+      ascending_node_deg: 0.0
+
+  - name: Brontes
+    role: assist
+    gravitational_parameter_m3_s2: 1.26686534e+17
+    radius_m: 6.9911e+7
+    color: "#D99B5B"
+    orbit:
+      semi_major_axis_m: 7.785e+11
+      phase_at_epoch_deg: 80.2
+      inclination_deg: 0.0
+      ascending_node_deg: 0.0
+
+  - name: Caelus
+    role: destination
+    gravitational_parameter_m3_s2: 4.0e+14
+    radius_m: 8.0e+6
+    color: "#75B7C7"
+    orbit:
+      semi_major_axis_m: 1.08e+12
+      phase_at_epoch_deg: 128.7
+      inclination_deg: 0.0
+      ascending_node_deg: 0.0
+
+spacecraft:
+  name: Selene Pathfinder
+  mass_kg: 1450.0
+  dry_mass_kg: 980.0
+  # State is specified at the edge of the fictional departure sphere of influence.
+  reference_body: Asteria
+  # Radial, transverse, normal position and velocity offsets in SI units.
+  position_offset_rtn_m: [1.0e+9, 0.0, 0.0]
+  velocity_offset_rtn_mps: [0.0, 8850.0, 0.0]
+
+# Higher-fidelity terms are opt-in so the baseline remains easy to audit.
+force_model:
+  j2: 0.0
+  reference_radius_m: 6.957e+8
+  radiation_area_m2: 0.0
+  reflectivity_coefficient: 1.4
+  include_relativity: false
+
+mission:
+  duration_days: 2100.0
+  step_s: 21600.0
+  assist_encounter_radius_m: 5.0e+9
+  destination_arrival_radius_m: 8.0e+9
+  output_directory: results/interplanetary_gravity_assist
+  snapshot_time_days: 1342.0

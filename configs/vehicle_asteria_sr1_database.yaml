@@ -1,0 +1,39 @@
+metadata:
+  name: Asteria-SR1-DB
+  description: >-
+    Fictional civilian research rocket using a synthetic regular-grid aerodynamic
+    database. No value represents a real or operational vehicle.
+  fictional: true
+
+geometry:
+  reference_area_m2: 0.031416
+  reference_length_m: 2.8
+
+propulsion:
+  time_s: [0.0, 0.05, 0.20, 1.00, 2.00, 3.20, 3.35]
+  thrust_n: [0.0, 900.0, 1750.0, 1680.0, 1600.0, 1300.0, 0.0]
+  propellant_mass_kg: 10.5
+
+mass_properties:
+  dry_mass_kg: 19.5
+  dry_cg_from_nose_m: 1.35
+  wet_cg_from_nose_m: 1.55
+  dry_inertia_body_kgm2:
+    - [0.16, 0.0, 0.0]
+    - [0.0, 12.8, 0.0]
+    - [0.0, 0.0, 12.8]
+  wet_inertia_body_kgm2:
+    - [0.23, 0.0, 0.0]
+    - [0.0, 19.6, 0.0]
+    - [0.0, 0.0, 19.6]
+
+aerodynamics:
+  database_file: aero_database_synthetic.csv
+  out_of_range: clamp
+
+actuator:
+  time_constant_s: 0.06
+  position_limit_deg: 12.0
+  rate_limit_degps: 120.0
+  command_delay_s: 0.03
+  moment_per_command_nm_per_rad: [80.0, 250.0, 250.0]

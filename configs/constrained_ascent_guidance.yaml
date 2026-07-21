@@ -1,0 +1,43 @@
+metadata:
+  name: asteria_sr1_constrained_ascent
+  safety_scope: >-
+    Fictional civilian research-rocket ascent using synthetic parameters for
+    academic trajectory shaping and verification only.
+
+base_scenario: three_dof_aero_database.yaml
+
+reference:
+  time_s: [0.0, 0.60, 1.80, 3.35]
+  elevation_deg: [86.0, 86.0, 82.0, 78.0]
+  throttle: [1.0, 1.0, 1.0, 1.0]
+
+constraints:
+  maximum_dynamic_pressure_pa: 12000.0
+  maximum_proper_load_factor: 6.00
+  maximum_angle_of_attack_deg: 5.0
+  minimum_alpha_constraint_dynamic_pressure_pa: 100.0
+
+governor:
+  dynamic_pressure_soft_fraction: 0.82
+  ballistic_apogee_reserve_m: 120.0
+
+pitch_response:
+  time_constant_s: 0.16
+  rate_limit_degps: 28.0
+
+performance:
+  desired_apogee_m: 800.0
+  apogee_tolerance_m: 18.0
+
+optimization:
+  elevation_offset_bounds_deg: [-12.0, 8.0]
+  throttle_scale_bounds: [0.65, 1.0]
+  initial_elevation_step_deg: 4.0
+  initial_throttle_step: 0.08
+  maximum_iterations: 10
+
+simulation:
+  step_s: 0.08
+  maximum_time_s: 55.0
+
+output_directory: results/constrained_ascent_guidance

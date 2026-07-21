@@ -1,0 +1,18 @@
+name: Milky Way
+morphology: barred spiral galaxy
+disk_diameter_light_year_approx: 100000.0
+star_count_estimate:
+  lower: 100000000000
+  upper: 400000000000
+solar_arm: Orion Arm (Orion Spur)
+solar_galactic_orbit_period_year_approx: 230000000.0
+scope_note: >-
+  These are approximate public astronomy context values, not a complete mass
+  model, star catalog, navigation ephemeris, or assertion that all Galactic
+  planets are known. Humanity has observed only a minute subset of the Milky
+  Way's planetary systems.
+source_urls:
+  - https://science.nasa.gov/universe/galaxies/
+  - https://science.nasa.gov/universe/exoplanets/our-milky-way-galaxy-how-big-is-space/
+  - https://science.nasa.gov/solar-system/solar-system-facts/
+  - https://science.nasa.gov/resource/the-milky-way-galaxy/

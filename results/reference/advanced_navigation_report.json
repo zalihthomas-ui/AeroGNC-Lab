@@ -1,0 +1,113 @@
+{
+  "coning_sculling": {
+    "uncompensated_attitude_difference_deg": 0.00523557242937369,
+    "uncompensated_position_difference_m": 0.03705664424620634
+  },
+  "consistency": {
+    "barometer_mean_nis": 0.9910596777813554,
+    "barometer_mean_nis_bounds": [
+      0.9334509211141704,
+      1.0688080453488409
+    ],
+    "confidence": 0.95,
+    "gnss_mean_nis": 6.1131451002353,
+    "gnss_mean_nis_bounds": [
+      5.764506450276013,
+      6.240142016391849
+    ],
+    "nees_15_bounds_for_ensemble_mean": [
+      11.446580237501816,
+      19.026425340643943
+    ],
+    "nees_15_mean_over_time": 12.180557419907371,
+    "nees_inside_fraction": 0.594913714804723,
+    "run_count": 8,
+    "seeds": [
+      20270721,
+      20270722,
+      20270723,
+      20270724,
+      20270725,
+      20270726,
+      20270727,
+      20270728
+    ]
+  },
+  "fixed_lag_and_integrity": {
+    "maximum_replayed_step_count": 18,
+    "sensors": {
+      "barometer": {
+        "accepted_count": 205,
+        "final_health": "healthy",
+        "maximum_nis": 654.7165197077578,
+        "measurement_count": 210,
+        "rejected_count": 5
+      },
+      "gnss": {
+        "accepted_count": 95,
+        "final_health": "healthy",
+        "maximum_nis": 8436.666828571359,
+        "measurement_count": 102,
+        "rejected_count": 7
+      }
+    }
+  },
+  "limitations": [
+    "The truth motion and all sensor characteristics are synthetic.",
+    "The 15-state model omits lever arms, scale factors, misalignment states, clock states, and atmosphere-dependent GNSS errors.",
+    "The observability rank applies only to the configured maneuver and sensor set.",
+    "Chi-square bounds diagnose statistical consistency; they do not certify a physical navigation system."
+  ],
+  "observability": {
+    "normalised_gramian_rank": 15,
+    "normalised_gramian_singular_values": [
+      6.379532789890937,
+      4.487363706111826,
+      2.6270647907420654,
+      0.5371019087075799,
+      0.4668761321295788,
+      0.3440892659095619,
+      0.059119552721316734,
+      0.04201661908589632,
+      0.024847019217631685,
+      0.014651098034481735,
+      0.013280934501062503,
+      0.003334031973584505,
+      0.0003983655862160922,
+      0.0002853561416732814,
+      3.8429246589295885e-05
+    ],
+    "rank_tolerance_relative": 1e-08
+  },
+  "performance": {
+    "attitude_rms_deg": 1.810653714123204,
+    "final_position_error_ned_m": [
+      -0.010402233571596753,
+      0.007848970328533017,
+      0.25363581341224517
+    ],
+    "final_velocity_error_ned_mps": [
+      -0.025571497139523558,
+      0.06701268696715232,
+      0.017412424349416256
+    ],
+    "position_rms_m": 2.4897236165914176,
+    "velocity_rms_mps": 0.2897100236976917
+  },
+  "requirements": {
+    "all_pass": false,
+    "attitude_rms_at_most_3_deg": true,
+    "barometer_mean_nis_inside_confidence_bounds": true,
+    "coning_sculling_effect_resolved": true,
+    "delayed_replay_exercised": true,
+    "gnss_mean_nis_inside_confidence_bounds": true,
+    "injected_faults_rejected": true,
+    "nees_inside_fraction_at_least_0_80": false,
+    "observability_rank_15": true,
+    "position_rms_at_most_3_m": true,
+    "sensor_health_recovered": true,
+    "velocity_rms_at_most_0_5_mps": true
+  },
+  "scope": "Synthetic civilian rotating-planet strapdown navigation and integrity verification; not a flight-ready navigation product.",
+  "seed": 20260721
+}

@@ -1,0 +1,92 @@
+metadata:
+  name: rotating_delayed_navigation_verification
+  safety_scope: >-
+    Fictional civilian research-flight navigation study using a synthetic planet,
+    synthetic IMU/aiding data, and no operational vehicle or proprietary data.
+  fictional: true
+
+rotating_ascent_configuration: rotating_planet_ascent.yaml
+
+simulation:
+  output_directory: results/advanced_navigation
+  duration_s: 22.0
+  imu_sample_rate_hz: 50.0
+  random_seed: 20260721
+
+truth:
+  initial_velocity_ned_mps: [0.0, 0.0, 0.0]
+  initial_euler321_deg: [0.0, 80.0, 0.0]
+  powered_duration_s: 6.0
+  powered_specific_force_body_mps2: [24.0, 0.0, 0.0]
+  coast_specific_force_body_mps2: [0.0, 0.0, 0.0]
+  coning_rate_amplitude_body_radps: [0.08, 0.07, 0.015]
+  coning_frequency_hz: 3.5
+  sculling_force_amplitude_body_mps2: [0.0, 0.40, 0.30]
+
+imu:
+  gyro_noise_density_radps_per_sqrt_hz: [0.0008, 0.0008, 0.0008]
+  accelerometer_noise_density_mps2_per_sqrt_hz: [0.020, 0.020, 0.025]
+  initial_gyro_bias_body_radps: [0.0015, -0.0010, 0.0007]
+  initial_accelerometer_bias_body_mps2: [0.08, -0.05, 0.10]
+  gyro_bias_random_walk_radps2_per_sqrt_hz: [0.00002, 0.00002, 0.00002]
+  accelerometer_bias_random_walk_mps3_per_sqrt_hz: [0.0002, 0.0002, 0.0002]
+
+aiding_sensors:
+  gnss:
+    sample_rate_hz: 5.0
+    noise_std: [1.2, 1.2, 1.8, 0.20, 0.20, 0.30]
+    constant_bias: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    bias_drift_std_per_sqrt_s: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    quantisation: [0.05, 0.05, 0.05, 0.01, 0.01, 0.01]
+    delay_s: 0.36
+    dropout_probability: 0.01
+    dropout_intervals_s: [[9.0, 10.2]]
+  barometer:
+    sample_rate_hz: 10.0
+    noise_std: [2.5]
+    constant_bias: [0.4]
+    bias_drift_std_per_sqrt_s: [0.015]
+    quantisation: [0.1]
+    delay_s: 0.14
+    dropout_probability: 0.01
+    dropout_intervals_s: [[20.0, 20.7]]
+
+faults:
+  - sensor: gnss
+    mode: bias_step
+    start_time_s: 13.0
+    end_time_s: 14.3
+    value: [75.0, -55.0, 40.0, 8.0, -6.0, 5.0]
+  - sensor: barometer
+    mode: bias_step
+    start_time_s: 17.0
+    end_time_s: 17.5
+    value: [60.0]
+
+filter:
+  initial_position_error_ned_m: [15.0, -10.0, 8.0]
+  initial_velocity_error_ned_mps: [1.0, -0.5, 0.8]
+  initial_attitude_error_euler321_deg: [1.0, -1.5, 2.0]
+  initial_gyro_bias_estimate_radps: [0.0, 0.0, 0.0]
+  initial_accelerometer_bias_estimate_mps2: [0.0, 0.0, 0.0]
+  initial_standard_deviation:
+    position_m: [25.0, 25.0, 25.0]
+    velocity_mps: [3.0, 3.0, 3.0]
+    attitude_deg: [5.0, 5.0, 5.0]
+    gyro_bias_radps: [0.01, 0.01, 0.01]
+    accelerometer_bias_mps2: [0.25, 0.25, 0.25]
+  process_noise:
+    gyro_noise_std_radps_per_sqrt_hz: 0.0008
+    accelerometer_noise_std_mps2_per_sqrt_hz: 0.025
+    gyro_bias_random_walk_std_radps2_per_sqrt_hz: 0.00002
+    accelerometer_bias_random_walk_std_mps3_per_sqrt_hz: 0.0002
+  fixed_lag_s: 1.0
+  innovation_gate:
+    gnss_nis_threshold: 16.812
+    barometer_nis_threshold: 6.635
+    degraded_after_rejections: 2
+    failed_after_rejections: 5
+
+consistency:
+  runs: 8
+  confidence: 0.95

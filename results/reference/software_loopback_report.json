@@ -1,0 +1,20 @@
+{
+  "applied_command_checksum": -58.32345125772506,
+  "command_deadline_misses": 0,
+  "command_packets_accepted": 498,
+  "command_packets_dropped": 0,
+  "command_packets_duplicated": 0,
+  "command_packets_stale": 0,
+  "maximum_logical_latency_s": 0.020000000000000462,
+  "mean_logical_latency_s": 0.02,
+  "model": "deterministic logical-time software loopback; no physical HIL",
+  "p95_logical_latency_s": 0.020000000000000462,
+  "pending_command_packets": 1,
+  "pending_state_packets": 1,
+  "sample_count": 500,
+  "state_packets_accepted": 499,
+  "state_packets_dropped": 0,
+  "state_packets_duplicated": 0,
+  "state_packets_stale": 0,
+  "watchdog_activations": 2
+}

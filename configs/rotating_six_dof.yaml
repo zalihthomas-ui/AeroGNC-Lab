@@ -1,0 +1,11 @@
+metadata:
+  name: rotating_planet_six_dof_ascent
+  fictional: true
+  safety_scope: >-
+    Fictional civilian research-rocket rigid-body ascent on the synthetic Orbis-A
+    planet for education, verification, and portfolio demonstration only.
+
+six_dof_configuration: six_dof_nominal.yaml
+rotating_planet_configuration: rotating_planet_ascent.yaml
+output_directory: results/rotating_six_dof
+

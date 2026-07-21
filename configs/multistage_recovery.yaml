@@ -1,0 +1,46 @@
+metadata:
+  name: fictional_two_stage_recovery_demo
+  fictional: true
+  safety_scope: >-
+    Fictional civilian research-rocket vertical staging and recovery benchmark using
+    synthetic parameters for education, verification, and portfolio demonstration.
+
+vehicle:
+  payload_mass_kg: 4.0
+  stages:
+    - name: booster
+      dry_mass_kg: 3.0
+      propellant_mass_kg: 2.0
+      ignition_time_s: 0.0
+      separation_time_s: 2.2
+      thrust_time_s: [0.0, 0.2, 1.8, 2.0]
+      thrust_n: [0.0, 190.0, 190.0, 0.0]
+    - name: sustainer
+      dry_mass_kg: 1.5
+      propellant_mass_kg: 1.0
+      ignition_time_s: 2.2
+      separation_time_s: null
+      thrust_time_s: [0.0, 0.2, 1.8, 2.0]
+      thrust_n: [0.0, 90.0, 90.0, 0.0]
+
+recovery:
+  trigger_time_s: 5.0
+  deployment_delay_s: 0.5
+  reefing_time_s: 0.8
+  reefed_hold_time_s: 1.0
+  inflation_time_s: 1.2
+  reefed_area_m2: 0.25
+  full_area_m2: 1.0
+  drag_coefficient: 1.4
+
+simulation:
+  initial_altitude_m: 0.0
+  initial_velocity_down_mps: -1.0
+  density_kgpm3: 1.225
+  gravity_mps2: 9.80665
+  body_drag_area_m2: 0.015
+  body_drag_coefficient: 0.45
+  step_s: 0.01
+  maximum_time_s: 180.0
+  output_directory: results/multistage_recovery
+

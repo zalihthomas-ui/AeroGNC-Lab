@@ -1,0 +1,31 @@
+metadata:
+  name: asteria_neria_launch_window
+  safety_scope: >-
+    Fictional civilian research transfer using synthetic worlds and epochs for
+    education and portfolio verification only; not an operational trajectory.
+  fictional: true
+
+catalog_path: fictional_planetary_system.yaml
+
+route:
+  departure_body: Asteria
+  destination_body: Neria
+  departure_day_bounds: [0.0, 120.0]
+  arrival_day_bounds: [200.0, 420.0]
+
+parking_orbits:
+  departure_altitude_m: 300000.0
+  destination_altitude_m: 300000.0
+
+constraints:
+  maximum_c3_m2_s2: 4.0e+7
+  maximum_arrival_excess_speed_mps: 8000.0
+  maximum_total_delta_v_mps: 7500.0
+
+optimizer:
+  departure_grid_count: 9
+  arrival_grid_count: 12
+  maximum_refinement_iterations: 25
+  epoch_tolerance_s: 600.0
+
+output_directory: results/launch_window_optimization

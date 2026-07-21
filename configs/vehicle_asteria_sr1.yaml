@@ -1,0 +1,52 @@
+metadata:
+  name: Asteria-SR1
+  description: >-
+    Fictional civilian single-stage research/sounding rocket. Every value is
+    synthetic and does not represent any real or operational vehicle.
+  fictional: true
+
+geometry:
+  reference_area_m2: 0.031416
+  reference_length_m: 2.8
+
+propulsion:
+  # Synthetic laboratory curve; time [s], thrust [N].
+  time_s: [0.0, 0.05, 0.20, 1.00, 2.00, 3.20, 3.35]
+  thrust_n: [0.0, 900.0, 1750.0, 1680.0, 1600.0, 1300.0, 0.0]
+  propellant_mass_kg: 10.5
+
+mass_properties:
+  dry_mass_kg: 19.5
+  dry_cg_from_nose_m: 1.35
+  wet_cg_from_nose_m: 1.55
+  # Body FRD inertia tensors about instantaneous CG [kg m^2].
+  dry_inertia_body_kgm2:
+    - [0.16, 0.0, 0.0]
+    - [0.0, 12.8, 0.0]
+    - [0.0, 0.0, 12.8]
+  wet_inertia_body_kgm2:
+    - [0.23, 0.0, 0.0]
+    - [0.0, 19.6, 0.0]
+    - [0.0, 0.0, 19.6]
+
+aerodynamics:
+  # Synthetic zero-angle drag data, replaceable by future CFD-derived tables.
+  mach_points: [0.0, 0.5, 0.8, 1.0, 1.2, 2.0, 3.0]
+  drag_coefficients: [0.42, 0.43, 0.48, 0.68, 0.56, 0.45, 0.40]
+  out_of_range: clamp
+  drag_alpha2_per_rad2: 0.30
+  side_beta_per_rad: -1.50
+  normal_alpha_per_rad: 2.40
+  roll_beta_per_rad: -0.05
+  pitch_alpha_per_rad: -1.80
+  yaw_beta_per_rad: 1.50
+  roll_rate: -0.12
+  pitch_rate: -6.00
+  yaw_rate: -5.00
+
+actuator:
+  time_constant_s: 0.06
+  position_limit_deg: 12.0
+  rate_limit_degps: 120.0
+  command_delay_s: 0.03
+  moment_per_command_nm_per_rad: [80.0, 250.0, 250.0]

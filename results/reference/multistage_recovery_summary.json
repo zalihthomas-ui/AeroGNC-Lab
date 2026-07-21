@@ -1,0 +1,104 @@
+{
+  "events": [
+    {
+      "altitude_m": 0.0,
+      "ground_range_m": 0.0,
+      "name": "booster_ignition",
+      "speed_mps": 1.0,
+      "time_s": 0.0
+    },
+    {
+      "altitude_m": 14.08950920992315,
+      "ground_range_m": 0.0,
+      "name": "booster_burnout",
+      "speed_mps": 13.997891858719504,
+      "time_s": 2.0
+    },
+    {
+      "altitude_m": 16.69140405030525,
+      "ground_range_m": 0.0,
+      "name": "booster_separation",
+      "speed_mps": 12.021802416229145,
+      "time_s": 2.2
+    },
+    {
+      "altitude_m": 16.69140405030525,
+      "ground_range_m": 0.0,
+      "name": "sustainer_ignition",
+      "speed_mps": 12.021802416229145,
+      "time_s": 2.2
+    },
+    {
+      "altitude_m": 47.241768955585506,
+      "ground_range_m": 0.0,
+      "name": "sustainer_burnout",
+      "speed_mps": 19.13204920588051,
+      "time_s": 4.2
+    },
+    {
+      "altitude_m": 63.681799591480576,
+      "ground_range_m": 0.0,
+      "name": "recovery_deployment_start",
+      "speed_mps": 6.213543285270244,
+      "time_s": 5.5
+    },
+    {
+      "altitude_m": 65.6240277600952,
+      "ground_range_m": 0.0,
+      "name": "apogee",
+      "speed_mps": 0.0,
+      "time_s": 6.1267490374243545
+    },
+    {
+      "altitude_m": 65.47721935592638,
+      "ground_range_m": 0.0,
+      "name": "recovery_reefed",
+      "speed_mps": 1.6927678588679436,
+      "time_s": 6.3
+    },
+    {
+      "altitude_m": 59.40329980388649,
+      "ground_range_m": 0.0,
+      "name": "recovery_full_inflation_start",
+      "speed_mps": 9.811591133675085,
+      "time_s": 7.3
+    },
+    {
+      "altitude_m": 46.932509960215064,
+      "ground_range_m": 0.0,
+      "name": "recovery_fully_inflated",
+      "speed_mps": 9.10825644365206,
+      "time_s": 8.5
+    },
+    {
+      "altitude_m": 0.0,
+      "ground_range_m": 0.0,
+      "name": "ground_contact",
+      "speed_mps": 7.911889317715858,
+      "time_s": 14.37309520603372
+    }
+  ],
+  "maxima": {
+    "altitude": {
+      "time_s": 6.129999999999914,
+      "unit": "m",
+      "value": 65.62408352092756
+    },
+    "dry_mass_margin": {
+      "time_s": 4.199999999999955,
+      "unit": "kg",
+      "value": 0.0
+    },
+    "opening_load": {
+      "time_s": 8.359999999999866,
+      "unit": "N",
+      "value": 71.54344617618018
+    },
+    "speed": {
+      "time_s": 4.079999999999957,
+      "unit": "m/s",
+      "value": 19.755231414344053
+    }
+  },
+  "scenario": "fictional_two_stage_recovery_demo"
+}

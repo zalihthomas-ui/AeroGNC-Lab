@@ -1,0 +1,29 @@
+{
+  "source_name": "NASA Exoplanet Archive",
+  "source_url": "https://exoplanetarchive.ipac.caltech.edu/TAP/sync",
+  "source_table": "pscomppars",
+  "query": "select pl_name,hostname,sy_pnum,discoverymethod,disc_year,pl_orbper,pl_orbsmax,pl_rade,pl_bmasse,sy_dist,ra,dec,st_spectype,st_teff,st_mass,st_rad from pscomppars order by pl_name",
+  "retrieved_utc": "2026-07-19T22:05:28+00:00",
+  "row_count": 6324,
+  "sha256": "9024b5cd53c121bdd2e71866a27c3bf0615a107a083724ba62db9297d3ceba83",
+  "fields": [
+    "pl_name",
+    "hostname",
+    "sy_pnum",
+    "discoverymethod",
+    "disc_year",
+    "pl_orbper",
+    "pl_orbsmax",
+    "pl_rade",
+    "pl_bmasse",
+    "sy_dist",
+    "ra",
+    "dec",
+    "st_spectype",
+    "st_teff",
+    "st_mass",
+    "st_rad"
+  ],
+  "scope_note": "Point-in-time confirmed-planet snapshot. Blank values mean not reported in the selected composite fields. This is not a census of all Milky Way planets and does not provide complete dynamical ephemerides.",
+  "documentation_url": "https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html"
+}

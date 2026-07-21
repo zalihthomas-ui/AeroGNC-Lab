@@ -1,0 +1,10 @@
+{
+  "artifact_type": "FMI 3.0 Co-Simulation interface contract only",
+  "fmi_specification": "https://fmi-standard.org/docs/3.0.2/",
+  "fmu_built": false,
+  "fmu_executed": false,
+  "model_identifier": "aerognc_attitude_controller",
+  "official_xsd_validation_executed": false,
+  "reason": "No mandatory FMI C API binary or source wrapper has been implemented; therefore this directory must not be distributed or described as an FMU.",
+  "variable_count": 24
+}

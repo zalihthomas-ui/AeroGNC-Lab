@@ -1,0 +1,24 @@
+metadata:
+  safety_scope: >-
+    Fictional civilian research-rocket ascent on a synthetic rotating oblate
+    planet for education, verification, and portfolio demonstration only.
+  fictional: true
+
+base_configuration: three_dof_nominal.yaml
+output_directory: results/rotating_planet_ascent
+
+planet:
+  name: Orbis-A
+  fictional: true
+  semi_major_axis_m: 6400000.0
+  flattening: 0.0033333333333333335
+  gravitational_parameter_m3ps2: 4.05e+14
+  rotation_rate_radps: 7.5e-5
+  j2: 0.0011
+
+launch_site:
+  latitude_deg: 38.0
+  longitude_deg: 29.0
+  altitude_m: 850.0
+  azimuth_deg: 15.0
+  elevation_deg: 86.0

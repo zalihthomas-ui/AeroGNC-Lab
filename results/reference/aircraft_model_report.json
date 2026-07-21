@@ -1,0 +1,44 @@
+{
+  "events": [],
+  "ground_impact": false,
+  "interpretation": "The aircraft remained above ground for the configured finite simulation horizon; no claim is made beyond that horizon.",
+  "limitations": [
+    "All vehicle coefficients and mass properties are synthetic, not certification data.",
+    "Stall is a deterministic coefficient-break model; spin and separated-flow CFD are omitted.",
+    "The spherical-planet atmosphere is a fixed reference, not measured weather or space weather.",
+    "Ground contact, landing gear, structural flexibility, heating, and ablation are omitted.",
+    "Crossing 100 km does not imply a sustainable orbit; orbital energy must be assessed separately."
+  ],
+  "maxima": {
+    "maximum_airspeed": {
+      "unit": "m/s",
+      "value": 82.34326963101554
+    },
+    "maximum_altitude": {
+      "unit": "m",
+      "value": 1537.0583133716136
+    },
+    "maximum_load_factor": {
+      "unit": "g",
+      "value": 1.0097629848986194
+    },
+    "maximum_mach": {
+      "unit": "1",
+      "value": 0.246176699220298
+    },
+    "maximum_turn_rate": {
+      "unit": "deg/s",
+      "value": 0.00025425678718307926
+    },
+    "stall_duration": {
+      "unit": "s",
+      "value": 0.0
+    }
+  },
+  "reached_100_km": false,
+  "safety_scope": "Fictional civilian research aircraft with wholly synthetic coefficients and mass properties for education, numerical verification, and portfolio demonstration.",
+  "scenario": "Aquila-X1 Civilian Research Aircraft",
+  "schema_version": "1.0",
+  "stalled_duration_s": 0.0,
+  "vehicle": "Aquila-X1 fictional civilian research aircraft"
+}

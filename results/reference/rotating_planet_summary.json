@@ -1,0 +1,53 @@
+{
+  "events": [
+    {
+      "altitude_m": 266.3461427036673,
+      "ground_range_m": 90.93691741942928,
+      "name": "burnout",
+      "speed_mps": 165.414699596251,
+      "time_s": 3.35
+    },
+    {
+      "altitude_m": 1091.8061748966575,
+      "ground_range_m": 652.0672153288164,
+      "name": "apogee",
+      "speed_mps": 40.43475570262745,
+      "time_s": 15.459589531803395
+    },
+    {
+      "altitude_m": -3.725290298461914e-09,
+      "ground_range_m": 1203.0345498597885,
+      "name": "ground_impact",
+      "speed_mps": 121.3600666741455,
+      "time_s": 31.54292147313084
+    }
+  ],
+  "maxima": {
+    "altitude": {
+      "time_s": 15.45999999999976,
+      "unit": "m",
+      "value": 1091.8062137942761
+    },
+    "dynamic_pressure": {
+      "time_s": 3.3000000000000025,
+      "unit": "Pa",
+      "value": 16226.74908872772
+    },
+    "ground_range": {
+      "time_s": 31.54292147313084,
+      "unit": "m",
+      "value": 1203.0345498597885
+    },
+    "mach": {
+      "time_s": 3.3000000000000025,
+      "unit": "1",
+      "value": 0.4857189582795959
+    },
+    "speed": {
+      "time_s": 3.3000000000000025,
+      "unit": "m/s",
+      "value": 165.89720126254878
+    }
+  },
+  "scenario": "rotating_planet_ascent"
+}

@@ -1,0 +1,94 @@
+{
+  "events": [
+    {
+      "distance_m": 150600000000.0,
+      "heliocentric_speed_mps": 38634.47986388267,
+      "name": "departure_injection",
+      "reference_body": "Helios",
+      "time_days": 0.0
+    },
+    {
+      "distance_m": 4999990600.422488,
+      "heliocentric_speed_mps": 6404.603428269345,
+      "name": "assist_entry",
+      "reference_body": "Brontes",
+      "time_days": 1330.9300254647212
+    },
+    {
+      "distance_m": 370995837.61138165,
+      "heliocentric_speed_mps": 17299.9640277327,
+      "name": "assist_closest_approach",
+      "reference_body": "Brontes",
+      "time_days": 1335.7710346665174
+    },
+    {
+      "distance_m": 4999989705.845341,
+      "heliocentric_speed_mps": 16505.680074470623,
+      "name": "assist_exit",
+      "reference_body": "Brontes",
+      "time_days": 1340.6118988249536
+    },
+    {
+      "distance_m": 7999907313.029558,
+      "heliocentric_speed_mps": 11739.844649812816,
+      "name": "destination_arrival",
+      "reference_body": "Caelus",
+      "time_days": 1843.5420138652973
+    },
+    {
+      "distance_m": 1206869495904.423,
+      "heliocentric_speed_mps": 10503.597961037434,
+      "name": "mission_end",
+      "reference_body": "Helios",
+      "time_days": 2100.0
+    }
+  ],
+  "maxima": {
+    "assist_central_energy_gain": {
+      "time_days": 1335.7710346665174,
+      "unit": "J/kg",
+      "value": 116474604.43587676
+    },
+    "assist_closest_approach": {
+      "time_days": 1335.7696987598656,
+      "unit": "m",
+      "value": 371014892.4448031
+    },
+    "assist_heliocentric_speed_gain": {
+      "time_days": 1335.7710346665174,
+      "unit": "m/s",
+      "value": 10101.076646201287
+    },
+    "assist_relative_speed_change": {
+      "time_days": 1335.7710346665174,
+      "unit": "m/s",
+      "value": 0.8803863116772845
+    },
+    "commanded_impulsive_delta_v": {
+      "time_days": 2100.0,
+      "unit": "m/s",
+      "value": 0.0
+    },
+    "destination_arrival": {
+      "time_days": 1843.5420138652973,
+      "unit": "boolean",
+      "value": 1.0
+    },
+    "destination_closest_approach": {
+      "time_days": 1854.0985755142017,
+      "unit": "m",
+      "value": 5537624722.517606
+    },
+    "maximum_heliocentric_speed": {
+      "time_days": 0.0,
+      "unit": "m/s",
+      "value": 38634.47986388267
+    },
+    "propellant_used": {
+      "time_days": 2100.0,
+      "unit": "kg",
+      "value": 0.0
+    }
+  },
+  "scenario": "helios_pathfinder_gravity_assist"
+}

@@ -1,0 +1,53 @@
+metadata:
+  name: synthetic_vertical_navigation
+  safety_scope: >-
+    Fictional civilian research-rocket navigation demonstration using synthetic
+    truth and configurable sensor errors only.
+
+base_scenario_file: three_dof_nominal.yaml
+
+simulation:
+  output_directory: results/navigation_demo
+  random_seed: 20260720
+
+sensors:
+  accelerometer:
+    sample_rate_hz: 50.0
+    noise_std: [0.03, 0.03, 0.08]
+    constant_bias: [0.0, 0.0, 0.12]
+    bias_drift_std_per_sqrt_s: [0.001, 0.001, 0.003]
+    quantisation: [0.001, 0.001, 0.001]
+    delay_s: 0.02
+    dropout_probability: 0.0
+    dropout_intervals_s: []
+  barometer:
+    sample_rate_hz: 10.0
+    noise_std: [3.0]
+    constant_bias: [0.5]
+    bias_drift_std_per_sqrt_s: [0.02]
+    quantisation: [0.1]
+    delay_s: 0.10
+    dropout_probability: 0.02
+    dropout_intervals_s: [[12.0, 13.0]]
+  gnss:
+    sample_rate_hz: 5.0
+    noise_std: [1.5, 1.5, 2.0, 0.25, 0.25, 0.35]
+    constant_bias: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    bias_drift_std_per_sqrt_s: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    quantisation: [0.05, 0.05, 0.05, 0.01, 0.01, 0.01]
+    delay_s: 0.20
+    dropout_probability: 0.03
+    dropout_intervals_s: [[14.0, 16.0]]
+
+filter:
+  initial_state: [0.0, 0.0, 0.0]
+  initial_covariance:
+    - [25.0, 0.0, 0.0]
+    - [0.0, 4.0, 0.0]
+    - [0.0, 0.0, 0.25]
+  # Includes unmodelled delay-compensation and attitude/gravity-projection error.
+  acceleration_process_std_mps2: 3.0
+  bias_random_walk_std_mps2_per_sqrt_s: 0.05
+  barometer_std_m: 3.0
+  gnss_altitude_std_m: 2.0
+  gnss_vertical_velocity_std_mps: 0.35

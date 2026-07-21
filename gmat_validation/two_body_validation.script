@@ -1,0 +1,41 @@
+% AeroGNC-Lab independent two-body validation interface
+% Fictional civilian verification spacecraft; no operational mission data.
+Create Spacecraft AeroGNCValidationSat;
+GMAT AeroGNCValidationSat.DateFormat = UTCGregorian;
+GMAT AeroGNCValidationSat.Epoch = '01 Jan 2026 00:00:00.000';
+GMAT AeroGNCValidationSat.CoordinateSystem = EarthMJ2000Eq;
+GMAT AeroGNCValidationSat.DisplayStateType = Cartesian;
+GMAT AeroGNCValidationSat.X = 7000.0;
+GMAT AeroGNCValidationSat.Y = 0.0;
+GMAT AeroGNCValidationSat.Z = 0.0;
+GMAT AeroGNCValidationSat.VX = 0.0;
+GMAT AeroGNCValidationSat.VY = 7.5;
+GMAT AeroGNCValidationSat.VZ = 1.0;
+
+Create ForceModel EarthPointMass;
+GMAT EarthPointMass.CentralBody = Earth;
+GMAT EarthPointMass.PrimaryBodies = {Earth};
+GMAT EarthPointMass.Drag = None;
+GMAT EarthPointMass.SRP = Off;
+GMAT EarthPointMass.RelativisticCorrection = Off;
+
+Create Propagator AeroGNCProp;
+GMAT AeroGNCProp.FM = EarthPointMass;
+GMAT AeroGNCProp.Type = PrinceDormand78;
+GMAT AeroGNCProp.InitialStepSize = 10.0;
+GMAT AeroGNCProp.Accuracy = 1.0e-12;
+
+Create ReportFile AeroGNCReport;
+GMAT AeroGNCReport.Filename = 'gmat_two_body_report.txt';
+GMAT AeroGNCReport.Precision = 16;
+GMAT AeroGNCReport.FixedWidth = false;
+GMAT AeroGNCReport.Delimiter = ' ';
+
+Create Variable index;
+
+BeginMissionSequence;
+Report AeroGNCReport AeroGNCValidationSat.ElapsedSecs AeroGNCValidationSat.EarthMJ2000Eq.X AeroGNCValidationSat.EarthMJ2000Eq.Y AeroGNCValidationSat.EarthMJ2000Eq.Z AeroGNCValidationSat.EarthMJ2000Eq.VX AeroGNCValidationSat.EarthMJ2000Eq.VY AeroGNCValidationSat.EarthMJ2000Eq.VZ;
+For index = 1:90;
+   Propagate AeroGNCProp(AeroGNCValidationSat) {AeroGNCValidationSat.ElapsedSecs = 60};
+   Report AeroGNCReport AeroGNCValidationSat.ElapsedSecs AeroGNCValidationSat.EarthMJ2000Eq.X AeroGNCValidationSat.EarthMJ2000Eq.Y AeroGNCValidationSat.EarthMJ2000Eq.Z AeroGNCValidationSat.EarthMJ2000Eq.VX AeroGNCValidationSat.EarthMJ2000Eq.VY AeroGNCValidationSat.EarthMJ2000Eq.VZ;
+EndFor;

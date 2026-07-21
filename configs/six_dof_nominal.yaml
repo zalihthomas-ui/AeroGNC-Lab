@@ -1,0 +1,34 @@
+metadata:
+  name: six_dof_closed_loop_ascent
+  safety_scope: >-
+    Fictional civilian research-rocket ascent and attitude-stabilisation case using
+    only synthetic, non-operational parameters.
+
+base_scenario_file: three_dof_nominal.yaml
+
+simulation:
+  step_s: 0.005
+  duration_s: 8.0
+  output_directory: results/six_dof_nominal
+
+initial:
+  # The rigid-body case starts at a synthetic rail-exit condition; the 3-DOF case
+  # separately covers ignition from the launch datum.
+  position_ned_m: [0.0, 0.0, -5.0]
+  speed_mps: 10.0
+  # Aerospace 3-2-1 roll, pitch, yaw [deg].
+  euler321_deg: [0.0, 86.0, 15.0]
+  angular_rate_body_degps: [0.5, -0.3, 0.2]
+
+attitude_reference:
+  # Synthetic time-indexed research-ascent reference; no target state is used.
+  time_s: [0.0, 3.35, 8.0]
+  euler321_deg:
+    - [0.0, 86.0, 15.0]
+    - [0.0, 84.0, 15.0]
+    - [0.0, 82.0, 15.0]
+
+controller:
+  proportional_moment_nm_per_rad: [8.0, 45.0, 45.0]
+  rate_damping_nms_per_rad: [2.5, 14.0, 14.0]
+  moment_limit_nm: [15.0, 50.0, 50.0]

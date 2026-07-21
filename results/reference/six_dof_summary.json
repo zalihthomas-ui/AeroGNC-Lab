@@ -1,0 +1,44 @@
+{
+  "events": [
+    {
+      "altitude_m": 312.5978090535743,
+      "ground_range_m": 20.3633896446676,
+      "name": "burnout",
+      "speed_mps": 171.56475340034623,
+      "time_s": 3.35
+    }
+  ],
+  "maxima": {
+    "altitude": {
+      "time_s": 8.0,
+      "unit": "m",
+      "value": 913.263410605339
+    },
+    "angular_rate": {
+      "time_s": 5.805,
+      "unit": "deg/s",
+      "value": 5.118172690693205
+    },
+    "attitude_error": {
+      "time_s": 7.48,
+      "unit": "deg",
+      "value": 5.11484415101072
+    },
+    "dynamic_pressure": {
+      "time_s": 3.3000000000000003,
+      "unit": "Pa",
+      "value": 17543.565824831112
+    },
+    "mach": {
+      "time_s": 3.305,
+      "unit": "1",
+      "value": 0.5064136501282749
+    },
+    "speed": {
+      "time_s": 3.3000000000000003,
+      "unit": "m/s",
+      "value": 172.10617444679116
+    }
+  },
+  "scenario": "six_dof_closed_loop_ascent"
+}

@@ -1,0 +1,58 @@
+{
+  "correction_burns": [],
+  "escaped": false,
+  "events": [
+    {
+      "altitude_m": 120000.00000000093,
+      "name": "reentry_threshold",
+      "time_days": 0.9400646582139813,
+      "time_s": 81221.58646968799
+    }
+  ],
+  "initial_altitude_m": 200000.0,
+  "initial_speed_mps": 7788.487967387528,
+  "limitations": [
+    "The primary, moons, satellite, and density profile are fictional/synthetic.",
+    "Thermospheric density is a fixed scalable reference, not space-weather forecasting.",
+    "Reentry is a threshold crossing; heating, breakup, lift, and attitude are omitted.",
+    "A no-reentry result proves survival only through the configured finite horizon.",
+    "Correction impulses are idealized instantaneous recircularization events."
+  ],
+  "maxima": {
+    "correction_delta_v": {
+      "unit": "m/s",
+      "value": 0.0
+    },
+    "maximum_altitude": {
+      "unit": "m",
+      "value": 199999.99999999907
+    },
+    "maximum_eccentricity": {
+      "unit": "1",
+      "value": 0.0017489900563243729
+    },
+    "maximum_speed": {
+      "unit": "m/s",
+      "value": 7835.880202684715
+    },
+    "minimum_altitude": {
+      "unit": "m",
+      "value": 120000.00000000093
+    },
+    "revolutions": {
+      "unit": "rev",
+      "value": 15.414288776690489
+    }
+  },
+  "model": "perturbed_decay",
+  "model_description": "Perturbed low orbit: central gravity, J2, a rotating reference atmosphere, drag, mass, area, Cd, and optional idealized correction impulses affect the path.",
+  "nominal_period_s": 5301.00461429175,
+  "primary": "Orbis-A",
+  "reentered": true,
+  "safety_scope": "Fictional civilian satellite and wholly synthetic mission parameters for education, numerical verification, and portfolio demonstration; not operational navigation.",
+  "satellite": "Meridian-1",
+  "scenario": "Orbis-A Civilian Satellite Sandbox",
+  "schema_version": "1.0",
+  "simulated_duration_s": 81221.58646968799,
+  "survival_statement": "Reentry threshold reached after 0.940 modeled days under the selected reference-density assumptions."
+}

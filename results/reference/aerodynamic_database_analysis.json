@@ -1,0 +1,64 @@
+{
+  "axis_bounds": {
+    "alpha_rad": [
+      -0.174532925199,
+      0.174532925199
+    ],
+    "beta_rad": [
+      -0.13962634016,
+      0.13962634016
+    ],
+    "mach": [
+      0.0,
+      2.0
+    ]
+  },
+  "coefficient_jacobian": {
+    "drag": {
+      "alpha_rad": 0.05235987756224425,
+      "beta_rad": 0.0,
+      "mach": 0.26000000000000006
+    },
+    "normal": {
+      "alpha_rad": -2.4000000000080215,
+      "beta_rad": 0.0,
+      "mach": 0.0
+    },
+    "pitch": {
+      "alpha_rad": -1.8000000000045837,
+      "beta_rad": 0.0,
+      "mach": 0.0
+    },
+    "roll": {
+      "alpha_rad": 0.0,
+      "beta_rad": -0.04999999999985676,
+      "mach": 0.0
+    },
+    "side": {
+      "alpha_rad": 0.0,
+      "beta_rad": -1.4999999999928382,
+      "mach": 0.0
+    },
+    "yaw": {
+      "alpha_rad": 0.0,
+      "beta_rad": 1.4999999999928382,
+      "mach": 0.0
+    }
+  },
+  "interpolation_policy": "clamp",
+  "nominal_coefficients": {
+    "drag": 0.628,
+    "normal": 0.0,
+    "pitch": 0.0,
+    "roll": 0.0,
+    "side": 0.0,
+    "yaw": 0.0
+  },
+  "nominal_condition": {
+    "alpha_rad": 0.0,
+    "beta_rad": 0.0,
+    "mach": 0.8
+  },
+  "source_path": "configs/aero_database_synthetic.csv",
+  "source_sha256": "2987744ab060fdb9e2b930175559d99db7fa8e51e972851e12e64b80d5ed9859"
+}

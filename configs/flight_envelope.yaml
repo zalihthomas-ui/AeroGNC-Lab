@@ -1,0 +1,38 @@
+metadata:
+  name: asteria_sr1_synthetic_ascent_envelope
+  safety_scope: >-
+    Fictional civilian research-rocket analysis using only synthetic vehicle,
+    aerodynamic, actuator, and uncertainty parameters.
+
+base_scenario: three_dof_aero_database.yaml
+
+grid:
+  mach: [0.35, 0.80, 1.20, 1.80]
+  altitude_m: [0.0, 5000.0, 10000.0]
+  mass_kg: [19.5, 24.75, 30.0]
+
+aerodynamic_derivatives:
+  normal_control_per_rad: -0.18
+  pitch_control_per_rad: 0.95
+  pitch_rate: -7.5
+
+trim:
+  disturbance_moment_nm: 0.35
+  alpha_limit_deg: 10.0
+
+lqr:
+  state_weight_diagonal: [36.0, 3.0]
+  input_weight: 0.28
+
+robustness:
+  sample_count: 120
+  aerodynamic_derivative_sigma_fraction: 0.10
+  control_effectiveness_sigma_fraction: 0.08
+  inertia_sigma_fraction: 0.06
+  random_seed: 314159
+
+requirements:
+  minimum_control_authority_fraction: 0.70
+  minimum_closed_loop_damping_ratio: 0.35
+
+output_directory: results/flight_envelope

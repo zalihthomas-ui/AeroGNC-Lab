@@ -1,0 +1,19 @@
+{
+  "solver": "MATLAB ode113 R2024a",
+  "sample_count": 160,
+  "final_position_m": [
+    1.9155590568055776E+6,
+    6.7328027967474945E+6,
+    0
+  ],
+  "final_velocity_mps": [
+    -7258.0126708629659,
+    2064.9872461432751,
+    0
+  ],
+  "position_error_m": 7.7903338058807593E-8,
+  "velocity_error_mps": 1.1101518248231049E-10,
+  "position_tolerance_m": 0.1,
+  "velocity_tolerance_mps": 0.0001,
+  "passed": true
+}

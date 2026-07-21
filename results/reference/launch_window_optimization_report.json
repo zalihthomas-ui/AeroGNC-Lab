@@ -1,0 +1,45 @@
+{
+  "limitations": [
+    "Worlds and epochs are fictional and synthetic.",
+    "The search is deterministic local refinement after a finite grid, not global proof.",
+    "The objective uses ideal impulsive parking-orbit injection and capture.",
+    "Operational ephemerides, navigation, finite burns, launch, entry, and landing are excluded."
+  ],
+  "optimizer": {
+    "converged": true,
+    "epoch_tolerance_s": 600.0,
+    "evaluation_count": 210,
+    "grid_shape": [
+      9,
+      12
+    ],
+    "improvement_count": 7,
+    "method": "complete rectangular grid plus bounded coordinate refinement"
+  },
+  "optimum": {
+    "arrival_day": 266.38671875,
+    "arrival_excess_speed_mps": 2665.234084147896,
+    "best_feasible_grid_delta_v_mps": 7320.870876882737,
+    "capture_delta_v_mps": 3716.3751214227123,
+    "departure_c3_m2_s2": 8773617.4312442,
+    "departure_day": 28.212890625,
+    "injection_delta_v_mps": 3596.010908300367,
+    "lambert_endpoint_error_m": 0.004122697780266278,
+    "time_of_flight_days": 238.173828125,
+    "total_delta_v_mps": 7312.386029723079
+  },
+  "requirements": {
+    "all_pass": true,
+    "converged_pass": true,
+    "delta_v_pass": true,
+    "endpoint_pass": true,
+    "feasible_pass": true,
+    "refinement_nonworsening_pass": true
+  },
+  "route": {
+    "departure": "Asteria",
+    "destination": "Neria"
+  },
+  "safety_scope": "Fictional civilian research transfer using synthetic worlds and epochs for education and portfolio verification only; not an operational trajectory.",
+  "scenario": "asteria_neria_launch_window"
+}

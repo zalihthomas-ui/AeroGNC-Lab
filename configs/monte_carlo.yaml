@@ -1,0 +1,35 @@
+metadata:
+  name: Coupled flight, navigation, and control dispersions
+  safety_scope: >-
+    Fictional civilian research-rocket performance verification using synthetic
+    dispersions only; no target or engagement scenario is represented.
+
+base_scenario_file: three_dof_nominal.yaml
+navigation_config_file: navigation_demo.yaml
+attitude_config_file: attitude_control.yaml
+
+execution:
+  sample_count: 12
+  workers: 2
+  master_seed: 20260721
+  output_directory: results/monte_carlo
+
+dispersions:
+  initial_speed_std_mps: 0.15
+  initial_elevation_std_deg: 0.35
+  vehicle_mass_scale_std: 0.025
+  thrust_scale_std: 0.035
+  thrust_misalignment_std_deg: 0.20
+  aerodynamic_scale_std: 0.08
+  wind_scale_std: 0.15
+  sensor_noise_scale_std: 0.12
+  sensor_bias_scale_std: 0.15
+  actuator_delay_scale_std: 0.15
+  controller_gain_scale_std: 0.08
+
+requirements:
+  minimum_apogee_m: 900.0
+  maximum_dynamic_pressure_pa: 20000.0
+  maximum_landing_range_m: 1600.0
+  maximum_navigation_rms_m: 1.5
+  maximum_control_settling_time_s: 3.0

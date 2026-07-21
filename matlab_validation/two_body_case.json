@@ -1,0 +1,10 @@
+{
+  "gravitational_parameter_m3_s2": 398600441800000.0,
+  "initial_position_m": [7000000.0, 0.0, 0.0],
+  "initial_velocity_mps": [0.0, 7546.053290107542, 0.0],
+  "duration_s": 1200.0,
+  "python_position_m": [1915559.0568055087, 6732802.796747458, 0.0],
+  "python_velocity_mps": [-7258.01267086306, 2064.9872461432155, 0.0],
+  "absolute_position_tolerance_m": 0.1,
+  "absolute_velocity_tolerance_mps": 0.0001
+}

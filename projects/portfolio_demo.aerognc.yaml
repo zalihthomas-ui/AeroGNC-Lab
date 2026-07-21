@@ -1,0 +1,47 @@
+schema_version: "1.0"
+workspace_root: ..
+name: AeroGNC-Portfolio
+description: Reproducible fictional research-rocket and civilian planetary analysis workspace.
+safety_scope: >-
+  Fictional civilian research vehicles and synthetic mission parameters only; no
+  target interception, terminal homing, or operational engagement logic.
+settings:
+  result_directory: results/projects/portfolio_demo
+  default_seed: 20260720
+  max_workers: 2
+scenarios:
+  - name: nominal-3dof
+    workflow: three-dof
+    configuration: configs/three_dof_nominal.yaml
+    description: Verified deterministic point-mass sounding-rocket ascent.
+    enabled: true
+    tags: [rocket, baseline]
+    parameters: {}
+  - name: nominal-6dof
+    workflow: six-dof
+    configuration: configs/six_dof_nominal.yaml
+    description: Verified quaternion rigid-body attitude-control ascent.
+    enabled: true
+    tags: [rocket, attitude]
+    parameters: {}
+  - name: rotating-planet-6dof
+    workflow: rotating-six-dof
+    configuration: configs/rotating_six_dof.yaml
+    description: Inertial quaternion flight with rotating-atmosphere and geodetic outputs.
+    enabled: true
+    tags: [rocket, attitude, rotating-planet]
+    parameters: {}
+  - name: two-stage-recovery
+    workflow: multistage-recovery
+    configuration: configs/multistage_recovery.yaml
+    description: Ordered staging and continuous reefed-to-full recovery deployment.
+    enabled: true
+    tags: [rocket, staging, recovery]
+    parameters: {}
+  - name: orbit-assisted-tour
+    workflow: orbit-tour
+    configuration: configs/orbit_assisted_tour.yaml
+    description: Fictional capture, two-revolution parking orbit, and departure tour.
+    enabled: true
+    tags: [space, transfer]
+    parameters: {}

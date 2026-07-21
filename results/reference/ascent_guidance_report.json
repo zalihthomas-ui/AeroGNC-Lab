@@ -1,0 +1,278 @@
+{
+  "constraint_scope": "Max-Q and proper load are assessed from launch through the motor-window end. Angle of attack is assessed over that interval where dynamic pressure is at least 100.0 Pa.",
+  "limitations": [
+    "The offline optimizer has two design variables and is not a general optimal-control solver.",
+    "Pitch response is a bounded first-order surrogate, not a full closed-loop 6-DOF plant.",
+    "The post-apogee attitude/recovery system is intentionally outside constraint assessment."
+  ],
+  "optimized_run": {
+    "all_powered_constraints_satisfied": true,
+    "apogee_error_m": -14.686563355140493,
+    "apogee_m": 785.3134366448595,
+    "decision": {
+      "terminal_elevation_offset_deg": 8.0,
+      "throttle_scale": 1.0
+    },
+    "events": [
+      {
+        "altitude_m": 240.7926415177934,
+        "ground_range_m": 15.985450666046999,
+        "name": "motor_window_end",
+        "speed_mps": 116.5902206850756,
+        "time_s": 3.35
+      },
+      {
+        "altitude_m": 785.3128056984082,
+        "ground_range_m": 100.54194461118657,
+        "name": "apogee",
+        "speed_mps": 7.644325995927446,
+        "time_s": 13.51832137212504
+      },
+      {
+        "altitude_m": -0.0,
+        "ground_range_m": 268.3750570306301,
+        "name": "ground_impact",
+        "speed_mps": 105.92465486200152,
+        "time_s": 26.964113744108754
+      }
+    ],
+    "final_propellant_mass_kg": 2.1414397570276678,
+    "governor_enabled": true,
+    "limiter_active_duration_s": {
+      "alpha_limiter_active": 0.24000000000000005,
+      "apogee_limiter_active": 0.5200000000000005,
+      "load_limiter_active": 3.0400000000000014,
+      "max_q_limiter_active": 0.0
+    },
+    "maximum_powered_absolute_angle_of_attack_deg": 4.104092555960662,
+    "maximum_powered_dynamic_pressure_pa": 8841.70261097294,
+    "maximum_powered_proper_load_factor": 5.995508223868131,
+    "objective": 0.665725750569616
+  },
+  "optimizer": {
+    "evaluation_count": 20,
+    "evaluations": [
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 780.9241558131415,
+        "evaluation_index": 0,
+        "objective": 1.1231105908682186,
+        "terminal_elevation_offset_deg": 0.0,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 777.0359706369983,
+        "evaluation_index": 1,
+        "objective": 1.6276131005703853,
+        "terminal_elevation_offset_deg": -4.0,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 783.6890354929183,
+        "evaluation_index": 2,
+        "objective": 0.8211344541706177,
+        "terminal_elevation_offset_deg": 4.0,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 781.2902802961993,
+        "evaluation_index": 3,
+        "objective": 1.0804123808481134,
+        "terminal_elevation_offset_deg": 4.0,
+        "throttle_scale": 0.92
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.3134366448595,
+        "evaluation_index": 4,
+        "objective": 0.665725750569616,
+        "terminal_elevation_offset_deg": 8.0,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 782.9193246152951,
+        "evaluation_index": 5,
+        "objective": 0.9004613320915587,
+        "terminal_elevation_offset_deg": 8.0,
+        "throttle_scale": 0.92
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 784.6415328632511,
+        "evaluation_index": 6,
+        "objective": 0.7280324468845566,
+        "terminal_elevation_offset_deg": 6.000000000000001,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 784.6450522145775,
+        "evaluation_index": 7,
+        "objective": 0.7276988317686767,
+        "terminal_elevation_offset_deg": 8.0,
+        "throttle_scale": 0.96
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.0095662336647,
+        "evaluation_index": 8,
+        "objective": 0.6935589645150775,
+        "terminal_elevation_offset_deg": 7.0,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.1184429856983,
+        "evaluation_index": 9,
+        "objective": 0.6835207999071393,
+        "terminal_elevation_offset_deg": 8.0,
+        "throttle_scale": 0.98
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.1691499526113,
+        "evaluation_index": 10,
+        "objective": 0.6788707195312644,
+        "terminal_elevation_offset_deg": 7.499999999999999,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.2477821815368,
+        "evaluation_index": 11,
+        "objective": 0.6716911437141488,
+        "terminal_elevation_offset_deg": 8.0,
+        "throttle_scale": 0.99
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.2431970650026,
+        "evaluation_index": 12,
+        "objective": 0.6721087434023065,
+        "terminal_elevation_offset_deg": 7.75,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.2851097140255,
+        "evaluation_index": 13,
+        "objective": 0.6682962843465065,
+        "terminal_elevation_offset_deg": 8.0,
+        "throttle_scale": 0.995
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.2787097060964,
+        "evaluation_index": 14,
+        "objective": 0.6688777404857437,
+        "terminal_elevation_offset_deg": 7.875,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.2992742107068,
+        "evaluation_index": 15,
+        "objective": 0.6670103047283636,
+        "terminal_elevation_offset_deg": 8.0,
+        "throttle_scale": 0.9975
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.2961933806541,
+        "evaluation_index": 16,
+        "objective": 0.6672899046269116,
+        "terminal_elevation_offset_deg": 7.937500000000001,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.3063556852792,
+        "evaluation_index": 17,
+        "objective": 0.6663678495294053,
+        "terminal_elevation_offset_deg": 8.0,
+        "throttle_scale": 0.99875
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.3048435355992,
+        "evaluation_index": 18,
+        "objective": 0.6665050108432771,
+        "terminal_elevation_offset_deg": 7.968750000000001,
+        "throttle_scale": 1.0
+      },
+      {
+        "all_constraints_satisfied": true,
+        "apogee_m": 785.3098962294033,
+        "evaluation_index": 19,
+        "objective": 0.6660467555274666,
+        "terminal_elevation_offset_deg": 8.0,
+        "throttle_scale": 0.999375
+      }
+    ],
+    "method": "bounded deterministic coordinate search"
+  },
+  "reference_run": {
+    "all_powered_constraints_satisfied": false,
+    "apogee_error_m": 315.6296061966989,
+    "apogee_m": 1115.629606196699,
+    "decision": {
+      "terminal_elevation_offset_deg": 0.0,
+      "throttle_scale": 1.0
+    },
+    "events": [
+      {
+        "altitude_m": 276.46091847250256,
+        "ground_range_m": 35.8594125954562,
+        "name": "motor_window_end",
+        "speed_mps": 161.72634385065905,
+        "time_s": 3.35
+      },
+      {
+        "altitude_m": 1115.6272422830937,
+        "ground_range_m": 313.6277723521755,
+        "name": "apogee",
+        "speed_mps": 18.334889138362424,
+        "time_s": 15.68745947290332
+      },
+      {
+        "altitude_m": -0.0,
+        "ground_range_m": 739.2382825433697,
+        "name": "ground_impact",
+        "speed_mps": 115.74529166503123,
+        "time_s": 32.51446607241297
+      }
+    ],
+    "final_propellant_mass_kg": 0.008411181777848012,
+    "governor_enabled": false,
+    "limiter_active_duration_s": {
+      "alpha_limiter_active": 0.0,
+      "apogee_limiter_active": 0.0,
+      "load_limiter_active": 0.0,
+      "max_q_limiter_active": 0.0
+    },
+    "maximum_powered_absolute_angle_of_attack_deg": 4.722041689264636,
+    "maximum_powered_dynamic_pressure_pa": 15687.585166719993,
+    "maximum_powered_proper_load_factor": 6.582998430029146,
+    "objective": 328.2502258507679
+  },
+  "requirements": {
+    "all_pass": true,
+    "angle_of_attack_requirement_pass": true,
+    "apogee_requirement_pass": true,
+    "apogee_tolerance_m": 18.0,
+    "desired_apogee_m": 800.0,
+    "mass_consistency_pass": true,
+    "max_q_requirement_pass": true,
+    "maximum_angle_of_attack_deg": 5.0,
+    "maximum_dynamic_pressure_pa": 12000.0,
+    "maximum_proper_load_factor": 6.0,
+    "objective_improvement_pass": true,
+    "proper_load_requirement_pass": true
+  },
+  "safety_scope": "Fictional civilian research-rocket ascent using synthetic parameters for academic trajectory shaping and verification only.",
+  "scenario": "asteria_sr1_constrained_ascent"
+}

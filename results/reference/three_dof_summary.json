@@ -1,0 +1,58 @@
+{
+  "events": [
+    {
+      "altitude_m": 267.08977829905655,
+      "ground_range_m": 89.8485705081879,
+      "name": "burnout",
+      "speed_mps": 165.598678773131,
+      "time_s": 3.35
+    },
+    {
+      "altitude_m": 1101.4916205878683,
+      "ground_range_m": 648.4503759520424,
+      "name": "apogee",
+      "speed_mps": 39.91003397596833,
+      "time_s": 15.568656727662344
+    },
+    {
+      "altitude_m": -0.0,
+      "ground_range_m": 1197.0173709370886,
+      "name": "ground_impact",
+      "speed_mps": 121.16714664772692,
+      "time_s": 31.793784242744994
+    }
+  ],
+  "maxima": {
+    "acceleration": {
+      "time_s": 2.0000000000000013,
+      "unit": "m/s^2",
+      "value": 55.85977824802124
+    },
+    "altitude": {
+      "time_s": 15.559999999999757,
+      "unit": "m",
+      "value": 1101.491734618083
+    },
+    "dynamic_pressure": {
+      "time_s": 3.3000000000000025,
+      "unit": "Pa",
+      "value": 16263.817678113448
+    },
+    "ground_range": {
+      "time_s": 31.793784242744994,
+      "unit": "m",
+      "value": 1197.0173709370886
+    },
+    "mach": {
+      "time_s": 3.3000000000000025,
+      "unit": "1",
+      "value": 0.48629431624829683
+    },
+    "speed": {
+      "time_s": 3.3000000000000025,
+      "unit": "m/s",
+      "value": 166.07964281434113
+    }
+  },
+  "scenario": "three_dof_nominal"
+}

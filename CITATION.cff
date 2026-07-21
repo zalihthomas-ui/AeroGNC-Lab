@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use AeroGNC-Lab, please cite this software."
+title: "AeroGNC-Lab: A Modular Flight Dynamics, Guidance, Navigation and Control Verification Platform"
+type: software
+authors:
+  - name: "AeroGNC-Lab Contributors"
+version: 0.8.0
+date-released: 2026-07-20
+license: MIT
+keywords:
+  - flight dynamics
+  - guidance navigation and control
+  - verification
+  - research rocket

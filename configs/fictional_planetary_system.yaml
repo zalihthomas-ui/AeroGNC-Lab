@@ -1,0 +1,72 @@
+metadata:
+  name: Helios Synthetic Civilian System
+  safety_scope: >-
+    Fictional civilian research system with wholly synthetic parameters for education
+    and portfolio verification; it is not an operational or real-world mission model.
+
+primary:
+  name: Helios
+  gravitational_parameter_m3_s2: 1.32712440018e+20
+  radius_m: 6.957e+8
+  color: "#FDB813"
+
+bodies:
+  - name: Cyra
+    gravitational_parameter_m3_s2: 2.20e+13
+    radius_m: 3.10e+6
+    color: "#B9A28B"
+    orbit:
+      semi_major_axis_m: 8.20e+10
+      eccentricity: 0.04
+      phase_at_epoch_deg: 210.0
+      inclination_deg: 2.0
+      ascending_node_deg: 18.0
+      argument_of_periapsis_deg: 45.0
+
+  - name: Asteria
+    gravitational_parameter_m3_s2: 3.9860044e+14
+    radius_m: 6.371e+6
+    color: "#3E8ED0"
+    orbit:
+      semi_major_axis_m: 1.496e+11
+      eccentricity: 0.012
+      phase_at_epoch_deg: 0.0
+      inclination_deg: 0.0
+      ascending_node_deg: 0.0
+      argument_of_periapsis_deg: 10.0
+
+  - name: Neria
+    gravitational_parameter_m3_s2: 5.10e+14
+    radius_m: 7.20e+6
+    color: "#D86C70"
+    orbit:
+      semi_major_axis_m: 2.28e+11
+      eccentricity: 0.035
+      phase_at_epoch_deg: 325.0
+      inclination_deg: 1.1
+      ascending_node_deg: 27.0
+      argument_of_periapsis_deg: 72.0
+
+  - name: Brontes
+    gravitational_parameter_m3_s2: 1.26686534e+17
+    radius_m: 6.9911e+7
+    color: "#D99B5B"
+    orbit:
+      semi_major_axis_m: 7.785e+11
+      eccentricity: 0.025
+      phase_at_epoch_deg: 80.2
+      inclination_deg: 0.7
+      ascending_node_deg: 12.0
+      argument_of_periapsis_deg: 33.0
+
+  - name: Caelus
+    gravitational_parameter_m3_s2: 4.00e+14
+    radius_m: 8.00e+6
+    color: "#75B7C7"
+    orbit:
+      semi_major_axis_m: 1.08e+12
+      eccentricity: 0.018
+      phase_at_epoch_deg: 128.7
+      inclination_deg: 1.5
+      ascending_node_deg: 41.0
+      argument_of_periapsis_deg: 105.0
