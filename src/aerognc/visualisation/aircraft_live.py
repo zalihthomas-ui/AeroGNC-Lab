@@ -225,6 +225,9 @@ class AircraftLivePlayer:
         self._history_alpha: deque[float] = deque(maxlen=900)
         self._next_log_time_s = 0.1
         self._camera_azimuth_deg = -55.0
+        # In "free" mode the world limits are fixed once so the aircraft visibly
+        # translates through a stationary scene and the user owns rotation/zoom.
+        self._free_limits_set = False
         self._last_saved_message = ""
         self._active_warning_codes: set[str] = set()
         self._clock = simulation_clock or RealtimeSimulationClock(
@@ -295,20 +298,13 @@ class AircraftLivePlayer:
             fontsize=15,
             fontweight="bold",
         )
-        ground_x, ground_y = np.meshgrid(
-            np.linspace(-200_000.0, 200_000.0, 17),
-            np.linspace(-200_000.0, 200_000.0, 17),
+        # Dynamic local ground grid: re-tiled each frame to the current view with a
+        # stable "nice" line spacing. This replaces a single huge fixed wireframe
+        # whose sparse gridlines popped in and out as the view moved (the glitch).
+        self.ground_grid = Line3DCollection(
+            [], colors="#A9A28F", linewidths=0.5, alpha=0.35
         )
-        self.scene_axis.plot_wireframe(
-            ground_x,
-            ground_y,
-            np.zeros_like(ground_x),
-            color="#A9A28F",
-            alpha=0.18,
-            linewidth=0.45,
-            rstride=1,
-            cstride=1,
-        )
+        self.scene_axis.add_collection3d(self.ground_grid, autolim=False)
         self.scene_axis.plot(
             [-200_000.0, 200_000.0],
             [0.0, 0.0],
@@ -543,6 +539,12 @@ class AircraftLivePlayer:
         positions = self._full_trail_positions(current)
         full_span = max(float(np.max(np.ptp(positions, axis=0))), 500.0)
         if self.camera_mode == "free":
+            # Stationary world: fix the limits once, then leave rotation/zoom to
+            # the user's mouse. The aircraft translates through the fixed scene.
+            if not self._free_limits_set:
+                self._apply_world_limits(positions, full_span)
+                self._free_limits_set = True
+            self._update_ground_grid()
             return full_span
         target_azimuth = 90.0 - telemetry.heading_deg
         self._camera_azimuth_deg = self._smoothed_angle_deg(
@@ -575,18 +577,57 @@ class AircraftLivePlayer:
                     max(-50.0, current[2] - 0.65 * span), current[2] + span
                 )
                 self.scene_axis.view_init(elev=22.0, azim=self._camera_azimuth_deg)
+            self._update_ground_grid()
             return 2.0 * span
+        self._apply_world_limits(positions, full_span)
+        self.scene_axis.view_init(
+            elev=90.0 if self.camera_mode == "top" else 28.0,
+            azim=-90.0 if self.camera_mode == "top" else self._camera_azimuth_deg,
+        )
+        self._update_ground_grid()
+        return full_span
+
+    def _apply_world_limits(self, positions: FloatArray, full_span: float) -> None:
+        """Fit the scene limits to the whole flight (stationary-world view)."""
         margin = 0.18 * full_span
         minimum = np.min(positions, axis=0) - margin
         maximum = np.max(positions, axis=0) + margin
         self.scene_axis.set_xlim(minimum[0], maximum[0])
         self.scene_axis.set_ylim(minimum[1], maximum[1])
         self.scene_axis.set_zlim(min(-20.0, minimum[2]), max(100.0, maximum[2]))
-        self.scene_axis.view_init(
-            elev=90.0 if self.camera_mode == "top" else 28.0,
-            azim=-90.0 if self.camera_mode == "top" else self._camera_azimuth_deg,
-        )
-        return full_span
+
+    def _update_ground_grid(self) -> None:
+        """Re-tile the ground grid to the current view with a stable spacing.
+
+        Regenerating a bounded set of evenly-spaced lines every frame (instead of
+        clipping one enormous fixed wireframe) keeps the gridlines steady as the
+        view pans/zooms, which removes the flicker/"glitch".
+        """
+        x_min, x_max = self.scene_axis.get_xlim3d()
+        y_min, y_max = self.scene_axis.get_ylim3d()
+        span = max(x_max - x_min, y_max - y_min)
+        if not np.isfinite(span) or span <= 0.0:
+            return
+        magnitude = 10.0 ** np.floor(np.log10(span / 10.0))
+        spacing = 10.0 * magnitude
+        for nice in (1.0, 2.0, 5.0):
+            candidate = nice * magnitude
+            if span / candidate <= 14.0:
+                spacing = candidate
+                break
+        x0 = np.floor(x_min / spacing) * spacing
+        x1 = np.ceil(x_max / spacing) * spacing
+        y0 = np.floor(y_min / spacing) * spacing
+        y1 = np.ceil(y_max / spacing) * spacing
+        segments = [
+            [(float(x), y0, 0.0), (float(x), y1, 0.0)]
+            for x in np.arange(x0, x1 + 0.5 * spacing, spacing)
+        ]
+        segments += [
+            [(x0, float(y), 0.0), (x1, float(y), 0.0)]
+            for y in np.arange(y0, y1 + 0.5 * spacing, spacing)
+        ]
+        self.ground_grid.set_segments(segments)
 
     def _update_trail_artist(self) -> FloatArray:
         view = self.trail.view(self.time_s, mode=self.trail_mode)
@@ -946,9 +987,11 @@ class AircraftLivePlayer:
         elif key == "c":
             index = (LIVE_CAMERA_MODES.index(self.camera_mode) + 1) % len(LIVE_CAMERA_MODES)
             self.camera_mode = LIVE_CAMERA_MODES[index]
+            self._free_limits_set = False  # re-fit the world if entering free
         elif key == "0":
             self.camera_mode = "chase"
             self._camera_azimuth_deg = -55.0
+            self._free_limits_set = False
         elif key == "v":
             index = (TRAIL_MODES.index(self.trail_mode) + 1) % len(TRAIL_MODES)
             self.trail_mode = TRAIL_MODES[index]
@@ -1037,6 +1080,9 @@ class AircraftLivePlayer:
         self._history_alpha.clear()
         self._next_log_time_s = 0.1
         self._camera_azimuth_deg = -55.0
+        # In "free" mode the world limits are fixed once so the aircraft visibly
+        # translates through a stationary scene and the user owns rotation/zoom.
+        self._free_limits_set = False
         self._last_saved_message = ""
         self._active_warning_codes.clear()
         self._clock.resynchronize()

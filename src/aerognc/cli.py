@@ -185,8 +185,9 @@ def _parser() -> argparse.ArgumentParser:
     fly_aircraft.add_argument(
         "--camera",
         choices=("chase", "cockpit", "orbit", "top", "free"),
-        default="chase",
-        help="initial 3D camera",
+        default="orbit",
+        help="initial 3D camera (default: orbit, a stationary world view the "
+        "aircraft flies through; 'chase' follows the aircraft)",
     )
     fly_aircraft.add_argument(
         "--no-gamepad", action="store_true", help="disable optional Windows XInput polling"
