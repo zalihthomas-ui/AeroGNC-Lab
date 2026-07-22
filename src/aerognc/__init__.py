@@ -12,15 +12,18 @@ except PackageNotFoundError:  # pragma: no cover - source tree without installat
     __version__ = "0.0.0+local"
 
 if TYPE_CHECKING:
-    from aerognc.api import fly_mission
+    from aerognc.api import fly_configured_mission, fly_mission
 
-__all__ = ["__version__", "fly_mission"]
+__all__ = ["__version__", "fly_configured_mission", "fly_mission"]
 
 
 def __getattr__(name: str) -> Any:
     """Lazily expose the high-level API without a heavy top-level import."""
-    if name == "fly_mission":
-        from aerognc.api import fly_mission
+    if name in {"fly_configured_mission", "fly_mission"}:
+        from aerognc.api import fly_configured_mission, fly_mission
 
-        return fly_mission
+        return {
+            "fly_configured_mission": fly_configured_mission,
+            "fly_mission": fly_mission,
+        }[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

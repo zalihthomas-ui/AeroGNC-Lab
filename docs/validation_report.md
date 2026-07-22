@@ -39,8 +39,8 @@ validation.
 
 | Area | Executed result | Acceptance |
 |---|---|---|
-| Automated suite | 594 deterministic tests | All pass |
-| Branch coverage | 80.48% core/package coverage | Enforced minimum 75% |
+| Automated suite | 610 deterministic tests | All pass |
+| Branch coverage | 80.62% core/package coverage | Enforced minimum 75% |
 | Adaptive numerical core | DP5(4) convergence/reference cases, dense directed events, checkpoint hashes, deterministic task order, and finite-difference sensitivities | Every numerical/tolerance/integrity assertion passes |
 | Nominal 3-DOF | Burnout 3.350 s; apogee 1101.49 m at 15.569 s; impact 31.794 s | Ordered events and bounded mass |
 | Interactive playback | Pause/restart/seek/speed state tests, PNG frame, and headless GIF export pass | Source trajectory remains unchanged |
@@ -170,7 +170,7 @@ hiding it.
   bounded socket timeout, and fail-silent watchdog behavior. FMI evidence checks the
   project XML contract without treating it as an executable FMU.
 
-The final branch-aware report is 80.48% against an enforced 75% threshold. It
+The final branch-aware report is 80.62% against an enforced 75% threshold. It
 excludes `visualisation/mission_designer.py` and `visualisation/workbench.py`, whose Tk
 event loops are exercised by CLI dispatch and live-window/widget-construction smoke
 checks. The input, planning, propagation, catalog, uncertainty, and plotting services

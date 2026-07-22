@@ -52,8 +52,18 @@ class NoisyStateProvider(NavigationProvider):
         airspeed_sigma_mps: float = 0.4,
         gps_dropout_window_s: tuple[float, float] | None = None,
     ) -> None:
-        if position_sigma_m < 0.0 or velocity_sigma_mps < 0.0 or airspeed_sigma_mps < 0.0:
-            raise ValueError("noise sigmas must be nonnegative")
+        sigmas = (position_sigma_m, velocity_sigma_mps, airspeed_sigma_mps)
+        if not np.all(np.isfinite(sigmas)) or np.any(np.asarray(sigmas) < 0.0):
+            raise ValueError("noise sigmas must be finite and nonnegative")
+        if gps_dropout_window_s is not None:
+            start_s, end_s = gps_dropout_window_s
+            if (
+                not np.isfinite(start_s)
+                or not np.isfinite(end_s)
+                or start_s < 0.0
+                or end_s <= start_s
+            ):
+                raise ValueError("GPS dropout window must be finite, nonnegative, and increasing")
         self._seed = seed
         self.position_sigma_m = position_sigma_m
         self.velocity_sigma_mps = velocity_sigma_mps
@@ -67,6 +77,8 @@ class NoisyStateProvider(NavigationProvider):
         self._time_s = 0.0
 
     def update(self, truth: NavigationState, dt_s: float) -> NavigationState:
+        if not np.isfinite(dt_s) or dt_s <= 0.0:
+            raise ValueError("dt_s must be positive and finite")
         self._time_s += dt_s
         dropped = False
         if self.gps_dropout_window_s is not None:

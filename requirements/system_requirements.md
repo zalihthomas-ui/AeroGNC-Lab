@@ -514,6 +514,16 @@ defined in `verification_plan.md`.
   shall remain separate from manual control, contain no target/terminal guidance, and
   cross the defined 100 km altitude boundary in the configured synthetic benchmark
   while reporting that the crossing is neither orbital insertion nor design proof.
+- **SYS-SIM-021 (T,A):** The integrated fixed-wing waypoint workflow shall load a
+  versioned runtime configuration covering the mission reference, solver,
+  environment, navigation, guidance, autopilot, safety, reduced internal vehicle,
+  actuator dynamics/failures, and output directory; it shall reject missing or
+  unknown keys, unsupported schema versions or vehicle backends, invalid values, and
+  any request for real-vehicle output before propagation begins.
+- **SYS-SIM-022 (T,D):** The waypoint CLI and public API shall execute a validated
+  runtime configuration with a fresh navigation provider for each run, preserve the
+  explicit mission-only CLI form, and record both runtime-configuration and mission
+  SHA-256 provenance in configured-run output.
 
 ### Astrodynamics
 

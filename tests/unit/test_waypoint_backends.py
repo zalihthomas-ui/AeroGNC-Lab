@@ -52,6 +52,25 @@ def test_gps_dropout_marks_state_invalid() -> None:
     assert provider.update(_truth(), 0.3).valid  # t=0.6 after window
 
 
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"position_sigma_m": float("nan")},
+        {"gps_dropout_window_s": (-1.0, 2.0)},
+        {"gps_dropout_window_s": (2.0, 1.0)},
+    ],
+)
+def test_noisy_provider_rejects_invalid_settings(kwargs) -> None:
+    with pytest.raises(ValueError):
+        NoisyStateProvider(**kwargs)
+
+
+@pytest.mark.parametrize("dt_s", [0.0, -0.1, float("nan")])
+def test_noisy_provider_rejects_invalid_time_step(dt_s: float) -> None:
+    with pytest.raises(ValueError, match="positive and finite"):
+        NoisyStateProvider().update(_truth(), dt_s)
+
+
 # --- internal backend --------------------------------------------------------
 
 
