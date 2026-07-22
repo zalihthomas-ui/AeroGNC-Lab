@@ -1,6 +1,6 @@
 # Repository Inspection Report — Waypoint Fixed-Wing GNC Integration
 
-_Date: 2026-07-21. Author: integration pass. Companion: `implementation_plan.md`, `../../TODO.md`._
+_Date: 2026-07-21. Author: Zalih Thomas. Companion: `implementation_plan.md`, `../../TODO.md`._
 
 ## Boundary (scope decision)
 

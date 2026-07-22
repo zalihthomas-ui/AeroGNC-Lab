@@ -3,7 +3,8 @@ message: "If you use AeroGNC-Lab, please cite this software."
 title: "AeroGNC-Lab: A Modular Flight Dynamics, Guidance, Navigation and Control Verification Platform"
 type: software
 authors:
-  - name: "AeroGNC-Lab Contributors"
+  - family-names: "Thomas"
+    given-names: "Zalih"
 version: 0.8.0
 date-released: 2026-07-20
 license: MIT

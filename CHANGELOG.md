@@ -51,6 +51,11 @@ and the project uses Semantic Versioning.
   forms, and a pull-request checklist.
 - Applied the configured Ruff formatter across the current source and test tree and
   removed two stale quality-gate violations found during publication validation.
+- Replaced generic contributor metadata with Zalih Thomas as the named author and
+  copyright holder across the license, package metadata, citation record, README,
+  and engineering inspection byline.
+- Made optional Windows integrations type-check consistently on Linux and Windows
+  without changing their runtime scope.
 
 ### Verification
 

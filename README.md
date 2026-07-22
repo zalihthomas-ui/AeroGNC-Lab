@@ -664,8 +664,10 @@ states, variance-based global sensitivity indices, and an executed Simulink
 comparison. Hardware selection remains deferred until controller timing and target
 I/O requirements are measured; see the [future HIL plan](docs/future_hil.md).
 
-## Licence and citation
+## Author, licence and citation
 
-Released under the [MIT License](LICENSE). Citation metadata is provided in
+AeroGNC-Lab is created and maintained by
+[Zalih Thomas](https://github.com/zalihthomas-ui). Released under the
+[MIT License](LICENSE). Citation metadata is provided in
 [`CITATION.cff`](CITATION.cff). The canonical source repository is
 [github.com/zalihthomas-ui/AeroGNC-Lab](https://github.com/zalihthomas-ui/AeroGNC-Lab).
