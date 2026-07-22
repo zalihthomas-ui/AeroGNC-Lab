@@ -294,8 +294,13 @@ def run_waypoint_mission(
 
         samples.append(
             _make_sample(
-                time_s, nav, guidance_command, deflections,
-                manager_status.state, segment.waypoint_id, verdict.response.value
+                time_s,
+                nav,
+                guidance_command,
+                deflections,
+                manager_status.state,
+                segment.waypoint_id,
+                verdict.response.value,
             )
         )
         time_s += cfg.dt_s
@@ -319,8 +324,7 @@ def run_waypoint_mission(
                 for t in manager.transitions
             ],
             "safety_events": [
-                (e.time_s, e.trigger, e.value, e.threshold, e.response.value)
-                for e in safety.events
+                (e.time_s, e.trigger, e.value, e.threshold, e.response.value) for e in safety.events
             ],
         },
     )

@@ -1,0 +1,58 @@
+name: Bug report
+description: Report reproducible incorrect behavior in AeroGNC-Lab
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve AeroGNC-Lab. Remove credentials, personal data,
+        proprietary material, and sensitive mission information before submitting.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Provide the release version or commit SHA where the problem occurs.
+      placeholder: "0.8.0 or 1a2b3c4"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include the operating system, Python version, installation method, and relevant optional tools.
+      placeholder: "Windows 11, Python 3.13, editable installation"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Provide a minimal command, configuration, or code sample that reproduces the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and evidence
+      description: Include concise logs, tracebacks, plots, or numerical differences after removing sensitive data.
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues for the same problem.
+          required: true
+        - label: This report contains no credentials, classified information, proprietary vehicle data, or operational weapon-system information.
+          required: true
+        - label: I will report security vulnerabilities privately through the Security tab instead of this form.
+          required: true

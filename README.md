@@ -1,19 +1,40 @@
 # AeroGNC-Lab
 
-**A Modular Flight Dynamics, Guidance, Navigation and Control Verification Platform**
+**A modular, verification-first flight dynamics, guidance, navigation, and control platform.**
 
-> **Public-safety statement:** AeroGNC-Lab models a completely fictional civilian
-> research/sounding rocket and planetary mission using synthetic parameters. It is an educational,
-> research, and engineering-portfolio project. It contains no classified,
-> proprietary, or operational weapon-system information; it does not reproduce a
-> specific vehicle; and it deliberately excludes target interception, proportional
-> navigation against targets, terminal homing, and engagement logic.
+[![CI](https://github.com/zalihthomas-ui/AeroGNC-Lab/actions/workflows/ci.yml/badge.svg)](https://github.com/zalihthomas-ui/AeroGNC-Lab/actions/workflows/ci.yml)
+[![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Status: Alpha](https://img.shields.io/badge/Status-Alpha-orange.svg)](#status)
 
-AeroGNC-Lab is a Python-first engineering project that implements the important
-flight-mechanics and GNC mathematics directly. Established scientific libraries are
-used for independent validation, plotting, and supporting utilities—not as a hidden
-flight-dynamics engine. The repository is designed to make assumptions, units,
-requirements, and evidence traceable from equation to test.
+AeroGNC-Lab is a Python-first engineering laboratory for inspectable flight mechanics,
+GNC, astrodynamics, simulation, and verification. Core models are implemented directly;
+established scientific libraries support independent validation, plotting, and utilities
+rather than hiding the dynamics. Assumptions, units, requirements, and evidence remain
+traceable from equation to test.
+
+**Explore:** [Quick start](#installation-and-quick-start) ·
+[Architecture](docs/architecture.md) · [Validation](docs/validation_report.md) ·
+[Requirements](requirements/system_requirements.md) · [Contributing](CONTRIBUTING.md) ·
+[Citation](CITATION.cff)
+
+![AeroGNC-Lab interplanetary mission-control dashboard](results/reference/interplanetary_mission_control.png)
+
+| At a glance | |
+|---|---|
+| Core domains | Flight dynamics, GNC, astrodynamics, simulation, and verification |
+| Models | 3-DOF and 6-DOF flight, rotating planets, fixed-wing aircraft, and orbital missions |
+| Interfaces | Python API, command-line tools, YAML projects, and a desktop engineering workbench |
+| Evidence | 593 deterministic tests and 80.48% branch-aware coverage on the current branch |
+| Runtime | Python 3.12 or newer |
+| License | MIT |
+
+> [!IMPORTANT]
+> **Scope and safety:** all executable vehicles, missions, and parameters are fictional and
+> synthetic. AeroGNC-Lab is intended for education, research, and engineering portfolios;
+> it is not a certification, launch-approval, or operational mission-design tool. The project
+> excludes target interception, terminal homing, engagement logic, classified information,
+> proprietary vehicle data, and operational weapon-system information.
 
 ## What it solves and who it is for
 
@@ -43,7 +64,7 @@ pages provide read-only context and do not calculate routes to real exoplanets.
 
 ## Status
 
-Version 0.8.0 is a locally verified release candidate. It adds near-planet orbit and
+Version 0.8.0 is a verified alpha release candidate. It adds near-planet orbit and
 live fictional-aircraft sandboxes to the portable engineering
 projects and immutable run evidence, adaptive integration/checkpoint/sensitivity
 tools, rotating-planet 6-DOF and staged recovery, advanced mission-analysis and
@@ -51,11 +72,11 @@ telemetry boundaries, robust experiment design, a project-aware eight-page deskt
 workbench, localhost UDP packet verification, and an actionable one-click diagnostic.
 The checksummed snapshot contains all 6,324 NASA-confirmed exoplanets available at
 retrieval, explicitly as observational context rather than transfer ephemerides.
-Automated lint, strict typing, 402 tests, and 80.23% branch-aware coverage pass; two
+Automated lint, strict typing, 593 tests, and 80.48% branch-aware coverage pass; two
 MATLAB benchmarks were executed independently. No FMU binary was built or imported,
 and GMAT, SPICE, Simulink, and physical HIL remain explicitly unexecuted where
-unavailable. No remote repository is created or modified by any build or generation
-command.
+unavailable. Build and generation commands remain local-only and never publish or
+modify remote repositories.
 
 ## Capabilities
 
@@ -551,8 +572,8 @@ acceptance. Evidence is mapped in
 
 | Evidence | Executed result |
 |---|---|
-| Python suite | 402 deterministic unit, integration, and validation tests pass |
-| Coverage | 80.23% branch-aware core/package coverage; enforced threshold 75% |
+| Python suite | 593 deterministic unit, integration, and validation tests pass |
+| Coverage | 80.48% branch-aware core/package coverage; enforced threshold 75% |
 | RK4 | Fourth-order convergence and independent SciPy agreement below \(10^{-6}\) |
 | Adaptive numerics | Dormand--Prince convergence/reference agreement, dense events, checkpoints, scheduler order, and variational derivatives pass |
 | Nominal 3-DOF | 1101.49 m apogee; burnout/apogee/impact events ordered and bounded |
@@ -646,5 +667,5 @@ I/O requirements are measured; see the [future HIL plan](docs/future_hil.md).
 ## Licence and citation
 
 Released under the [MIT License](LICENSE). Citation metadata is provided in
-[`CITATION.cff`](CITATION.cff). A repository URL can be added after publication is
-explicitly approved.
+[`CITATION.cff`](CITATION.cff). The canonical source repository is
+[github.com/zalihthomas-ui/AeroGNC-Lab](https://github.com/zalihthomas-ui/AeroGNC-Lab).

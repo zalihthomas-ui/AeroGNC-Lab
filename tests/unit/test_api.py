@@ -20,7 +20,11 @@ def _mission() -> Mission:
         waypoints=(
             Waypoint(id=1, name="A", latitude_deg=0.006, longitude_deg=0.0, altitude_m=120.0),
             Waypoint(
-                id=2, name="B", latitude_deg=0.0, longitude_deg=0.0, altitude_m=100.0,
+                id=2,
+                name="B",
+                latitude_deg=0.0,
+                longitude_deg=0.0,
+                altitude_m=100.0,
                 action=WaypointAction.RETURN_HOME,
             ),
         ),

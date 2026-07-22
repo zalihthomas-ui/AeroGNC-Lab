@@ -27,7 +27,11 @@ def _straight_mission(action_last: WaypointAction = WaypointAction.FLY_THROUGH) 
             Waypoint(id=1, name="A", latitude_deg=0.006, longitude_deg=0.0, altitude_m=120.0),
             Waypoint(id=2, name="B", latitude_deg=0.012, longitude_deg=0.004, altitude_m=160.0),
             Waypoint(
-                id=3, name="C", latitude_deg=0.012, longitude_deg=0.010, altitude_m=160.0,
+                id=3,
+                name="C",
+                latitude_deg=0.012,
+                longitude_deg=0.010,
+                altitude_m=160.0,
                 action=action_last,
             ),
         ),
@@ -64,9 +68,7 @@ def test_bundled_demo_mission_completes() -> None:
 
 @pytest.mark.parametrize("mode", list(GuidanceMode))
 def test_all_guidance_modes_complete(mode: GuidanceMode) -> None:
-    result = run_waypoint_mission(
-        _straight_mission(), WaypointMissionConfig(guidance_mode=mode)
-    )
+    result = run_waypoint_mission(_straight_mission(), WaypointMissionConfig(guidance_mode=mode))
     assert result.completed
 
 

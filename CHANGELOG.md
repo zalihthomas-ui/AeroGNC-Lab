@@ -44,6 +44,20 @@ and the project uses Semantic Versioning.
   - 76 new unit/integration/scenario tests (nominal, all guidance modes,
     crosswind, GPS dropout, return-home, geofence, actuator failure).
 
+### Changed
+
+- Prepared the project for its public GitHub publication with a concise README
+  overview, repository links, citation metadata, a security policy, structured issue
+  forms, and a pull-request checklist.
+- Applied the configured Ruff formatter across the current source and test tree and
+  removed two stale quality-gate violations found during publication validation.
+
+### Verification
+
+- The current suite passes 593 deterministic tests with 80.48% branch-aware package
+  coverage against the enforced 75% floor. Ruff lint/format and strict MyPy checks
+  pass on Python 3.13.
+
 ## [0.8.0] - 2026-07-20
 
 ### Added

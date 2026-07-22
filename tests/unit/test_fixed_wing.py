@@ -129,9 +129,7 @@ def test_initial_state_starts_at_zero_body_rate_with_trimmed_elevator() -> None:
     np.testing.assert_array_equal(state[10:13], np.zeros(3))
     assert state[14] == 0.0
     assert state[15] == pytest.approx(
-        longitudinal_trim_elevator_rad(
-            configuration.initial.angle_of_attack_rad, configuration
-        )
+        longitudinal_trim_elevator_rad(configuration.initial.angle_of_attack_rad, configuration)
     )
     assert state[16] == 0.0
 

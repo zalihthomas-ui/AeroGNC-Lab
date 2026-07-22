@@ -181,8 +181,7 @@ def aircraft_preflight(configuration: AircraftSandboxConfiguration) -> AircraftP
     fuel_flow_kgps = configuration.mass.maximum_fuel_flow_kgps * configuration.initial_throttle
     endurance_s = np.inf if fuel_flow_kgps <= 1.0e-12 else fuel_mass_kg / fuel_flow_kgps
     return AircraftPreflight(
-        wing_loading_kgpm2=configuration.mass.initial_mass_kg
-        / configuration.geometry.wing_area_m2,
+        wing_loading_kgpm2=configuration.mass.initial_mass_kg / configuration.geometry.wing_area_m2,
         maximum_air_breathing_thrust_to_weight=configuration.propulsion.maximum_thrust_n
         / (configuration.mass.initial_mass_kg * STANDARD_GRAVITY_MPS2),
         stall_speed_1g_mps=stall_speed,
@@ -268,14 +267,10 @@ def evaluate_training_task(
         )
         altitude_loss_m = float(max(0.0, altitude[0] - np.min(altitude)))
         passed = (
-            heading_change_deg >= 350.0
-            and sideslip_rms_deg <= 5.0
-            and altitude_loss_m <= 250.0
+            heading_change_deg >= 350.0 and sideslip_rms_deg <= 5.0 and altitude_loss_m <= 250.0
         )
         score = (
-            min(100.0, heading_change_deg / 3.6)
-            - 5.0 * sideslip_rms_deg
-            - 0.08 * altitude_loss_m
+            min(100.0, heading_change_deg / 3.6) - 5.0 * sideslip_rms_deg - 0.08 * altitude_loss_m
         )
         return TrainingEvaluation(
             task,

@@ -130,8 +130,17 @@ class InternalFixedWingBackend(VehicleBackend):
         if not np.isfinite(airspeed_mps) or airspeed_mps <= 0.0:
             raise ValueError("airspeed_mps must be positive and finite")
         self._state = np.array(
-            [position[0], position[1], position[2], 0.0, 0.0, wrap_to_pi(heading_rad),
-             airspeed_mps, 0.0, 0.0],
+            [
+                position[0],
+                position[1],
+                position[2],
+                0.0,
+                0.0,
+                wrap_to_pi(heading_rad),
+                airspeed_mps,
+                0.0,
+                0.0,
+            ],
             dtype=np.float64,
         )
 

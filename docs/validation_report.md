@@ -1,7 +1,9 @@
 # Validation Report
 
-**Release candidate:** 0.8.0  
-**Evidence date:** 2026-07-20  
+**Release candidate:** 0.8.0
+
+**Evidence date:** 2026-07-22
+
 **Local environment:** Windows, CPython 3.13.1, NumPy 2.5.1, SciPy 1.18.0,
 MATLAB R2024a Update 3
 
@@ -26,7 +28,9 @@ ensembles, a project-aware workbench, localhost UDP packet exchange, and an
 environment diagnostic. Version 0.8 adds a near-planet satellite sandbox spanning
 force-free through full N-body and drag-decay models, plus a fictional
 coefficient-driven 18-state aircraft with live pilot input, visual mesh import, and
-a separately verified 100 km research-ascent case. The release does not claim
+a separately verified 100 km research-ascent case. The current branch additionally
+covers waypoint-based fixed-wing guidance, path management, mission sequencing,
+safety envelopes, deterministic simulation, and replay. The release does not claim
 physical-flight, real-HIL,
 operational-ephemeris, GMAT, SPICE, Simulink, FMU runtime, or official FMI-schema
 validation.
@@ -35,8 +39,8 @@ validation.
 
 | Area | Executed result | Acceptance |
 |---|---|---|
-| Automated suite | 402 deterministic tests | All pass |
-| Branch coverage | 80.23% core/package coverage | Enforced minimum 75% |
+| Automated suite | 593 deterministic tests | All pass |
+| Branch coverage | 80.48% core/package coverage | Enforced minimum 75% |
 | Adaptive numerical core | DP5(4) convergence/reference cases, dense directed events, checkpoint hashes, deterministic task order, and finite-difference sensitivities | Every numerical/tolerance/integrity assertion passes |
 | Nominal 3-DOF | Burnout 3.350 s; apogee 1101.49 m at 15.569 s; impact 31.794 s | Ordered events and bounded mass |
 | Interactive playback | Pause/restart/seek/speed state tests, PNG frame, and headless GIF export pass | Source trajectory remains unchanged |
@@ -166,7 +170,7 @@ hiding it.
   bounded socket timeout, and fail-silent watchdog behavior. FMI evidence checks the
   project XML contract without treating it as an executable FMU.
 
-The final branch-aware report is 80.23% against an enforced 75% threshold. It
+The final branch-aware report is 80.48% against an enforced 75% threshold. It
 excludes `visualisation/mission_designer.py` and `visualisation/workbench.py`, whose Tk
 event loops are exercised by CLI dispatch and live-window/widget-construction smoke
 checks. The input, planning, propagation, catalog, uncertainty, and plotting services

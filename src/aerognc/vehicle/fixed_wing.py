@@ -174,9 +174,7 @@ def initial_tangent_displacement_ned_m(
     if not np.all(np.isfinite([time_s, rotation_rate_radps])) or time_s < 0.0:
         raise ValueError("local-displacement time/rate must be finite and time nonnegative")
     current_inertial = as_vector(position_inertial_m, 3, name="position_inertial_m")
-    initial_inertial = as_vector(
-        initial_position_inertial_m, 3, name="initial_position_inertial_m"
-    )
+    initial_inertial = as_vector(initial_position_inertial_m, 3, name="initial_position_inertial_m")
     current_fixed = dcm_inertial_to_ecef(rotation_rate_radps * time_s) @ current_inertial
     initial_fixed = initial_inertial
     return local_ned_dcm_inertial(initial_fixed).T @ (current_fixed - initial_fixed)
@@ -316,8 +314,7 @@ def _post_stall_lift(
     )
     sign = 1.0 if angle_of_attack_rad >= 0.0 else -1.0
     boundary_linear_lift = (
-        aerodynamics.cl_zero
-        + aerodynamics.cl_alpha_per_rad * sign * aerodynamics.stall_angle_rad
+        aerodynamics.cl_zero + aerodynamics.cl_alpha_per_rad * sign * aerodynamics.stall_angle_rad
     )
     boundary_lift = float(
         np.clip(
@@ -403,8 +400,7 @@ def aerodynamic_state(
         )
     drag_coefficient += 0.02 * (abs(aileron) + abs(elevator) + abs(rudder))
     side_force_coefficient += (
-        aero.side_force_aileron_per_rad * aileron
-        + aero.side_force_rudder_per_rad * rudder
+        aero.side_force_aileron_per_rad * aileron + aero.side_force_rudder_per_rad * rudder
     )
     roll_coefficient += (
         aero.roll_rate * rates[0] * rate_scale_lateral
@@ -493,15 +489,11 @@ class FixedWingFlightModel:
             "alpha_rad",
             "beta_rad",
         }:
-            raise ValueError(
-                "fixed-wing static table axes must be mach, alpha_rad, and beta_rad"
-            )
+            raise ValueError("fixed-wing static table axes must be mach, alpha_rad, and beta_rad")
         self.aerodynamic_database = aerodynamic_database
         self.atmosphere = ReferenceOrbitalAtmosphere(configuration.planet.atmosphere_density_scale)
         self.wind_model = WindModel(
-            WindProfile.constant(
-                [configuration.wind_north_mps, configuration.wind_east_mps, 0.0]
-            ),
+            WindProfile.constant([configuration.wind_north_mps, configuration.wind_east_mps, 0.0]),
             gust_std_ned_mps=configuration.turbulence_std_ned_mps,
             correlation_time_s=configuration.turbulence_correlation_time_s,
             sample_step_s=0.1,

@@ -26,16 +26,12 @@ def test_aircraft_replay_seeks_recorded_states_without_evaluating_plant(
     recorder.append(
         initial,
         command,
-        aircraft_telemetry(
-            model, 0.0, initial, command, initial_position_inertial_m=initial[:3]
-        ),
+        aircraft_telemetry(model, 0.0, initial, command, initial_position_inertial_m=initial[:3]),
     )
     recorder.append(
         following,
         command,
-        aircraft_telemetry(
-            model, 0.1, following, command, initial_position_inertial_m=initial[:3]
-        ),
+        aircraft_telemetry(model, 0.1, following, command, initial_position_inertial_m=initial[:3]),
     )
     artifacts = recorder.write(tmp_path)
     recording = load_recorded_flight(artifacts.csv_path)

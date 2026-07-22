@@ -179,15 +179,12 @@ class VirtualPilotStick:
         updated: list[float] = []
         for axis, target in zip(current, targets, strict=True):
             rate = (
-                profile.keyboard_ramp_per_s
-                if target != 0.0
-                else profile.keyboard_recentering_per_s
+                profile.keyboard_ramp_per_s if target != 0.0 else profile.keyboard_recentering_per_s
             )
             updated.append(_move_toward(axis, target, rate * duration_s))
         self.roll, self.pitch, self.yaw = updated
         trim_direction = float(
-            (bindings.trim_nose_up in pressed_keys)
-            - (bindings.trim_nose_down in pressed_keys)
+            (bindings.trim_nose_up in pressed_keys) - (bindings.trim_nose_down in pressed_keys)
         )
         self.pitch_trim = float(
             np.clip(

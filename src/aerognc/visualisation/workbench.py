@@ -1718,9 +1718,9 @@ class AeroGNCWorkbenchApp:
         control_feel.grid(row=4, column=0, columnspan=2, sticky="ew", pady=(10, 0))
         control_feel.columnconfigure(1, weight=1)
         ttk.Label(control_feel, text="Pilot profile JSON").grid(row=0, column=0, sticky="w")
-        ttk.Entry(
-            control_feel, textvariable=self.aircraft_vars["pilot_profile_path"]
-        ).grid(row=0, column=1, sticky="ew", padx=(10, 6), pady=5)
+        ttk.Entry(control_feel, textvariable=self.aircraft_vars["pilot_profile_path"]).grid(
+            row=0, column=1, sticky="ew", padx=(10, 6), pady=5
+        )
         choose_profile = ttk.Button(
             control_feel, text="CHOOSE...", command=self._choose_aircraft_pilot_profile
         )
@@ -2019,9 +2019,7 @@ class AeroGNCWorkbenchApp:
         if not path_text:
             raise ValueError("Choose a pilot profile JSON file")
         profile = load_pilot_profile(Path(path_text))
-        selected_mode = AIRCRAFT_CONTROL_MODE_CHOICES.get(
-            self.aircraft_vars["control_mode"].get()
-        )
+        selected_mode = AIRCRAFT_CONTROL_MODE_CHOICES.get(self.aircraft_vars["control_mode"].get())
         if selected_mode is None:
             raise ValueError("Choose a listed aircraft control mode")
         return replace(
@@ -2033,17 +2031,11 @@ class AeroGNCWorkbenchApp:
             pitch_sensitivity=self._number(
                 self.aircraft_vars["pitch_sensitivity"], "Pitch sensitivity"
             ),
-            yaw_sensitivity=self._number(
-                self.aircraft_vars["yaw_sensitivity"], "Yaw sensitivity"
-            ),
+            yaw_sensitivity=self._number(self.aircraft_vars["yaw_sensitivity"], "Yaw sensitivity"),
             input_expo=self._number(self.aircraft_vars["input_expo"], "Control expo"),
-            analog_deadzone=self._number(
-                self.aircraft_vars["analog_deadzone"], "Analog deadzone"
-            ),
+            analog_deadzone=self._number(self.aircraft_vars["analog_deadzone"], "Analog deadzone"),
             invert_pitch=self.aircraft_invert_pitch_var.get(),
-            keyboard_ramp_per_s=self._number(
-                self.aircraft_vars["keyboard_ramp"], "Keyboard ramp"
-            ),
+            keyboard_ramp_per_s=self._number(self.aircraft_vars["keyboard_ramp"], "Keyboard ramp"),
             keyboard_recentering_per_s=self._number(
                 self.aircraft_vars["keyboard_recentering"], "Keyboard recentering"
             ),
@@ -3595,9 +3587,7 @@ class AeroGNCWorkbenchApp:
             )
             camera_mode = AIRCRAFT_CAMERA_CHOICES.get(self.aircraft_vars["camera"].get())
             trail_mode = AIRCRAFT_TRAIL_CHOICES.get(self.aircraft_vars["trail_mode"].get())
-            trail_color = AIRCRAFT_TRAIL_COLOR_CHOICES.get(
-                self.aircraft_vars["trail_color"].get()
-            )
+            trail_color = AIRCRAFT_TRAIL_COLOR_CHOICES.get(self.aircraft_vars["trail_color"].get())
             if None in (control_mode, camera_mode, trail_mode, trail_color):
                 raise ValueError("Choose listed control, camera, trail, and colour options")
             from aerognc.visualisation.aircraft_experience import TrailSettings
@@ -3628,15 +3618,11 @@ class AeroGNCWorkbenchApp:
                     if self.aircraft_vars["mesh_scale_mode"].get() == "True physical scale"
                     else "enlarged_marker"
                 ),
-                recorder_directory=Path(
-                    self.aircraft_vars["recorder_directory"].get()
-                ).resolve(),
+                recorder_directory=Path(self.aircraft_vars["recorder_directory"].get()).resolve(),
                 training_task=cast(
                     "TrainingTask",
                     AIRCRAFT_TRAINING_TASK_BY_PRESET.get(
-                        AIRCRAFT_PRESET_CHOICES.get(
-                            self.aircraft_vars["preset"].get(), ""
-                        )
+                        AIRCRAFT_PRESET_CHOICES.get(self.aircraft_vars["preset"].get(), "")
                     ),
                 ),
             )

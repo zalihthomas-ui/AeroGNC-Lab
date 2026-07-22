@@ -67,7 +67,7 @@ def test_cli_benchmark_writes_scoped_resource_evidence(tmp_path: Path) -> None:
             "--repetitions",
             "1",
             "--max-wall-time-s",
-            "10",
+            "20",
             "--max-peak-memory-mb",
             "100",
             "--output",

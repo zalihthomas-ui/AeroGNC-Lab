@@ -93,8 +93,7 @@ class Waypoint:
             raise ValueError(f"waypoint {self.name!r} coordinates must be finite")
         if not -90.0 <= self.latitude_deg <= 90.0:
             raise ValueError(
-                f"waypoint {self.name!r} latitude_deg must be in [-90, 90], "
-                f"got {self.latitude_deg}"
+                f"waypoint {self.name!r} latitude_deg must be in [-90, 90], got {self.latitude_deg}"
             )
         if not -180.0 <= self.longitude_deg <= 180.0:
             raise ValueError(

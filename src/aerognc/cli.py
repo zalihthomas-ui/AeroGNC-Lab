@@ -203,9 +203,7 @@ def _parser() -> argparse.ArgumentParser:
         default=Path("configs/pilot_profiles/accessible.json"),
         help="versioned JSON response, sensitivity, binding, and assistance profile",
     )
-    fly_aircraft.add_argument(
-        "--trail", choices=("off", "fading", "full"), default="fading"
-    )
+    fly_aircraft.add_argument("--trail", choices=("off", "fading", "full"), default="fading")
     fly_aircraft.add_argument("--trail-duration", type=float, default=45.0)
     fly_aircraft.add_argument(
         "--trail-color",
@@ -244,9 +242,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     replay_aircraft.add_argument("--config", type=Path, required=True)
     replay_aircraft.add_argument("--recording", type=Path, required=True)
-    replay_aircraft.add_argument(
-        "--mesh", type=Path, default=Path("assets/models/aquila_x1.obj")
-    )
+    replay_aircraft.add_argument("--mesh", type=Path, default=Path("assets/models/aquila_x1.obj"))
     replay_aircraft.add_argument("--playback-factor", type=float, default=1.0)
     aircraft_aero_compare = subparsers.add_parser(
         "aircraft-aero-compare",
@@ -573,9 +569,7 @@ def _parser() -> argparse.ArgumentParser:
     project_report.add_argument("run_id", help="stored run identifier")
     project_report.add_argument("--output", type=Path, help="HTML report path")
 
-    mission = subparsers.add_parser(
-        "mission", help="validate a waypoint mission file"
-    )
+    mission = subparsers.add_parser("mission", help="validate a waypoint mission file")
     mission_commands = mission.add_subparsers(dest="mission_command", required=True)
     mission_validate = mission_commands.add_parser(
         "validate", help="load and validate a waypoint mission (schema + flight envelope)"
@@ -596,9 +590,7 @@ def _parser() -> argparse.ArgumentParser:
     waypoint.add_argument(
         "--wind-north-mps", type=float, default=0.0, help="steady north wind [m/s]"
     )
-    waypoint.add_argument(
-        "--wind-east-mps", type=float, default=0.0, help="steady east wind [m/s]"
-    )
+    waypoint.add_argument("--wind-east-mps", type=float, default=0.0, help="steady east wind [m/s]")
     waypoint.add_argument("--dt-s", type=float, default=0.05, help="integration step [s]")
     waypoint.add_argument(
         "--max-time-s", type=float, default=900.0, help="simulation time limit [s]"
@@ -625,7 +617,9 @@ def _parser() -> argparse.ArgumentParser:
         "--altitude-km", type=float, default=500.0, help="target circular-orbit altitude [km]"
     )
     rpo.add_argument(
-        "--start-behind-m", type=float, default=800.0,
+        "--start-behind-m",
+        type=float,
+        default=800.0,
         help="chaser initial along-track offset behind the target [m]",
     )
     rpo.add_argument(

@@ -124,7 +124,10 @@ class SafetyManager:
         if altitude > limits.max_altitude_m:
             events.append(
                 SafetyEvent(
-                    time_s, "max_altitude", altitude, limits.max_altitude_m,
+                    time_s,
+                    "max_altitude",
+                    altitude,
+                    limits.max_altitude_m,
                     SafetyResponse.RETURN_HOME,
                 )
             )
@@ -133,7 +136,10 @@ class SafetyManager:
         if geofence_range_m > limits.geofence_radius_m:
             events.append(
                 SafetyEvent(
-                    time_s, "geofence", geofence_range_m, limits.geofence_radius_m,
+                    time_s,
+                    "geofence",
+                    geofence_range_m,
+                    limits.geofence_radius_m,
                     SafetyResponse.RETURN_HOME,
                 )
             )
@@ -146,7 +152,10 @@ class SafetyManager:
         if cross_track_error_m is not None and abs(cross_track_error_m) > limits.max_cross_track_m:
             events.append(
                 SafetyEvent(
-                    time_s, "cross_track", abs(cross_track_error_m), limits.max_cross_track_m,
+                    time_s,
+                    "cross_track",
+                    abs(cross_track_error_m),
+                    limits.max_cross_track_m,
                     SafetyResponse.RETURN_HOME,
                 )
             )
@@ -167,14 +176,20 @@ class SafetyManager:
         if abs(vehicle_state.roll_rad) > limits.max_bank_rad:
             events.append(
                 SafetyEvent(
-                    time_s, "bank", abs(vehicle_state.roll_rad), limits.max_bank_rad,
+                    time_s,
+                    "bank",
+                    abs(vehicle_state.roll_rad),
+                    limits.max_bank_rad,
                     SafetyResponse.LIMIT,
                 )
             )
         if abs(vehicle_state.pitch_rad) > limits.max_pitch_rad:
             events.append(
                 SafetyEvent(
-                    time_s, "pitch", abs(vehicle_state.pitch_rad), limits.max_pitch_rad,
+                    time_s,
+                    "pitch",
+                    abs(vehicle_state.pitch_rad),
+                    limits.max_pitch_rad,
                     SafetyResponse.LIMIT,
                 )
             )

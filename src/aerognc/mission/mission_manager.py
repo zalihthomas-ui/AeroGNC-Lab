@@ -54,9 +54,7 @@ class SafetyResponse(StrEnum):
 _TERMINAL_STATES = frozenset(
     {MissionState.ABORT, MissionState.EMERGENCY, MissionState.LANDED, MissionState.MISSION_COMPLETE}
 )
-_ACTIVE_STATES = frozenset(
-    {MissionState.NAVIGATE, MissionState.LOITER, MissionState.RETURN_HOME}
-)
+_ACTIVE_STATES = frozenset({MissionState.NAVIGATE, MissionState.LOITER, MissionState.RETURN_HOME})
 
 
 @dataclass(frozen=True, slots=True)

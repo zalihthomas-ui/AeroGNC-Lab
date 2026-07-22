@@ -129,7 +129,11 @@ def test_arm_rejects_invalid_mission() -> None:
         home=HomePosition(0.0, 0.0, 0.0),
         waypoints=(
             Waypoint(
-                id=1, name="F", latitude_deg=0.01, longitude_deg=0.0, altitude_m=100.0,
+                id=1,
+                name="F",
+                latitude_deg=0.01,
+                longitude_deg=0.0,
+                altitude_m=100.0,
                 airspeed_mps=999.0,
             ),
         ),

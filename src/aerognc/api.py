@@ -48,9 +48,7 @@ def fly_mission(
     keyword arguments for the common knobs (guidance mode and steady wind). This
     runs the internal simulation backend only and commands no hardware.
     """
-    resolved_mission = (
-        mission if isinstance(mission, Mission) else load_mission(mission)
-    )
+    resolved_mission = mission if isinstance(mission, Mission) else load_mission(mission)
     if config is None:
         config = WaypointMissionConfig(
             dt_s=dt_s,

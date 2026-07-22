@@ -40,9 +40,7 @@ def test_realtime_clock_uses_fixed_steps_and_is_render_rate_invariant() -> None:
         for _ in range(count):
             source.time_s += callback_step_s
             tick = clock.tick()
-            assert tick.simulation_duration_s == pytest.approx(
-                tick.physics_step_count * 0.02
-            )
+            assert tick.simulation_duration_s == pytest.approx(tick.physics_step_count * 0.02)
             total += tick.simulation_duration_s
         return total
 
@@ -111,9 +109,7 @@ def test_recorder_round_trip_replays_recorded_state_and_debriefs(tmp_path) -> No
     recorder.append(
         initial,
         command,
-        aircraft_telemetry(
-            model, 0.0, initial, command, initial_position_inertial_m=initial[:3]
-        ),
+        aircraft_telemetry(model, 0.0, initial, command, initial_position_inertial_m=initial[:3]),
     )
     recorder.append(
         following,

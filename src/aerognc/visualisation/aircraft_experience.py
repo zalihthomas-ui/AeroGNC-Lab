@@ -348,9 +348,7 @@ def classify_touchdown(
         or abs(runway_cross_track_m) > 30.0
     )
     if unsafe_attitude:
-        classification: Literal["soft", "firm", "hard", "unsafe_attitude"] = (
-            "unsafe_attitude"
-        )
+        classification: Literal["soft", "firm", "hard", "unsafe_attitude"] = "unsafe_attitude"
     elif sink_rate <= 1.5:
         classification = "soft"
     elif sink_rate <= 3.0:
@@ -463,9 +461,7 @@ class FlightRecorder:
     ) -> None:
         """Append an exact-state sample after monotonicity and finiteness checks."""
         state_array = as_vector(state, 18, name="recorded_aircraft_state")
-        if telemetry.time_s < 0.0 or (
-            self.records and telemetry.time_s <= self.records[-1].time_s
-        ):
+        if telemetry.time_s < 0.0 or (self.records and telemetry.time_s <= self.records[-1].time_s):
             raise ValueError("recorded flight times must be nonnegative and strictly increasing")
         if len(self.records) == self.maximum_samples:
             self.dropped_samples += 1
@@ -505,17 +501,11 @@ class FlightRecorder:
         segment_distance_m = np.hypot(np.diff(north_m), np.diff(east_m))
         headings_rad = np.unwrap(np.deg2rad([sample.heading_deg for sample in telemetry]))
         turn_rate_degps = (
-            np.zeros(1)
-            if len(records) == 1
-            else np.rad2deg(np.gradient(headings_rad, time_s))
+            np.zeros(1) if len(records) == 1 else np.rad2deg(np.gradient(headings_rad, time_s))
         )
         stalled = np.asarray([sample.stalled for sample in telemetry], dtype=np.float64)
-        stall_duration_s = (
-            0.0 if len(records) == 1 else float(np.trapezoid(stalled, time_s))
-        )
-        warning_counts = Counter(
-            code for record in records for code in record.warning_codes
-        )
+        stall_duration_s = 0.0 if len(records) == 1 else float(np.trapezoid(stalled, time_s))
+        warning_counts = Counter(code for record in records for code in record.warning_codes)
         return {
             "schema_version": "1.0",
             "scope": "fictional civilian research-aircraft simulation",
@@ -526,9 +516,7 @@ class FlightRecorder:
             "maximum_altitude_m": max(sample.altitude_m for sample in telemetry),
             "maximum_true_airspeed_mps": max(sample.true_airspeed_mps for sample in telemetry),
             "maximum_mach": max(sample.mach for sample in telemetry),
-            "maximum_dynamic_pressure_pa": max(
-                sample.dynamic_pressure_pa for sample in telemetry
-            ),
+            "maximum_dynamic_pressure_pa": max(sample.dynamic_pressure_pa for sample in telemetry),
             "maximum_absolute_normal_load_g": max(
                 abs(sample.normal_load_g) for sample in telemetry
             ),
@@ -542,7 +530,8 @@ class FlightRecorder:
             "limitations": [
                 "All vehicle data and operating cues are synthetic and not certified.",
                 "Touchdown is a kinematic event; landing gear and ground roll are omitted.",
-                "Replay interpolates recorded state and telemetry channels without evaluating the plant.",
+                "Replay interpolates recorded state and telemetry channels without "
+                "evaluating the plant.",
             ],
         }
 
@@ -642,8 +631,7 @@ class RecordedFlight:
         fraction = (
             0.0
             if lower == upper
-            else (selected_time - self.time_s[lower])
-            / (self.time_s[upper] - self.time_s[lower])
+            else (selected_time - self.time_s[lower]) / (self.time_s[upper] - self.time_s[lower])
         )
         return selected_time, lower, upper, float(fraction)
 
@@ -667,9 +655,7 @@ class RecordedFlight:
     def sample_telemetry(self, time_s: float) -> AircraftTelemetry:
         """Linearly sample only telemetry channels persisted in the recorder CSV."""
         selected_time, lower, upper, fraction = self._sample_bounds(time_s)
-        values = self.telemetry[lower] + fraction * (
-            self.telemetry[upper] - self.telemetry[lower]
-        )
+        values = self.telemetry[lower] + fraction * (self.telemetry[upper] - self.telemetry[lower])
         return AircraftTelemetry(selected_time, *(float(value) for value in values))
 
 

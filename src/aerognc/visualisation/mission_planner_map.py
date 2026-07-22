@@ -404,9 +404,7 @@ class InteractiveMissionPlanner:
         style.configure("TLabel", background=PANEL, foreground=TEXT)
         style.configure("Muted.TLabel", background=PANEL, foreground=MUTED)
         style.configure("TButton", padding=(8, 5))
-        style.configure(
-            "TEntry", fieldbackground=FIELD, foreground=TEXT, insertcolor=TEXT
-        )
+        style.configure("TEntry", fieldbackground=FIELD, foreground=TEXT, insertcolor=TEXT)
         style.configure(
             "TCombobox", fieldbackground=FIELD, foreground=TEXT, background=PANEL, arrowcolor=TEXT
         )
@@ -513,9 +511,9 @@ class InteractiveMissionPlanner:
             ttk.Button(playback_buttons, text=label, command=command).pack(side="left", padx=1)
 
         self.hud_var = tk.StringVar(value="")
-        ttk.Label(
-            side, textvariable=self.hud_var, style="Muted.TLabel", font=("Consolas", 9)
-        ).pack(anchor="w", pady=(6, 0))
+        ttk.Label(side, textvariable=self.hud_var, style="Muted.TLabel", font=("Consolas", 9)).pack(
+            anchor="w", pady=(6, 0)
+        )
 
         self.status_var = tk.StringVar(value=self.view.status)
         ttk.Label(side, textvariable=self.status_var, style="Muted.TLabel", wraplength=240).pack(
@@ -598,9 +596,7 @@ class InteractiveMissionPlanner:
         if self.view.selected_index is not None:
             new_index = self.view.selected_index + delta
             self.model.reorder_waypoint(self.view.selected_index, new_index)
-            self.view.selected_index = int(
-                np.clip(new_index, 0, len(self.model.waypoints) - 1)
-            )
+            self.view.selected_index = int(np.clip(new_index, 0, len(self.model.waypoints) - 1))
             self._refresh()
 
     def _clear(self) -> None:
@@ -786,7 +782,7 @@ class InteractiveMissionPlanner:
         try:  # best-effort open on Windows
             import os
 
-            os.startfile(path)  # type: ignore[attr-defined]
+            os.startfile(path)
         except (AttributeError, OSError):
             pass
 
@@ -820,8 +816,12 @@ class InteractiveMissionPlanner:
         if model.geofence_radius_m is not None:
             radius = model.meters_to_pixels(model.geofence_radius_m)
             canvas.create_oval(
-                home_px[0] - radius, home_px[1] - radius, home_px[0] + radius, home_px[1] + radius,
-                outline=MUTED, dash=(4, 3),
+                home_px[0] - radius,
+                home_px[1] - radius,
+                home_px[0] + radius,
+                home_px[1] + radius,
+                outline=MUTED,
+                dash=(4, 3),
             )
 
         points = [home_px] + [
@@ -841,14 +841,21 @@ class InteractiveMissionPlanner:
             accept_m = waypoint.acceptance_radius_m or model.defaults.acceptance_radius_m
             radius = model.meters_to_pixels(accept_m)
             canvas.create_oval(
-                px[0] - radius, px[1] - radius, px[0] + radius, px[1] + radius,
+                px[0] - radius,
+                px[1] - radius,
+                px[0] + radius,
+                px[1] + radius,
                 outline=MUTED,
             )
             if waypoint.loiter_radius_m:
                 loiter = model.meters_to_pixels(waypoint.loiter_radius_m)
                 canvas.create_oval(
-                    px[0] - loiter, px[1] - loiter, px[0] + loiter, px[1] + loiter,
-                    outline=AMBER, dash=(3, 2),
+                    px[0] - loiter,
+                    px[1] - loiter,
+                    px[0] + loiter,
+                    px[1] + loiter,
+                    outline=AMBER,
+                    dash=(3, 2),
                 )
             selected = index == self.view.selected_index
             self._draw_marker(px, str(index + 1), AMBER if selected else ROUTE)

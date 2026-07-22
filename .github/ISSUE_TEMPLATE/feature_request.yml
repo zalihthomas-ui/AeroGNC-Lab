@@ -1,0 +1,41 @@
+name: Feature request
+description: Propose a scoped, verifiable improvement to AeroGNC-Lab
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Engineering need
+      description: What problem or learning objective would this feature address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed capability
+      description: Describe the behavior, inputs, outputs, units, and fidelity boundary.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification approach
+      description: Suggest analytical, numerical, cross-model, or requirement-based evidence.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Note existing workflows or simpler approaches that were considered.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope checks
+      options:
+        - label: The proposal is fictional, civilian, public-safe, and suitable for an educational or research project.
+          required: true
+        - label: The proposal excludes interception, terminal homing, engagement logic, classified information, proprietary vehicle data, and operational weapon-system information.
+          required: true

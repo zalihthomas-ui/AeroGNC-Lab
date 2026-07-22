@@ -219,9 +219,7 @@ class PathFollowingGuidance(GuidanceLaw):
         distance_m = float(np.linalg.norm(delta))
         bearing_from_center = float(np.arctan2(delta[1], delta[0]))
         radial_fraction = (distance_m - segment.radius_m) / segment.radius_m
-        inward = float(
-            np.arctan(self.gains.orbit_gain_per_m * segment.radius_m * radial_fraction)
-        )
+        inward = float(np.arctan(self.gains.orbit_gain_per_m * segment.radius_m * radial_fraction))
         course_cmd = bearing_from_center + segment.direction * (0.5 * np.pi + inward)
         # Coordinated-turn roll to hold the circle: bank into the turn.
         roll_ff = segment.direction * float(

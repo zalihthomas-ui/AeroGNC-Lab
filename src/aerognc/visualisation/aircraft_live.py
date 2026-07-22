@@ -216,9 +216,7 @@ class AircraftLivePlayer:
         self._replay_players: list[object] = []
         self._initial_position = self.state[:3].copy()
         self._initial_ned = local_ned_dcm_inertial(self._initial_position)
-        self._dcm_display_ned = np.array(
-            [[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, -1.0]]
-        )
+        self._dcm_display_ned = np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, -1.0]])
         self._history_time: deque[float] = deque(maxlen=900)
         self._history_altitude: deque[float] = deque(maxlen=900)
         self._history_airspeed: deque[float] = deque(maxlen=900)
@@ -301,9 +299,7 @@ class AircraftLivePlayer:
         # Dynamic local ground grid: re-tiled each frame to the current view with a
         # stable "nice" line spacing. This replaces a single huge fixed wireframe
         # whose sparse gridlines popped in and out as the view moved (the glitch).
-        self.ground_grid = Line3DCollection(
-            [], colors="#A9A28F", linewidths=0.5, alpha=0.35
-        )
+        self.ground_grid = Line3DCollection([], colors="#A9A28F", linewidths=0.5, alpha=0.35)
         self.scene_axis.add_collection3d(self.ground_grid, autolim=False)
         self.scene_axis.plot(
             [-200_000.0, 200_000.0],
@@ -501,8 +497,8 @@ class AircraftLivePlayer:
 
     def _mesh_triangles(self, view_span_m: float) -> FloatArray:
         state = AircraftState.from_array(self.state, normalize=True)
-        dcm_display_body = (
-            self._dcm_display_inertial(self.time_s) @ quaternion_to_dcm(state.quaternion_ib)
+        dcm_display_body = self._dcm_display_inertial(self.time_s) @ quaternion_to_dcm(
+            state.quaternion_ib
         )
         position = self._display_position(state.position_inertial_m, self.time_s)
         base_length = max(float(np.ptp(self.mesh.vertices_body[:, 0])), 1.0e-9)
@@ -573,9 +569,7 @@ class AircraftLivePlayer:
                 span = max(350.0, min(8_000.0, 6.0 * telemetry.true_airspeed_mps))
                 self.scene_axis.set_xlim(current[0] - span, current[0] + span)
                 self.scene_axis.set_ylim(current[1] - span, current[1] + span)
-                self.scene_axis.set_zlim(
-                    max(-50.0, current[2] - 0.65 * span), current[2] + span
-                )
+                self.scene_axis.set_zlim(max(-50.0, current[2] - 0.65 * span), current[2] + span)
                 self.scene_axis.view_init(elev=22.0, azim=self._camera_azimuth_deg)
             self._update_ground_grid()
             return 2.0 * span
@@ -643,9 +637,7 @@ class AircraftLivePlayer:
             values = view.color_values[1:]
             spread = float(np.ptp(values))
             normalized = (
-                np.zeros_like(values)
-                if spread <= 1.0e-12
-                else (values - values.min()) / spread
+                np.zeros_like(values) if spread <= 1.0e-12 else (values - values.min()) / spread
             )
             rgba = np.asarray(plt.get_cmap("viridis")(normalized), dtype=np.float64)
         rgba[:, 3] = view.alpha[1:]
@@ -732,13 +724,9 @@ class AircraftLivePlayer:
             previous_record = self.recorder.records[-2]
             latest_record = self.recorder.records[-1]
             heading_change_deg = (
-                latest_record.telemetry.heading_deg
-                - previous_record.telemetry.heading_deg
-                + 180.0
+                latest_record.telemetry.heading_deg - previous_record.telemetry.heading_deg + 180.0
             ) % 360.0 - 180.0
-            turn_rate_degps = heading_change_deg / (
-                latest_record.time_s - previous_record.time_s
-            )
+            turn_rate_degps = heading_change_deg / (latest_record.time_s - previous_record.time_s)
         current = self._display_position(self.state[:3], self.time_s)
         self._update_trail_artist()
         view_span = self._camera(current, telemetry)
@@ -754,11 +742,7 @@ class AircraftLivePlayer:
         warnings = evaluate_flight_warnings(
             telemetry, command, self.envelope_limits, numerical_lag=lagged
         )
-        controller = (
-            "XInput"
-            if self.gamepad is not None and self.gamepad.available
-            else "keyboard"
-        )
+        controller = "XInput" if self.gamepad is not None and self.gamepad.available else "keyboard"
         self.telemetry_text.set_text(
             "FLIGHT HUD  [SI]\n"
             f"T / RTF     {telemetry.time_s:7.1f}s  "

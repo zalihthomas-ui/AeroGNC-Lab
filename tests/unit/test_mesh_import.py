@@ -86,10 +86,7 @@ def test_mesh_visual_transform_inspection_and_decimation_are_deterministic() -> 
     )
     np.testing.assert_allclose(
         0.5
-        * (
-            np.min(transformed.vertices_body, axis=0)
-            + np.max(transformed.vertices_body, axis=0)
-        ),
+        * (np.min(transformed.vertices_body, axis=0) + np.max(transformed.vertices_body, axis=0)),
         np.zeros(3),
         atol=1.0e-12,
     )

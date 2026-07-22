@@ -123,9 +123,7 @@ def _demo_mission() -> Mission:
         defaults=MissionDefaults(airspeed_mps=20.0, acceptance_radius_m=5.0),
         waypoints=(
             Waypoint(id=1, name="WP1", latitude_deg=0.01, longitude_deg=0.0, altitude_m=100.0),
-            Waypoint(
-                id=2, name="WP2", latitude_deg=0.01, longitude_deg=0.01, altitude_m=100.0
-            ),
+            Waypoint(id=2, name="WP2", latitude_deg=0.01, longitude_deg=0.01, altitude_m=100.0),
         ),
     )
 

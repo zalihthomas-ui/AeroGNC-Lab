@@ -112,9 +112,7 @@ def flat_earth_offset_ned_m(
     transverse_m = prime_vertical_radius_m(origin.latitude_rad, ellipsoid) + origin.altitude_m
     north_m = (target.latitude_rad - origin.latitude_rad) * meridian_m
     east_m = (
-        (target.longitude_rad - origin.longitude_rad)
-        * transverse_m
-        * np.cos(origin.latitude_rad)
+        (target.longitude_rad - origin.longitude_rad) * transverse_m * np.cos(origin.latitude_rad)
     )
     down_m = -(target.altitude_m - origin.altitude_m)
     return np.array([north_m, east_m, down_m], dtype=np.float64)

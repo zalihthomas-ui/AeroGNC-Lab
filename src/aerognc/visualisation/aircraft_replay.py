@@ -65,9 +65,7 @@ class AircraftReplayPlayer:
         self._updating_slider = False
         self._initial_position = recording.state[0, :3].copy()
         self._initial_ned = local_ned_dcm_inertial(self._initial_position)
-        self._dcm_display_ned = np.array(
-            [[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, -1.0]]
-        )
+        self._dcm_display_ned = np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, -1.0]])
         self._recorded_display_position = self._build_display_positions()
         with engineering_style():
             self.figure = plt.figure(figsize=(13.8, 7.8))
@@ -134,8 +132,8 @@ class AircraftReplayPlayer:
 
     def _mesh_triangles(self, view_span_m: float) -> FloatArray:
         typed = AircraftState.from_array(self.state, normalize=True)
-        dcm_display_body = (
-            self._dcm_display_inertial(self.time_s) @ quaternion_to_dcm(typed.quaternion_ib)
+        dcm_display_body = self._dcm_display_inertial(self.time_s) @ quaternion_to_dcm(
+            typed.quaternion_ib
         )
         position = self._display_position(typed.position_inertial_m, self.time_s)
         base_length = max(float(np.ptp(self.mesh.vertices_body[:, 0])), 1.0e-9)
@@ -235,9 +233,7 @@ class AircraftReplayPlayer:
 
     def set_time(self, time_s: float) -> None:
         """Seek to a recorded time and update the exact-state interpolation."""
-        self.time_s = float(
-            np.clip(time_s, self.recording.time_s[0], self.recording.time_s[-1])
-        )
+        self.time_s = float(np.clip(time_s, self.recording.time_s[0], self.recording.time_s[-1]))
         self.state, self.command = self.recording.sample(self.time_s)
         self.telemetry = self.recording.sample_telemetry(self.time_s)
         if not self._updating_slider and not np.isclose(self.timeline.val, self.time_s):

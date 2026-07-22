@@ -394,9 +394,7 @@ class PathManager:
             )
             if waypoint.action in (WaypointAction.LOITER, WaypointAction.HOLD):
                 assert waypoint.loiter_radius_m is not None  # enforced by validation
-                direction = (
-                    1 if waypoint.loiter_direction is LoiterDirection.CLOCKWISE else -1
-                )
+                direction = 1 if waypoint.loiter_direction is LoiterDirection.CLOCKWISE else -1
                 legs.append(
                     _Leg(
                         segment=OrbitSegment(
@@ -448,9 +446,7 @@ class PathManager:
         leg = self._legs[self._active]
         segment = leg.segment
         fraction = (
-            segment.along_track_fraction(position)
-            if isinstance(segment, LineSegment)
-            else 0.0
+            segment.along_track_fraction(position) if isinstance(segment, LineSegment) else 0.0
         )
         phase = self._phase(leg)
         return PathManagerStatus(

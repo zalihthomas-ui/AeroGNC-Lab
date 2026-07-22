@@ -48,9 +48,7 @@ def test_civilian_training_scores_use_recorded_telemetry() -> None:
     model = FixedWingFlightModel(configuration)
     state = aircraft_initial_state(configuration)
     command = longitudinal_trim_command(configuration)
-    sample = aircraft_telemetry(
-        model, 0.0, state, command, initial_position_inertial_m=state[:3]
-    )
+    sample = aircraft_telemetry(model, 0.0, state, command, initial_position_inertial_m=state[:3])
     steady = [
         sample,
         replace(sample, time_s=1.0, altitude_m=sample.altitude_m + 5.0),

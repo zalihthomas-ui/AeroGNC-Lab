@@ -44,7 +44,9 @@ def plot_rendezvous(trajectory: RelativeTrajectory, output_path: str | Path) -> 
         sep = axes[1]
         sep.plot(trajectory.time_s / 60.0, separation, color=BLUE)
         sep.axhline(
-            trajectory.closest_approach_m, color=RED, linestyle="--",
+            trajectory.closest_approach_m,
+            color=RED,
+            linestyle="--",
             label=f"min {trajectory.closest_approach_m:.1f} m",
         )
         sep.set_xlabel("time [min]")

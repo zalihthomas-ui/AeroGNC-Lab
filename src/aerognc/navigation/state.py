@@ -40,9 +40,7 @@ class NavigationState:
         object.__setattr__(
             self, "velocity_ned_mps", as_vector(self.velocity_ned_mps, 3, name="velocity_ned_mps")
         )
-        object.__setattr__(
-            self, "quaternion_nb", normalize_quaternion(self.quaternion_nb)
-        )
+        object.__setattr__(self, "quaternion_nb", normalize_quaternion(self.quaternion_nb))
         object.__setattr__(
             self,
             "angular_rate_body_radps",
