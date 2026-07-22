@@ -64,6 +64,16 @@ def test_detrended_hampel_filter_replaces_isolated_spike() -> None:
     assert filtered[40] == pytest.approx(0.004 * 40.0**2 - 0.2 * 40.0 + 1.0)
 
 
+def test_detrended_hampel_filter_ignores_least_squares_roundoff() -> None:
+    index = np.arange(81, dtype=np.float64)
+    values = 0.004 * index**2 - 0.2 * index + 1.0
+
+    filtered, outliers = hampel_filter(values, half_window=7, threshold_sigma=1.0)
+
+    assert not np.any(outliers)
+    assert np.array_equal(filtered, values)
+
+
 def test_local_polynomial_returns_cubic_value_and_derivative() -> None:
     time_s = np.linspace(-1.0, 1.0, 101)
     values = 0.5 + 2.0 * time_s - 0.3 * time_s**2 + 0.2 * time_s**3

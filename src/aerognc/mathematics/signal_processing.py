@@ -173,7 +173,7 @@ def hampel_filter(
                 local_index[finite] ** 2,
             )
         )
-        coefficients, _residuals, rank, _singular_values = np.linalg.lstsq(
+        coefficients, _residuals, rank, singular_values = np.linalg.lstsq(
             design,
             window[finite],
             rcond=None,
@@ -183,10 +183,21 @@ def hampel_filter(
         neighbour_residual = window[finite] - design @ coefficients
         median_residual = float(np.median(neighbour_residual))
         robust_sigma = 1.4826 * float(np.median(np.abs(neighbour_residual - median_residual)))
-        if robust_sigma <= np.finfo(np.float64).eps:
-            continue
         predicted = float(coefficients[0])
-        if abs(value - predicted) > threshold_sigma * robust_sigma:
+        numerical_scale = max(
+            abs(float(value)),
+            abs(predicted),
+            float(np.max(np.abs(window[finite]))),
+        )
+        # For exactly polynomial data, the MAD can collapse to solver noise.
+        # Bound that noise using the fitted design's condition number.
+        design_condition = float(singular_values[0] / singular_values[-1])
+        least_squares_roundoff = np.finfo(np.float64).eps * design_condition * numerical_scale
+        outlier_threshold = max(
+            threshold_sigma * robust_sigma,
+            least_squares_roundoff,
+        )
+        if abs(value - predicted) > outlier_threshold:
             filtered[index] = predicted
             outlier[index] = True
     return filtered, outlier

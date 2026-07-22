@@ -39,7 +39,7 @@ validation.
 
 | Area | Executed result | Acceptance |
 |---|---|---|
-| Automated suite | 593 deterministic tests | All pass |
+| Automated suite | 594 deterministic tests | All pass |
 | Branch coverage | 80.48% core/package coverage | Enforced minimum 75% |
 | Adaptive numerical core | DP5(4) convergence/reference cases, dense directed events, checkpoint hashes, deterministic task order, and finite-difference sensitivities | Every numerical/tolerance/integrity assertion passes |
 | Nominal 3-DOF | Burnout 3.350 s; apogee 1101.49 m at 15.569 s; impact 31.794 s | Ordered events and bounded mass |
