@@ -25,7 +25,7 @@ traceable from equation to test.
 | Core domains | Flight dynamics, GNC, astrodynamics, simulation, and verification |
 | Models | 3-DOF and 6-DOF flight, rotating planets, fixed-wing aircraft, and orbital missions |
 | Interfaces | Python API, command-line tools, YAML projects, and a desktop engineering workbench |
-| Evidence | 593 deterministic tests and 80.48% branch-aware coverage on the current branch |
+| Evidence | 594 deterministic tests and 80.48% branch-aware coverage on the current branch |
 | Runtime | Python 3.12 or newer |
 | License | MIT |
 
@@ -72,7 +72,7 @@ telemetry boundaries, robust experiment design, a project-aware eight-page deskt
 workbench, localhost UDP packet verification, and an actionable one-click diagnostic.
 The checksummed snapshot contains all 6,324 NASA-confirmed exoplanets available at
 retrieval, explicitly as observational context rather than transfer ephemerides.
-Automated lint, strict typing, 593 tests, and 80.48% branch-aware coverage pass; two
+Automated lint, strict typing, 594 tests, and 80.48% branch-aware coverage pass; two
 MATLAB benchmarks were executed independently. No FMU binary was built or imported,
 and GMAT, SPICE, Simulink, and physical HIL remain explicitly unexecuted where
 unavailable. Build and generation commands remain local-only and never publish or
@@ -572,7 +572,7 @@ acceptance. Evidence is mapped in
 
 | Evidence | Executed result |
 |---|---|
-| Python suite | 593 deterministic unit, integration, and validation tests pass |
+| Python suite | 594 deterministic unit, integration, and validation tests pass |
 | Coverage | 80.48% branch-aware core/package coverage; enforced threshold 75% |
 | RK4 | Fourth-order convergence and independent SciPy agreement below \(10^{-6}\) |
 | Adaptive numerics | Dormand--Prince convergence/reference agreement, dense events, checkpoints, scheduler order, and variational derivatives pass |
@@ -664,8 +664,10 @@ states, variance-based global sensitivity indices, and an executed Simulink
 comparison. Hardware selection remains deferred until controller timing and target
 I/O requirements are measured; see the [future HIL plan](docs/future_hil.md).
 
-## Licence and citation
+## Author, licence and citation
 
-Released under the [MIT License](LICENSE). Citation metadata is provided in
+AeroGNC-Lab is created and maintained by
+[Zalih Thomas](https://github.com/zalihthomas-ui). Released under the
+[MIT License](LICENSE). Citation metadata is provided in
 [`CITATION.cff`](CITATION.cff). The canonical source repository is
 [github.com/zalihthomas-ui/AeroGNC-Lab](https://github.com/zalihthomas-ui/AeroGNC-Lab).

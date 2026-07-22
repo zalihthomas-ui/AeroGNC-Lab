@@ -19,6 +19,7 @@ The planner runs missions on the internal simulator only; it commands no hardwar
 from __future__ import annotations
 
 import copy
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -782,8 +783,10 @@ class InteractiveMissionPlanner:
         try:  # best-effort open on Windows
             import os
 
-            os.startfile(path)
-        except (AttributeError, OSError):
+            start_file: Callable[[str], object] | None = getattr(os, "startfile", None)
+            if start_file is not None:
+                start_file(path)
+        except OSError:
             pass
 
     # -- rendering ------------------------------------------------------------

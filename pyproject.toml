@@ -9,7 +9,7 @@ description = "A modular flight dynamics, guidance, navigation and control verif
 readme = "README.md"
 requires-python = ">=3.12"
 license = {file = "LICENSE"}
-authors = [{name = "AeroGNC-Lab Contributors"}]
+authors = [{name = "Zalih Thomas"}]
 keywords = ["aerospace", "flight-dynamics", "gnc", "simulation", "verification"]
 classifiers = [
   "Development Status :: 3 - Alpha",

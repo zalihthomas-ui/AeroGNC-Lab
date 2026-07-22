@@ -1,6 +1,6 @@
 # Repository Inspection Report — Waypoint Fixed-Wing GNC Integration
 
-_Date: 2026-07-21. Author: integration pass. Companion: `implementation_plan.md`, `../../TODO.md`._
+_Date: 2026-07-21. Author: Zalih Thomas. Companion: `implementation_plan.md`, `../../TODO.md`._
 
 ## Boundary (scope decision)
 
@@ -29,7 +29,7 @@ implemented, with real-hardware output disabled by default.
   Pillow. Dev: mypy (strict), ruff, pytest, pytest-cov. Console script `aerognc`.
 - **Entry points:** `python -m aerognc.cli <subcommand>` (41 subcommands) and Windows
   `run_*.bat` launchers. GUI via `aerognc workbench` (Tk) and `aerognc mission-designer`.
-- **Tests:** 141 test files in `tests/{unit,integration,validation}`; 593 tests, 80.48%
+- **Tests:** 141 test files in `tests/{unit,integration,validation}`; 594 tests, 80.48%
   branch coverage, threshold 75%. Tk event-loop files omitted from coverage.
 - **Quality gates:** ruff (E,F,I,N,UP,B,SIM,RUF), mypy strict, CI in `.github/workflows/ci.yml`.
 

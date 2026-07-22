@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import ctypes
-import sys
+import platform
 from dataclasses import dataclass
 from typing import Protocol, cast
 
@@ -70,7 +70,7 @@ class XInputGamepad:
         self._get_state: _GetStateFunction | None = None
         self._throttle_ownership = TriggerThrottleOwnership()
         self.backend_name = "unavailable"
-        if sys.platform != "win32":
+        if platform.system() != "Windows":
             return
         loader = getattr(ctypes, "WinDLL", None)
         if loader is None:
