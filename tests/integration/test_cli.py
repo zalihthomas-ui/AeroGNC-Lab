@@ -57,6 +57,49 @@ def test_cli_run_writes_reproducible_core_outputs(tmp_path: Path) -> None:
     assert (tmp_path / "summary.json").is_file()
 
 
+def test_cli_waypoint_accepts_versioned_runtime_configuration(tmp_path: Path) -> None:
+    status = main(
+        [
+            "waypoint",
+            "--config",
+            str(PROJECT_ROOT / "configs" / "waypoint_gnc.yaml"),
+            "--output",
+            str(tmp_path),
+            "--no-plots",
+        ]
+    )
+
+    assert status == 0
+    payload = json.loads((tmp_path / "mission_log.json").read_text(encoding="utf-8"))
+    assert payload["summary"]["completed"] is True
+    assert payload["metadata"]["navigation_provider"] == "PerfectStateProvider"
+    assert payload["metadata"]["vehicle_backend"] == "InternalFixedWingBackend"
+    provenance = payload["metadata"]["runtime_configuration"]
+    assert provenance["name"] == "waypoint_demo_internal"
+    assert provenance["schema_version"] == 1
+    assert len(provenance["sha256"]) == 64
+    assert len(provenance["mission_sha256"]) == 64
+
+
+def test_cli_waypoint_preserves_mission_only_form(tmp_path: Path) -> None:
+    status = main(
+        [
+            "waypoint",
+            "--mission",
+            str(PROJECT_ROOT / "missions" / "waypoint_demo.mission.yaml"),
+            "--output",
+            str(tmp_path),
+            "--no-plots",
+        ]
+    )
+
+    assert status == 0
+    payload = json.loads((tmp_path / "mission_log.json").read_text(encoding="utf-8"))
+    assert payload["summary"]["completed"] is True
+    assert payload["metadata"]["navigation_provider"] == "PerfectStateProvider"
+    assert "runtime_configuration" not in payload["metadata"]
+
+
 def test_cli_benchmark_writes_scoped_resource_evidence(tmp_path: Path) -> None:
     output = tmp_path / "benchmark.json"
     status = main(

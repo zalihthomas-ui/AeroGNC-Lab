@@ -19,7 +19,10 @@ envelope, and logs everything.
 # Validate a mission (schema + flight-envelope checks)
 python -m aerognc.cli mission validate missions/waypoint_demo.mission.yaml
 
-# Fly it in the internal simulator (writes CSV + JSON log and a PNG dashboard)
+# Fly the fully configured runtime (writes CSV + JSON log and a PNG dashboard)
+python -m aerognc.cli waypoint --config configs/waypoint_gnc.yaml
+
+# The concise mission-only form remains available
 python -m aerognc.cli waypoint --mission missions/waypoint_demo.mission.yaml \
     --guidance vector_field --output results/waypoint_gnc
 
@@ -31,6 +34,27 @@ python -m aerognc.cli waypoint --mission missions/waypoint_demo.mission.yaml \
 The bundled `missions/waypoint_demo.mission.yaml` flies
 `navigate → loiter → return-home → complete` in ~248 s with a final cross-track
 error of ~0.07 m and bounded airspeed.
+
+## Runtime configuration (schema version 1)
+
+`configs/waypoint_gnc.yaml` is the reproducible execution boundary. It references
+the mission and explicitly records:
+
+- solver step, time limit, initial altitude, and initial airspeed;
+- wind and gravity;
+- perfect or seeded noisy navigation, including an optional GPS-dropout window;
+- guidance mode and gains;
+- cascaded-autopilot gains, limits, and trim;
+- safety envelope and geofence;
+- reduced internal-vehicle parameters;
+- actuator limits, dynamics, and injected failure modes; and
+- the simulation-only hardware gate.
+
+Unknown or missing keys, unsupported schema versions/backends, invalid values, and
+`hardware.allow_real_vehicle_output: true` fail before propagation. CLI guidance,
+wind, step, time-limit, and output options act as explicit one-run overrides.
+Configured-run JSON metadata records SHA-256 digests of both the runtime file and
+mission so the exact inputs can be identified later.
 
 ## Mission file format (schema version 1)
 
@@ -100,6 +124,11 @@ radii, a loiter radius below the minimum coordinated-turn radius
 ## Using it as a library
 
 ```python
+import aerognc
+
+configured = aerognc.fly_configured_mission("configs/waypoint_gnc.yaml")
+print(configured.summary())
+
 from aerognc.mission import load_mission
 from aerognc.gnc.waypoint_guidance import GuidanceMode
 from aerognc.simulation.waypoint_mission import run_waypoint_mission, WaypointMissionConfig
@@ -163,6 +192,6 @@ python -m pytest tests/unit tests/integration/test_waypoint_mission.py
 - The internal backend is a **reduced 6-DOF-lite** control-design model, not a
   validated flight-dynamics plant. The project's 18-state `vehicle/fixed_wing.py`
   is the intended higher-fidelity backend (integration hook).
-- Takeoff, autonomous landing, TECS, full EKF-estimated navigation, the interactive
-  map planner, and the SITL/MAVLink backends are scoped but deferred — see
+- Takeoff, autonomous landing, TECS, full EKF-estimated navigation, and the
+  SITL/MAVLink backends are scoped but deferred — see
   `../../TODO.md` and `sitl_hardware_roadmap.md`.

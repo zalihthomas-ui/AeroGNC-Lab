@@ -21,6 +21,10 @@ internals evolve.
 
 from pathlib import Path
 
+from aerognc.configuration.waypoint_loader import (
+    WaypointRuntimeConfiguration,
+    load_waypoint_runtime_configuration,
+)
 from aerognc.gnc.waypoint_guidance import GuidanceMode
 from aerognc.mission.mission import Mission
 from aerognc.mission.mission_io import load_mission
@@ -57,3 +61,21 @@ def fly_mission(
             wind_ned_mps=(wind_north_mps, wind_east_mps, 0.0),
         )
     return run_waypoint_mission(resolved_mission, config)
+
+
+def fly_configured_mission(
+    configuration: WaypointRuntimeConfiguration | str | Path,
+) -> WaypointMissionResult:
+    """Run a complete versioned waypoint runtime and return its result.
+
+    The runtime YAML references the mission and explicitly configures navigation,
+    guidance, control, safety, vehicle, actuators, environment, and solver settings.
+    Only the internal simulation backend is accepted; real-vehicle output is rejected.
+    """
+    runtime = (
+        configuration
+        if isinstance(configuration, WaypointRuntimeConfiguration)
+        else load_waypoint_runtime_configuration(configuration)
+    )
+    mission = load_mission(runtime.mission_path)
+    return run_waypoint_mission(mission, runtime.build_mission_config())

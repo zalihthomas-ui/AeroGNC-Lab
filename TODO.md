@@ -249,17 +249,23 @@ _Per-step structured log (`MissionSample`) + CSV/JSON export; metadata carries t
 
 - [x] 13.1 Structured logging of all categories (sim/est state, guidance/control/actuator
   cmds, waypoint events, state transitions, safety, sensors, backend comms, timing).
-- [~] 13.2 Run metadata: git hash, config, mission, aircraft, controller/guidance/backend
-  selection, seed, start time, version. (Reuse `project/` manifest patterns.)
+- [~] 13.2 Run metadata: configuration and mission SHA-256 plus guidance/navigation/
+  backend selection are recorded; git hash, aircraft identity, start time, and package
+  version remain. (Reuse `project/` manifest patterns.)
 - [~] 13.3 Replay tool reconstructing a mission from logs.
 
 ---
 
 ## Phase 14 — Configuration  (spec §25)
 
-- [ ] 14.1 Config files for aircraft/aero/prop/actuator-limits/gains/guidance/safety/
-  sensor-noise/environment/mission-defaults/backend/UI/logging. Reuse `configuration/` loaders.
-- [ ] 14.2 Startup validation with clear errors; no unexplained hard-coded values.
+- [x] 14.1 Add a versioned waypoint runtime configuration for mission reference,
+  solver, navigation/noise, environment, guidance, autopilot, safety, reduced vehicle,
+  actuators/failures, output, and the simulation-only hardware gate. Reuse the strict
+  `configuration/` boundary. → `configs/waypoint_gnc.yaml`
+- [x] 14.2 Validate every runtime section at startup with contextual errors; reject
+  unknown keys, unsupported versions/backends, invalid physics, and real output.
+- [ ] 14.3 Externalize optional planner UI preferences and structured logging policy
+  only when a stable user requirement exists; they remain presentation concerns.
 
 ---
 

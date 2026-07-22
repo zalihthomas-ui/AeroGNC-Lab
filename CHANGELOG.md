@@ -44,6 +44,13 @@ and the project uses Semantic Versioning.
   - 76 new unit/integration/scenario tests (nominal, all guidance modes,
     crosswind, GPS dropout, return-home, geofence, actuator failure).
 
+- A strict version-1 waypoint runtime configuration now records the mission,
+  navigation/noise mode, guidance, autopilot, safety envelope, reduced vehicle,
+  actuator dynamics/failures, environment, solver, and output policy. The CLI and
+  new `aerognc.fly_configured_mission` API consume the same boundary; unsupported
+  backends and real-vehicle output fail before propagation, and configured output
+  records SHA-256 provenance for both the runtime file and mission.
+
 ### Changed
 
 - Prepared the project for its public GitHub publication with a concise README
@@ -61,7 +68,7 @@ and the project uses Semantic Versioning.
 
 ### Verification
 
-- The current suite passes 594 deterministic tests with 80.48% branch-aware package
+- The current suite passes 610 deterministic tests with 80.62% branch-aware package
   coverage against the enforced 75% floor. Ruff lint/format and strict MyPy checks
   pass on Python 3.13.
 

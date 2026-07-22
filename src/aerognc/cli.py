@@ -5,6 +5,7 @@ import json
 import logging
 import sys
 from collections.abc import Sequence
+from dataclasses import replace
 from pathlib import Path
 from typing import cast
 
@@ -580,21 +581,22 @@ def _parser() -> argparse.ArgumentParser:
         "waypoint",
         help="fly a waypoint mission in the internal fixed-wing simulator",
     )
-    waypoint.add_argument("--mission", type=Path, required=True, help="mission YAML path")
+    waypoint_source = waypoint.add_mutually_exclusive_group(required=True)
+    waypoint_source.add_argument("--mission", type=Path, help="mission YAML path")
+    waypoint_source.add_argument(
+        "--config",
+        type=Path,
+        help="versioned waypoint runtime YAML (mission, navigation, GNC, safety, vehicle)",
+    )
     waypoint.add_argument(
         "--guidance",
         choices=("direct_bearing", "line_of_sight", "l1_guidance", "vector_field"),
-        default="vector_field",
-        help="lateral guidance mode (default: vector_field)",
+        help="override the configured lateral guidance mode",
     )
-    waypoint.add_argument(
-        "--wind-north-mps", type=float, default=0.0, help="steady north wind [m/s]"
-    )
-    waypoint.add_argument("--wind-east-mps", type=float, default=0.0, help="steady east wind [m/s]")
-    waypoint.add_argument("--dt-s", type=float, default=0.05, help="integration step [s]")
-    waypoint.add_argument(
-        "--max-time-s", type=float, default=900.0, help="simulation time limit [s]"
-    )
+    waypoint.add_argument("--wind-north-mps", type=float, help="override steady north wind [m/s]")
+    waypoint.add_argument("--wind-east-mps", type=float, help="override steady east wind [m/s]")
+    waypoint.add_argument("--dt-s", type=float, help="override integration step [s]")
+    waypoint.add_argument("--max-time-s", type=float, help="override simulation time limit [s]")
     waypoint.add_argument("--output", type=Path, help="output directory for log + plot")
     waypoint.add_argument("--no-plots", action="store_true", help="skip PNG generation")
     waypoint.add_argument(
@@ -1812,6 +1814,7 @@ def _run_mission_command(arguments: argparse.Namespace) -> int:
 
 
 def _run_waypoint_command(arguments: argparse.Namespace) -> int:
+    from aerognc.configuration.waypoint_loader import load_waypoint_runtime_configuration
     from aerognc.gnc.waypoint_guidance import GuidanceMode
     from aerognc.mission import load_mission
     from aerognc.simulation.waypoint_mission import (
@@ -1819,18 +1822,40 @@ def _run_waypoint_command(arguments: argparse.Namespace) -> int:
         run_waypoint_mission,
     )
 
-    mission = load_mission(arguments.mission)
-    config = WaypointMissionConfig(
-        dt_s=arguments.dt_s,
-        max_time_s=arguments.max_time_s,
-        guidance_mode=GuidanceMode(arguments.guidance),
-        wind_ned_mps=(arguments.wind_north_mps, arguments.wind_east_mps, 0.0),
-    )
+    if arguments.config is not None:
+        runtime = load_waypoint_runtime_configuration(arguments.config)
+        mission = load_mission(runtime.mission_path)
+        config = runtime.build_mission_config()
+        output_directory = arguments.output or runtime.output_directory
+        LOGGER.info(
+            "waypoint configuration=%s schema=%d navigation=%s",
+            runtime.name,
+            runtime.schema_version,
+            runtime.navigation.mode.value,
+        )
+    else:
+        mission = load_mission(arguments.mission)
+        config = WaypointMissionConfig()
+        output_directory = arguments.output or Path("results") / "waypoint_gnc"
+
+    if arguments.dt_s is not None:
+        config = replace(config, dt_s=arguments.dt_s)
+    if arguments.max_time_s is not None:
+        config = replace(config, max_time_s=arguments.max_time_s)
+    if arguments.guidance is not None:
+        config = replace(config, guidance_mode=GuidanceMode(arguments.guidance))
+    if arguments.wind_north_mps is not None or arguments.wind_east_mps is not None:
+        wind = list(config.wind_ned_mps)
+        if arguments.wind_north_mps is not None:
+            wind[0] = arguments.wind_north_mps
+        if arguments.wind_east_mps is not None:
+            wind[1] = arguments.wind_east_mps
+        config = replace(config, wind_ned_mps=(wind[0], wind[1], wind[2]))
+
     result = run_waypoint_mission(mission, config)
     summary = result.summary()
     LOGGER.info("waypoint mission outcome: %s", summary)
 
-    output_directory = arguments.output or Path("results") / "waypoint_gnc"
     output_directory.mkdir(parents=True, exist_ok=True)
     result.to_csv(output_directory / "mission_log.csv")
     result.to_json(output_directory / "mission_log.json")

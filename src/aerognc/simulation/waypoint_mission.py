@@ -74,16 +74,51 @@ class WaypointMissionConfig:
     aileron_limit_rad: float = float(np.deg2rad(22.0))
     elevator_limit_rad: float = float(np.deg2rad(25.0))
     rudder_limit_rad: float = float(np.deg2rad(28.0))
+    surface_time_constant_s: float = 0.12
+    surface_rate_limit_radps: float = float(np.deg2rad(120.0))
+    throttle_time_constant_s: float = 0.6
     surface_failures: Mapping[str, SurfaceFailureMode] = field(default_factory=dict)
     provider: NavigationProvider | None = None
+    configuration_name: str | None = None
+    configuration_schema_version: int | None = None
+    configuration_sha256: str | None = None
+    mission_sha256: str | None = None
 
     def __post_init__(self) -> None:
-        if self.dt_s <= 0.0 or self.max_time_s <= 0.0:
-            raise ValueError("dt_s and max_time_s must be positive")
+        positive = (
+            self.dt_s,
+            self.max_time_s,
+            self.initial_altitude_m,
+            self.initial_airspeed_mps,
+            self.gravity_mps2,
+            self.aileron_limit_rad,
+            self.elevator_limit_rad,
+            self.rudder_limit_rad,
+            self.surface_time_constant_s,
+            self.surface_rate_limit_radps,
+            self.throttle_time_constant_s,
+        )
+        if not np.all(np.isfinite(positive)) or np.any(np.asarray(positive) <= 0.0):
+            raise ValueError("waypoint mission scalar settings must be positive and finite")
+        if len(self.wind_ned_mps) != 3 or not np.all(np.isfinite(self.wind_ned_mps)):
+            raise ValueError("wind_ned_mps must contain three finite values")
         allowed = {"aileron", "elevator", "rudder"}
         unknown = set(self.surface_failures) - allowed
         if unknown:
             raise ValueError(f"unknown surface_failures channels: {sorted(unknown)}")
+        if self.configuration_name is not None and not self.configuration_name.strip():
+            raise ValueError("configuration_name must not be blank")
+        if self.configuration_schema_version is not None and self.configuration_schema_version < 1:
+            raise ValueError("configuration_schema_version must be positive")
+        for label, digest in (
+            ("configuration_sha256", self.configuration_sha256),
+            ("mission_sha256", self.mission_sha256),
+        ):
+            if digest is not None and (
+                len(digest) != 64
+                or any(character not in "0123456789abcdef" for character in digest)
+            ):
+                raise ValueError(f"{label} must be a lowercase SHA-256 digest")
 
 
 @dataclass(frozen=True, slots=True)
@@ -210,7 +245,11 @@ class WaypointMissionResult:
 def _build_surfaces(config: WaypointMissionConfig) -> ControlSurfaceSet:
     def make(channel: str, limit_rad: float) -> ControlSurface:
         return ControlSurface(
-            ControlSurfaceConfig(max_deflection_rad=limit_rad, time_constant_s=0.12),
+            ControlSurfaceConfig(
+                max_deflection_rad=limit_rad,
+                time_constant_s=config.surface_time_constant_s,
+                rate_limit_radps=config.surface_rate_limit_radps,
+            ),
             failure=config.surface_failures.get(channel, SurfaceFailureMode.NONE),
         )
 
@@ -218,6 +257,7 @@ def _build_surfaces(config: WaypointMissionConfig) -> ControlSurfaceSet:
         make("aileron", config.aileron_limit_rad),
         make("elevator", config.elevator_limit_rad),
         make("rudder", config.rudder_limit_rad),
+        throttle_time_constant_s=config.throttle_time_constant_s,
     )
 
 
@@ -243,6 +283,7 @@ def run_waypoint_mission(
     surfaces = _build_surfaces(cfg)
     backend = InternalFixedWingBackend(cfg.reduced_params)
     provider = cfg.provider or PerfectStateProvider()
+    provider.reset()
     safety = SafetyManager(cfg.safety_limits)
     environment = FlightEnvironment(np.asarray(cfg.wind_ned_mps, dtype=float), cfg.gravity_mps2)
 
@@ -308,25 +349,35 @@ def run_waypoint_mission(
     if manager.state is MissionState.MISSION_COMPLETE:
         outcome = "complete"
 
+    metadata: dict[str, object] = {
+        "guidance_mode": cfg.guidance_mode.value,
+        "navigation_provider": type(provider).__name__,
+        "vehicle_backend": type(backend).__name__,
+        "dt_s": cfg.dt_s,
+        "wind_ned_mps": list(cfg.wind_ned_mps),
+        "surface_failures": {k: v.value for k, v in cfg.surface_failures.items()},
+        "transitions": [
+            (t.time_s, t.from_state.value, t.to_state.value, t.reason) for t in manager.transitions
+        ],
+        "safety_events": [
+            (e.time_s, e.trigger, e.value, e.threshold, e.response.value) for e in safety.events
+        ],
+    }
+    if cfg.configuration_name is not None:
+        metadata["runtime_configuration"] = {
+            "name": cfg.configuration_name,
+            "schema_version": cfg.configuration_schema_version,
+            "sha256": cfg.configuration_sha256,
+            "mission_sha256": cfg.mission_sha256,
+        }
+
     return WaypointMissionResult(
         outcome=outcome,
         final_state=manager.state,
         duration_s=time_s,
         samples=tuple(samples),
         planned_path_ned_m=path_manager.planned_path_ned(),
-        metadata={
-            "guidance_mode": cfg.guidance_mode.value,
-            "dt_s": cfg.dt_s,
-            "wind_ned_mps": list(cfg.wind_ned_mps),
-            "surface_failures": {k: v.value for k, v in cfg.surface_failures.items()},
-            "transitions": [
-                (t.time_s, t.from_state.value, t.to_state.value, t.reason)
-                for t in manager.transitions
-            ],
-            "safety_events": [
-                (e.time_s, e.trigger, e.value, e.threshold, e.response.value) for e in safety.events
-            ],
-        },
+        metadata=metadata,
     )
 
 

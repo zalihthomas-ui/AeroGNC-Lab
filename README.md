@@ -25,7 +25,7 @@ traceable from equation to test.
 | Core domains | Flight dynamics, GNC, astrodynamics, simulation, and verification |
 | Models | 3-DOF and 6-DOF flight, rotating planets, fixed-wing aircraft, and orbital missions |
 | Interfaces | Python API, command-line tools, YAML projects, and a desktop engineering workbench |
-| Evidence | 594 deterministic tests and 80.48% branch-aware coverage on the current branch |
+| Evidence | 610 deterministic tests and 80.62% branch-aware coverage on the current branch |
 | Runtime | Python 3.12 or newer |
 | License | MIT |
 
@@ -72,7 +72,7 @@ telemetry boundaries, robust experiment design, a project-aware eight-page deskt
 workbench, localhost UDP packet verification, and an actionable one-click diagnostic.
 The checksummed snapshot contains all 6,324 NASA-confirmed exoplanets available at
 retrieval, explicitly as observational context rather than transfer ephemerides.
-Automated lint, strict typing, 594 tests, and 80.48% branch-aware coverage pass; two
+Automated lint, strict typing, 610 tests, and 80.62% branch-aware coverage pass; two
 MATLAB benchmarks were executed independently. No FMU binary was built or imported,
 and GMAT, SPICE, Simulink, and physical HIL remain explicitly unexecuted where
 unavailable. Build and generation commands remain local-only and never publish or
@@ -317,6 +317,7 @@ python -m aerognc.cli advanced-navigation --config configs/advanced_navigation.y
 python -m aerognc.cli flight-data-identification --config configs/flight_data_identification.yaml
 python -m aerognc.cli monte-carlo --config configs/monte_carlo.yaml
 python -m aerognc.cli flight-test --config configs/navigation_demo.yaml
+python -m aerognc.cli waypoint --config configs/waypoint_gnc.yaml
 ```
 
 The nominal synthetic run currently reaches 1.101 km apogee at 15.569 s. Burnout is
@@ -497,17 +498,23 @@ vehicle marker, flight phase/events, and live telemetry. See the
 
 A waypoint-based autonomous fixed-wing workflow demonstrates the full chain from
 mission planning to actuator commands. Define a mission as an ordered list of
-waypoints (home, fly-through, loiter, return-home) in a versioned YAML file, then
-fly it in the internal simulator; the GNC system computes desired course, heading,
-altitude, airspeed, roll/pitch, and the aileron/elevator/rudder/throttle commands,
-sequences the waypoints, holds loiter patterns, returns home, and enforces a safety
-envelope (airspeed/bank/pitch/altitude/geofence/GPS-loss).
+waypoints (home, fly-through, loiter, return-home), then pair it with a versioned
+runtime configuration covering navigation, guidance, control, safety, vehicle,
+actuators, wind, and solver settings. The GNC system computes desired course,
+heading, altitude, airspeed, roll/pitch, and aileron/elevator/rudder/throttle
+commands, sequences the waypoints, holds loiter patterns, returns home, and enforces
+a safety envelope (airspeed/bank/pitch/altitude/geofence/GPS-loss).
 
 ```bash
 python -m aerognc.cli mission validate missions/waypoint_demo.mission.yaml
-python -m aerognc.cli waypoint --mission missions/waypoint_demo.mission.yaml \
-    --guidance vector_field --output results/waypoint_gnc
+python -m aerognc.cli waypoint --config configs/waypoint_gnc.yaml
 ```
+
+The concise form remains available with `--mission`; guidance, wind, step, time-limit,
+and output flags can override either form explicitly. Library users can call
+`aerognc.fly_configured_mission("configs/waypoint_gnc.yaml")`. The runtime schema
+accepts only the internal simulation backend, rejects real-vehicle output, and
+records runtime-file and mission SHA-256 provenance in configured JSON results.
 
 Selectable guidance (`direct_bearing`, `line_of_sight`, `l1_guidance`,
 `vector_field`) feeds a cascaded autopilot; a `VehicleBackend` interface and a
@@ -572,8 +579,8 @@ acceptance. Evidence is mapped in
 
 | Evidence | Executed result |
 |---|---|
-| Python suite | 594 deterministic unit, integration, and validation tests pass |
-| Coverage | 80.48% branch-aware core/package coverage; enforced threshold 75% |
+| Python suite | 610 deterministic unit, integration, and validation tests pass |
+| Coverage | 80.62% branch-aware core/package coverage; enforced threshold 75% |
 | RK4 | Fourth-order convergence and independent SciPy agreement below \(10^{-6}\) |
 | Adaptive numerics | Dormand--Prince convergence/reference agreement, dense events, checkpoints, scheduler order, and variational derivatives pass |
 | Nominal 3-DOF | 1101.49 m apogee; burnout/apogee/impact events ordered and bounded |
