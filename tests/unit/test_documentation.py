@@ -40,6 +40,7 @@ def test_required_engineering_documents_are_present_and_substantive() -> None:
         "ui_architecture_decision.md",
         "orbit_sandbox.md",
         "aircraft_simulation.md",
+        "release_process.md",
     }
     docs = Path("docs")
     for name in required:

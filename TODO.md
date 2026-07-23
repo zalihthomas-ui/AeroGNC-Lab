@@ -144,14 +144,18 @@ _Module: `vehicle/control_surfaces.py`. 12 tests; ruff + mypy strict clean._
 
 ## Phase 7 — Navigation modes  (spec §9)
 
-- [ ] 7.1 `NavigationState` output struct (lat/lon/alt, NED pos/vel, groundspeed, airspeed,
+_The frame-explicit `NavigationState`, perfect provider, seeded noisy provider, dropout
+validity, and truth-isolating provider boundary are implemented and tested. Geodetic,
+acceleration, air-data, granular health, and full filter-backed estimation remain._
+
+- [~] 7.1 `NavigationState` output struct (lat/lon/alt, NED pos/vel, groundspeed, airspeed,
   RPY, quaternion, rates, accel, course, heading, climb rate, α/β if available, validity).
-- [ ] 7.2 **Perfect-state mode** (simulator truth passthrough).
+- [x] 7.2 **Perfect-state mode** (simulator truth passthrough).
 - [ ] 7.3 **Estimated-state mode** reusing existing filters (`gnc/ekf`, `error_state_ekf`,
   `strapdown_ins`); IMU/GPS/mag/baro/pitot sim reusing `vehicle/sensors.py`.
-- [ ] 7.4 GPS dropout behaviour, sensor validation, state-health flags.
-- [ ] 7.5 Controller must not read truth in estimated mode (enforce via interface).
-- [ ] 7.6 Unit/integration tests for both modes.
+- [~] 7.4 GPS dropout behaviour, sensor validation, state-health flags.
+- [x] 7.5 Controller must not read truth in estimated mode (enforce via interface).
+- [~] 7.6 Unit/integration tests for both modes.
 
 ---
 
@@ -279,7 +283,8 @@ _Unit + integration (full chain) + scenario tests (nominal, all 4 guidance modes
 - [x] 15.2 Integration tests along the full chain (planner→manager→guidance→control→
   actuator→dynamics→nav→guidance).
 - [~] 15.3 Scenario tests (17 scenarios in spec §26) with fixed seeds.
-- [~] 15.4 Keep coverage ≥ 75% (repo threshold); add new modules to coverage scope.
+- [x] 15.4 Keep coverage ≥ 75% (repo threshold); 622 tests pass with 80.62%
+  branch-aware package coverage under pytest 9.0.3 on 2026-07-23.
 
 ---
 
@@ -326,7 +331,32 @@ _`aerognc.api.fly_mission` façade done (lazily exposed as `aerognc.fly_mission`
 
 ---
 
+## Phase 19 — Repository, security, packaging & release hardening
+
+- [x] 19.1 Remove duplicate feature-branch CI runs and separate quality, canonical
+  coverage, compatibility/Windows, and clean-package jobs.
+- [x] 19.2 Declare typed-package metadata and verify `py.typed` in the built wheel.
+- [x] 19.3 Pin external Actions; add CODEOWNERS, Dependabot, CodeQL, dependency review,
+  and a complete runtime/development `pip-audit` job.
+- [x] 19.4 Enforce exact requirement/trace-row integrity and release tag/package/
+  citation version agreement with automated tests.
+- [x] 19.5 Add full tag acceptance, artifact validation, provenance attestation,
+  protected-environment PyPI trusted publishing, and documented release recovery.
+- [x] 19.6 Add a public roadmap and professional contribution/security guidance.
+- [~] 19.7 Apply remote repository settings, labels, milestones, branch protection,
+  and the PyPI environment after the hardening pull request is green and merged.
+
+---
+
 ## Running log (newest first)
+
+- 2026-07-23 — Repository-hardening tranche implemented: nonduplicating cross-platform
+  CI, typed clean-install distributions, immutable Action pins, CodeQL/dependency
+  review/audit, Dependabot/CODEOWNERS, exact traceability audits, tag/version gating,
+  provenance-attested release automation, roadmap, and release documentation. Local
+  wheel/sdist/Twine/clean-install/actionlint/security checks pass; **622 tests pass
+  with 80.62% branch coverage under pytest 9.0.3; Ruff and strict MyPy pass.** Remote
+  settings and PyPI trusted-publisher registration follow the green pull request.
 
 - 2026-07-21 (session 3) — Phase 11 interactive map planner + white-on-white fix (workbench +
   planner), Phase 16 orbital rendezvous/proximity-ops (CW dynamics, two-impulse + V-bar approach,

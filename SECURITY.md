@@ -5,6 +5,12 @@
 AeroGNC-Lab is pre-1.0 research software. Security fixes target the latest commit on
 `main` and the current 0.8.x release line; older snapshots are not maintained.
 
+| Version | Supported |
+|---|---|
+| `main` | Yes |
+| Latest `0.8.x` | Yes |
+| Earlier releases | No |
+
 ## Reporting a vulnerability
 
 Please do not publish exploit details in a regular issue. Use GitHub's
@@ -18,6 +24,19 @@ fix and disclosure through the private advisory. This policy covers the reposito
 software, parsers, local file handling, dependency configuration, and localhost test
 interfaces. It does not turn the project into certified, hardened, or operational
 flight software.
+
+## Automated safeguards
+
+Pull requests and `main` are checked with CodeQL, dependency review, a Python
+dependency vulnerability audit, pinned workflow dependencies, and package build/
+clean-install tests. Dependabot proposes bounded Python and GitHub Actions updates.
+Release artifacts are built in GitHub Actions, retained for inspection, and receive
+a build-provenance attestation before publication.
+
+These controls reduce common software-supply-chain risks; they are not a penetration
+test, safety case, airworthiness approval, or guarantee that the software is free of
+vulnerabilities. Never place credentials in configuration files, issue attachments,
+simulation logs, or generated reports.
 
 ## Public-safety scope
 
