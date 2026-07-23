@@ -1,10 +1,8 @@
-# SITL & Hardware Integration Roadmap
+# SITL & Physical-Output Safety Boundary Roadmap
 
-> **Safety-first.** Every step below keeps real-vehicle output **disabled by
-> default**. A backend that can command hardware must be gated behind an explicit
-> configuration flag (e.g. `hardware.allow_real_vehicle_output: true`) that does
-> not exist yet. Do not claim flight-readiness without staged, logged hardware
-> testing. Autonomous landing stays disabled until independently validated.
+> **Safety-first.** This roadmap covers internal simulation and local software-in-
+> the-loop only. Real-vehicle output is structurally unavailable, no enabling flag
+> exists, and autonomous landing is outside the accepted scope.
 
 The GNC logic is already isolated behind two interfaces so backends can be swapped
 without touching guidance/control:
@@ -21,7 +19,8 @@ without touching guidance/control:
   commands to JSBSim FCS inputs and reading its state into `NavigationState`.
 - Reuse the existing guidance/autopilot/mission/safety layers unchanged.
 - Validate: fly the bundled demo mission and compare ground track / completion
-  against the internal backend.
+  against both internal backends using the same quantitative evidence pattern as
+  `results/reference/waypoint_backend_comparison.json`.
 
 ## Stage 2 — ArduPilot SITL via MAVLink
 
@@ -39,28 +38,27 @@ without touching guidance/control:
 - Same `MavlinkBackend`, PX4 endpoint; use offboard/mission as appropriate.
 - Verify mode transitions and failsafe interaction with our safety manager.
 
-## Stage 4 — Hardware-in-the-loop (HIL)
+## Stage 4 — Processor/software loop timing
 
 - Reuse the project's HIL scaffolding (`simulation/hil.py`, `udp_transport.py`,
   `software_loopback.py`) for timing/latency/jitter/loss emulation.
 - Measure controller timing (`gnc/flight_analysis.benchmark_controller_sil`) and
-  target I/O requirements **before** selecting hardware (see `docs/future_hil.md`).
+  emulated I/O budgets without connecting actuators (see `docs/future_hil.md`).
 
-## Stage 5 — RC-aircraft integration
+## Out-of-scope physical integration boundary
 
-- Keep manual RC override always available (never permanently blocked by the
-  experimental GNC). Provide stabilized / autonomous / return-home / emergency
-  modes.
-- Require the explicit `hardware.allow_real_vehicle_output` opt-in, a pre-arm
-  checklist, geofence, and a command watchdog. Begin with bench tests, then
-  tethered/low-risk flights with a safety pilot, logging every flight.
+Physical aircraft, serial/CAN/radio links, actuator output, arming, and autonomous
+landing are not implemented by this roadmap. Any proposal to change that boundary
+requires a separately reviewed requirement set and safety case; SITL work must not
+create a latent physical-output path.
 
 ## Command-level matrix
 
 | Backend | Command level | Real output |
 |---|---|---|
-| Internal fixed-wing (this build) | raw actuator | none (simulation) |
+| Internal reduced fixed-wing | raw actuator | none (simulation) |
+| Internal coefficient-driven 18-state | raw actuator | none (simulation) |
 | JSBSim | raw actuator | none (simulation) |
 | ArduPilot SITL | mission / attitude / velocity | none (simulation) |
 | PX4 SITL | mission / offboard | none (simulation) |
-| Hardware (future) | per flight controller | **gated, off by default** |
+| Physical hardware | unavailable / out of scope | **no path exists** |

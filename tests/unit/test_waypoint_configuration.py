@@ -1,6 +1,7 @@
 """Tests for the versioned, simulation-only waypoint runtime configuration."""
 
 from collections.abc import Callable
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -13,10 +14,14 @@ from aerognc.configuration.waypoint_loader import (
     load_waypoint_runtime_configuration,
 )
 from aerognc.gnc.waypoint_guidance import GuidanceMode
+from aerognc.mission import load_mission
 from aerognc.navigation.providers import NoisyStateProvider, PerfectStateProvider
+from aerognc.simulation.waypoint_backends import VehicleBackendKind
+from aerognc.verification.waypoint_backends import compare_waypoint_vehicle_models
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BUNDLED = REPO_ROOT / "configs" / "waypoint_gnc.yaml"
+COEFFICIENT = REPO_ROOT / "configs" / "waypoint_gnc_coefficient.yaml"
 MISSION = REPO_ROOT / "missions" / "waypoint_demo.mission.yaml"
 
 
@@ -73,6 +78,38 @@ def test_noisy_navigation_builds_a_fresh_provider_per_run(tmp_path: Path) -> Non
     assert first is not second
 
 
+def test_coefficient_waypoint_runtime_loads_fictional_aircraft_and_provenance() -> None:
+    runtime = load_waypoint_runtime_configuration(COEFFICIENT)
+    config = runtime.build_mission_config()
+
+    assert config.vehicle_backend is VehicleBackendKind.INTERNAL_COEFFICIENT
+    assert config.coefficient_configuration is not None
+    assert config.coefficient_configuration.name.startswith("Sparrow-X2")
+    assert config.coefficient_configuration.source_path == (
+        REPO_ROOT / "configs" / "aircraft_waypoint_uav.yaml"
+    )
+    assert config.wind_ned_mps == (0.0, 0.0, 0.0)
+    assert config.autopilot_gains.throttle_trim == pytest.approx(0.28)
+
+
+def test_coefficient_runtime_rejects_inconsistent_solver_and_actuator_contracts() -> None:
+    config = load_waypoint_runtime_configuration(COEFFICIENT).build_mission_config()
+
+    with pytest.raises(ValueError, match="step cannot exceed"):
+        replace(config, dt_s=0.2)
+    with pytest.raises(ValueError, match="derives planet gravity"):
+        replace(config, gravity_mps2=9.7)
+    with pytest.raises(ValueError, match="actuator limits exceed"):
+        replace(config, aileron_limit_rad=1.0)
+    reduced = load_waypoint_runtime_configuration(BUNDLED).build_mission_config()
+    with pytest.raises(ValueError, match="same mission input"):
+        compare_waypoint_vehicle_models(
+            load_mission(MISSION),
+            reduced,
+            replace(config, mission_sha256="0" * 64),
+        )
+
+
 @pytest.mark.parametrize(
     ("mutate", "message"),
     [
@@ -92,7 +129,7 @@ def test_noisy_navigation_builds_a_fresh_provider_per_run(tmp_path: Path) -> Non
         ),
         (
             lambda payload: cast_mapping(payload["vehicle"]).update({"backend": "jsbsim"}),
-            "only internal_reduced is available",
+            "expected one of internal_reduced, internal_coefficient",
         ),
         (
             lambda payload: cast_mapping(cast_mapping(payload["navigation"])["noisy"]).update(

@@ -50,7 +50,7 @@ def fly_mission(
     ``mission`` may be a :class:`Mission` or a path to a mission YAML file. Pass a
     fully-specified ``config`` to override everything, or use the convenience
     keyword arguments for the common knobs (guidance mode and steady wind). This
-    runs the internal simulation backend only and commands no hardware.
+    runs the selected built-in simulation backend only and commands no hardware.
     """
     resolved_mission = mission if isinstance(mission, Mission) else load_mission(mission)
     if config is None:
@@ -70,7 +70,8 @@ def fly_configured_mission(
 
     The runtime YAML references the mission and explicitly configures navigation,
     guidance, control, safety, vehicle, actuators, environment, and solver settings.
-    Only the internal simulation backend is accepted; real-vehicle output is rejected.
+    Only the reduced and coefficient-driven built-in simulation backends are accepted;
+    external and real-vehicle output are rejected.
     """
     runtime = (
         configuration

@@ -10,6 +10,10 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import cast
 
+from aerognc.configuration.aircraft_loader import (
+    AircraftSandboxConfiguration,
+    load_aircraft_configuration,
+)
 from aerognc.configuration.loader import (
     ConfigurationError,
     _boolean,
@@ -29,7 +33,10 @@ from aerognc.navigation.providers import (
     NoisyStateProvider,
     PerfectStateProvider,
 )
-from aerognc.simulation.waypoint_backends import ReducedFixedWingParams
+from aerognc.simulation.waypoint_backends import (
+    ReducedFixedWingParams,
+    VehicleBackendKind,
+)
 from aerognc.simulation.waypoint_mission import WaypointMissionConfig
 from aerognc.vehicle.control_surfaces import SurfaceFailureMode
 
@@ -272,14 +279,35 @@ def _safety_configuration(value: object) -> SafetyLimits:
     )
 
 
-def _vehicle_configuration(value: object) -> ReducedFixedWingParams:
+def _vehicle_configuration(
+    value: object,
+    source_directory: Path,
+) -> tuple[VehicleBackendKind, ReducedFixedWingParams, AircraftSandboxConfiguration | None]:
     data = _mapping(value, "waypoint.vehicle")
-    _keys(data, "waypoint.vehicle", required={"backend", "parameters"})
+    _keys(
+        data,
+        "waypoint.vehicle",
+        required={"backend"},
+        optional={"parameters", "aircraft_config"},
+    )
     backend = _string(data["backend"], "waypoint.vehicle.backend")
-    if backend != "internal_reduced":
-        raise ConfigurationError(
-            "waypoint.vehicle.backend: only internal_reduced is available in this build"
-        )
+    try:
+        kind = VehicleBackendKind(backend)
+    except ValueError as error:
+        choices = ", ".join(item.value for item in VehicleBackendKind)
+        raise ConfigurationError(f"waypoint.vehicle.backend: expected one of {choices}") from error
+    if kind is VehicleBackendKind.INTERNAL_COEFFICIENT:
+        _keys(data, "waypoint.vehicle", required={"backend", "aircraft_config"})
+        aircraft_path = Path(_string(data["aircraft_config"], "waypoint.vehicle.aircraft_config"))
+        if not aircraft_path.is_absolute():
+            aircraft_path = (source_directory / aircraft_path).resolve()
+        try:
+            aircraft_configuration = load_aircraft_configuration(aircraft_path)
+        except (OSError, ValueError) as error:
+            raise ConfigurationError(f"waypoint.vehicle.aircraft_config: {error}") from error
+        return kind, ReducedFixedWingParams(), aircraft_configuration
+
+    _keys(data, "waypoint.vehicle", required={"backend", "parameters"})
     params = _mapping(data["parameters"], "waypoint.vehicle.parameters")
     _keys(
         params,
@@ -302,7 +330,7 @@ def _vehicle_configuration(value: object) -> ReducedFixedWingParams:
     def positive(name: str) -> float:
         return _number(params[name], f"waypoint.vehicle.parameters.{name}", positive=True)
 
-    return ReducedFixedWingParams(
+    reduced = ReducedFixedWingParams(
         roll_from_aileron=positive("roll_from_aileron"),
         roll_damping=positive("roll_damping"),
         pitch_from_elevator=positive("pitch_from_elevator"),
@@ -323,6 +351,7 @@ def _vehicle_configuration(value: object) -> ReducedFixedWingParams:
         ),
         max_bank_for_turn_rad=radians(positive("max_bank_for_turn_deg")),
     )
+    return kind, reduced, None
 
 
 def _navigation_configuration(value: object) -> WaypointNavigationConfiguration:
@@ -547,6 +576,9 @@ def load_waypoint_runtime_configuration(path: str | Path) -> WaypointRuntimeConf
         throttle_time_constant_s,
         failures,
     ) = _actuator_configuration(root["actuators"])
+    vehicle_backend, reduced_params, coefficient_configuration = _vehicle_configuration(
+        root["vehicle"], source_path.parent
+    )
 
     mission_config = WaypointMissionConfig(
         dt_s=_number(simulation["dt_s"], "waypoint.simulation.dt_s", positive=True),
@@ -567,7 +599,9 @@ def load_waypoint_runtime_configuration(path: str | Path) -> WaypointRuntimeConf
         guidance_gains=guidance_gains,
         autopilot_gains=_autopilot_configuration(root["autopilot"]),
         safety_limits=_safety_configuration(root["safety"]),
-        reduced_params=_vehicle_configuration(root["vehicle"]),
+        vehicle_backend=vehicle_backend,
+        reduced_params=reduced_params,
+        coefficient_configuration=coefficient_configuration,
         wind_ned_mps=wind,
         gravity_mps2=_number(
             environment["gravity_mps2"],

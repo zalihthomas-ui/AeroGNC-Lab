@@ -471,6 +471,7 @@ class FixedWingFlightModel:
         *,
         wind_horizon_s: float | None = None,
         aerodynamic_database: TabulatedAerodynamicDatabase | None = None,
+        steady_wind_ned_mps: npt.ArrayLike | None = None,
     ) -> None:
         if wind_horizon_s is not None and (
             not np.isfinite(wind_horizon_s) or wind_horizon_s <= 0.0
@@ -491,9 +492,17 @@ class FixedWingFlightModel:
         }:
             raise ValueError("fixed-wing static table axes must be mach, alpha_rad, and beta_rad")
         self.aerodynamic_database = aerodynamic_database
+        self.steady_wind_ned_mps = (
+            np.array(
+                [configuration.wind_north_mps, configuration.wind_east_mps, 0.0],
+                dtype=np.float64,
+            )
+            if steady_wind_ned_mps is None
+            else as_vector(steady_wind_ned_mps, 3, name="steady_wind_ned_mps")
+        )
         self.atmosphere = ReferenceOrbitalAtmosphere(configuration.planet.atmosphere_density_scale)
         self.wind_model = WindModel(
-            WindProfile.constant([configuration.wind_north_mps, configuration.wind_east_mps, 0.0]),
+            WindProfile.constant(self.steady_wind_ned_mps),
             gust_std_ned_mps=configuration.turbulence_std_ned_mps,
             correlation_time_s=configuration.turbulence_correlation_time_s,
             sample_step_s=0.1,

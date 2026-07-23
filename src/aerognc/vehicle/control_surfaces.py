@@ -140,14 +140,18 @@ class ControlSurfaceSet:
         *,
         throttle_time_constant_s: float = 0.6,
         throttle_stuck: bool = False,
+        initial_throttle: float = 0.0,
     ) -> None:
         if throttle_time_constant_s <= 0.0:
             raise ValueError("throttle_time_constant_s must be positive")
+        if not np.isfinite(initial_throttle) or not 0.0 <= initial_throttle <= 1.0:
+            raise ValueError("initial_throttle must lie in [0, 1]")
         self.aileron = aileron
         self.elevator = elevator
         self.rudder = rudder
         self._throttle_tc_s = throttle_time_constant_s
-        self._throttle = 0.0
+        self._initial_throttle = float(initial_throttle)
+        self._throttle = self._initial_throttle
         self._throttle_stuck = throttle_stuck
 
     @classmethod
@@ -160,6 +164,7 @@ class ControlSurfaceSet:
         time_constant_s: float = 0.12,
         rate_limit_radps: float = float(np.deg2rad(120.0)),
         throttle_time_constant_s: float = 0.6,
+        initial_throttle: float = 0.0,
     ) -> "ControlSurfaceSet":
         """Build a nominal (fault-free) surface set from deflection limits."""
 
@@ -177,6 +182,7 @@ class ControlSurfaceSet:
             make(elevator_limit_rad),
             make(rudder_limit_rad),
             throttle_time_constant_s=throttle_time_constant_s,
+            initial_throttle=initial_throttle,
         )
 
     def reset(self) -> None:
@@ -184,7 +190,7 @@ class ControlSurfaceSet:
         self.aileron.reset()
         self.elevator.reset()
         self.rudder.reset()
-        self._throttle = 0.0
+        self._throttle = self._initial_throttle
 
     def update(
         self,

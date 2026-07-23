@@ -54,6 +54,12 @@ from aerognc.verification.launch_window import (
     run_launch_window_optimization,
 )
 from aerognc.verification.metrics import StepResponseMetrics, step_response_metrics
+from aerognc.verification.waypoint_backends import (
+    WaypointCrossModelComparison,
+    WaypointCrossModelTolerances,
+    compare_waypoint_vehicle_models,
+    write_waypoint_cross_model_comparison,
+)
 
 __all__ = [
     "AdvancedNavigationAssessment",
@@ -73,6 +79,8 @@ __all__ = [
     "MorrisDesign",
     "MorrisEffect",
     "StepResponseMetrics",
+    "WaypointCrossModelComparison",
+    "WaypointCrossModelTolerances",
     "advanced_navigation_payload",
     "analyze_aerodynamic_database",
     "assess_advanced_navigation",
@@ -82,6 +90,7 @@ __all__ = [
     "benchmark_environment",
     "benchmark_payload",
     "bootstrap_confidence_interval",
+    "compare_waypoint_vehicle_models",
     "flight_data_identification_payload",
     "flight_envelope_payload",
     "latin_hypercube_design",
@@ -95,4 +104,5 @@ __all__ = [
     "step_response_metrics",
     "validate_samples_in_domain",
     "write_benchmark_report",
+    "write_waypoint_cross_model_comparison",
 ]

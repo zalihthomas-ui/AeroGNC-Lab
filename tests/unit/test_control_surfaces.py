@@ -97,9 +97,22 @@ def test_surface_set_maps_all_channels() -> None:
 
 def test_surface_set_throttle_settles() -> None:
     surfaces = ControlSurfaceSet.from_limits(
-        aileron_limit_rad=0.3, elevator_limit_rad=0.3, rudder_limit_rad=0.3
+        aileron_limit_rad=0.3,
+        elevator_limit_rad=0.3,
+        rudder_limit_rad=0.3,
+        initial_throttle=0.3,
     )
-    throttle = 0.0
+    throttle = surfaces.update(0.0, 0.0, 0.0, 0.3, 0.05).throttle
+    assert throttle == pytest.approx(0.3)
     for _ in range(200):
         throttle = surfaces.update(0.0, 0.0, 0.0, 0.8, 0.05).throttle
     assert throttle == pytest.approx(0.8, abs=1e-2)
+    surfaces.reset()
+    assert surfaces.update(0.0, 0.0, 0.0, 0.3, 0.05).throttle == pytest.approx(0.3)
+    with pytest.raises(ValueError, match="initial_throttle"):
+        ControlSurfaceSet.from_limits(
+            aileron_limit_rad=0.3,
+            elevator_limit_rad=0.3,
+            rudder_limit_rad=0.3,
+            initial_throttle=1.1,
+        )

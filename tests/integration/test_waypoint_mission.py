@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from aerognc.configuration.waypoint_loader import load_waypoint_runtime_configuration
 from aerognc.gnc.waypoint_guidance import GuidanceMode
 from aerognc.mission import HomePosition, Mission, MissionDefaults, Waypoint, WaypointAction
 from aerognc.mission.mission_manager import MissionState
@@ -14,6 +15,10 @@ from aerognc.simulation.waypoint_mission import (
     run_waypoint_mission,
 )
 from aerognc.vehicle.control_surfaces import SurfaceFailureMode
+from aerognc.verification.waypoint_backends import (
+    compare_waypoint_vehicle_models,
+    write_waypoint_cross_model_comparison,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -64,6 +69,38 @@ def test_bundled_demo_mission_completes() -> None:
     summary = result.summary()
     assert summary["min_airspeed_mps"] > 10.0  # never stalled to a standstill
     assert summary["max_abs_cross_track_m"] < 400.0
+
+
+def test_coefficient_backend_completes_and_passes_cross_model_bounds(tmp_path: Path) -> None:
+    from aerognc.mission import load_mission
+
+    reduced_runtime = load_waypoint_runtime_configuration(
+        REPO_ROOT / "configs" / "waypoint_gnc.yaml"
+    )
+    coefficient_runtime = load_waypoint_runtime_configuration(
+        REPO_ROOT / "configs" / "waypoint_gnc_coefficient.yaml"
+    )
+    comparison = compare_waypoint_vehicle_models(
+        load_mission(coefficient_runtime.mission_path),
+        reduced_runtime.build_mission_config(),
+        coefficient_runtime.build_mission_config(),
+    )
+    result = comparison.coefficient
+
+    assert comparison.passed
+    assert result.completed
+    assert result.metadata["safety_events"] == []
+    assert result.planned_path_ned_m[0, 2] == pytest.approx(-100.0)
+    summary = result.summary()
+    assert summary["max_abs_cross_track_m"] < 120.0
+    assert summary["min_altitude_m"] > 90.0
+    assert summary["min_airspeed_mps"] > 15.0
+    backend_details = result.metadata["vehicle_backend_details"]
+    assert isinstance(backend_details, dict)
+    assert backend_details["model"] == "coefficient_driven_18_state"
+    assert len(str(backend_details["aircraft_configuration_sha256"])) == 64
+    report = write_waypoint_cross_model_comparison(comparison, tmp_path / "comparison.json")
+    assert '"passed": true' in report.read_text(encoding="utf-8")
 
 
 @pytest.mark.parametrize("mode", list(GuidanceMode))

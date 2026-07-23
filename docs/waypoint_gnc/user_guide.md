@@ -1,9 +1,8 @@
 # Waypoint Fixed-Wing GNC — User & Developer Guide
 
-> **Safety.** This workflow is **designed for simulation, SITL validation, and
-> progressive preparation for hardware integration.** It is not flight-certified,
-> and it commands no real aircraft. Autonomous landing is not enabled. Real-vehicle
-> output requires an explicit opt-in that does not yet exist in this build.
+> **Safety.** This workflow is for internal simulation and future local software-in-
+> the-loop validation. It is not flight-certified, commands no real aircraft, and
+> contains no physical-output path. Autonomous landing is not enabled.
 
 ## What it does
 
@@ -22,6 +21,12 @@ python -m aerognc.cli mission validate missions/waypoint_demo.mission.yaml
 # Fly the fully configured runtime (writes CSV + JSON log and a PNG dashboard)
 python -m aerognc.cli waypoint --config configs/waypoint_gnc.yaml
 
+# Fly the same mission on the nonlinear coefficient-driven 18-state plant
+python -m aerognc.cli waypoint --config configs/waypoint_gnc_coefficient.yaml
+
+# Reproduce the reduced-versus-coefficient acceptance evidence
+python scripts/compare_waypoint_backends.py
+
 # The concise mission-only form remains available
 python -m aerognc.cli waypoint --mission missions/waypoint_demo.mission.yaml \
     --guidance vector_field --output results/waypoint_gnc
@@ -32,8 +37,10 @@ python -m aerognc.cli waypoint --mission missions/waypoint_demo.mission.yaml \
 ```
 
 The bundled `missions/waypoint_demo.mission.yaml` flies
-`navigate → loiter → return-home → complete` in ~248 s with a final cross-track
-error of ~0.07 m and bounded airspeed.
+`navigate → loiter → return-home → complete` on both plants without safety
+intervention. The committed comparison records 247.25 s for the reduced plant and
+180.30 s for the coefficient plant, a 0.40 m final horizontal separation, and a
+1.37 duration ratio under the declared 1.5 limit.
 
 ## Runtime configuration (schema version 1)
 
@@ -46,15 +53,53 @@ the mission and explicitly records:
 - guidance mode and gains;
 - cascaded-autopilot gains, limits, and trim;
 - safety envelope and geofence;
-- reduced internal-vehicle parameters;
+- either reduced internal-vehicle parameters or a strict fictional-aircraft
+  configuration reference;
 - actuator limits, dynamics, and injected failure modes; and
 - the simulation-only hardware gate.
 
 Unknown or missing keys, unsupported schema versions/backends, invalid values, and
 `hardware.allow_real_vehicle_output: true` fail before propagation. CLI guidance,
 wind, step, time-limit, and output options act as explicit one-run overrides.
-Configured-run JSON metadata records SHA-256 digests of both the runtime file and
-mission so the exact inputs can be identified later.
+Configured-run JSON metadata records SHA-256 digests of the runtime file and mission.
+The coefficient backend also records aircraft identity, model type, aerodynamic
+backend, steady wind, source filename, and aircraft-configuration SHA-256.
+
+### Built-in backend selection and independent comparison
+
+The default runtime contains:
+
+```yaml
+vehicle:
+  backend: internal_reduced
+  parameters:  # reduced response coefficients
+    # ...
+```
+
+`configs/waypoint_gnc_coefficient.yaml` instead selects:
+
+```yaml
+vehicle:
+  backend: internal_coefficient
+  aircraft_config: aircraft_waypoint_uav.yaml
+```
+
+The coefficient adapter propagates planet-centred inertial position/velocity,
+quaternion attitude, body rates, mass, physical surfaces, and throttle. It maps the
+mission actuator bank into the plant without applying actuator lag twice, converts
+the rotating-planet state back to the initial local NED frame, and fails closed if
+the runtime wind or gravity contract is inconsistent. `aircraft_waypoint_uav.yaml`
+contains only synthetic data for the fictional 18 kg Sparrow-X2 research UAV.
+
+`scripts/compare_waypoint_backends.py` runs the identical mission through both
+models and writes a deterministic JSON record. Acceptance requires both missions to
+complete without safety intervention, maximum cross-track below 175 m, duration
+ratio below 1.5, terminal horizontal separation below 5 m, altitude difference
+below 5 m, and airspeed difference below 1 m/s. The current reference record is
+[`results/reference/waypoint_backend_comparison.json`](../../results/reference/waypoint_backend_comparison.json).
+Passing these mission-level bounds demonstrates consistent behavior across two
+independently structured simulators; it is not aircraft certification or proof that
+the models are identical.
 
 ## Mission file format (schema version 1)
 
@@ -185,13 +230,15 @@ flowchart TD
 
 ```bash
 python -m pytest tests/unit tests/integration/test_waypoint_mission.py
+python scripts/compare_waypoint_backends.py
 ```
 
 ## Known limitations
 
-- The internal backend is a **reduced 6-DOF-lite** control-design model, not a
-  validated flight-dynamics plant. The project's 18-state `vehicle/fixed_wing.py`
-  is the intended higher-fidelity backend (integration hook).
+- The reduced backend is a **6-DOF-lite** mission/control-design model. The optional
+  18-state backend adds coefficient-driven nonlinear dynamics, rotating-planet
+  kinematics, propulsion, fuel mass, atmosphere, wind, and stall behavior. Both use
+  synthetic fictional inputs and neither is a validated real-aircraft model.
 - Takeoff, autonomous landing, TECS, full EKF-estimated navigation, and the
   SITL/MAVLink backends are scoped but deferred — see
   `../../TODO.md` and `sitl_hardware_roadmap.md`.

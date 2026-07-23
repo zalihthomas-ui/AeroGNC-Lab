@@ -17,8 +17,9 @@ It deliberately does **not** implement kinetic intercept-to-destroy, terminal ho
 proportional navigation against a target, engagement/fuzing/kill-assessment logic, or the
 removal of the repository's existing public-safety exclusions. This keeps the project
 consistent with its own stated public-safety posture (README §Public-safety statement).
-The fixed-wing waypoint workflow and PX4/ArduPilot preparation are unaffected and fully
-implemented, with real-hardware output disabled by default.
+The fixed-wing waypoint workflow is implemented with reduced and nonlinear
+coefficient-driven internal plants. PX4/ArduPilot SITL adapters remain optional,
+scoped future work; real-hardware output is structurally unavailable.
 
 ## 1. Repository at a glance
 
@@ -29,7 +30,7 @@ implemented, with real-hardware output disabled by default.
   Pillow. Dev: mypy (strict), ruff, pytest, pytest-cov. Console script `aerognc`.
 - **Entry points:** `python -m aerognc.cli <subcommand>` (41 subcommands) and Windows
   `run_*.bat` launchers. GUI via `aerognc workbench` (Tk) and `aerognc mission-designer`.
-- **Tests:** 158 test files in `tests/{unit,integration,validation}`; 622 tests, 80.62%
+- **Tests:** 158 test files in `tests/{unit,integration,validation}`; 635 tests, 80.66%
   branch coverage, threshold 75%. Tk event-loop files omitted from coverage.
 - **Quality gates:** ruff (E,F,I,N,UP,B,SIM,RUF), mypy strict, CI in `.github/workflows/ci.yml`.
 
@@ -85,7 +86,8 @@ implemented, with real-hardware output disabled by default.
   bearing, flat-earth, angle-wrap helpers. **(added)**
 - `gnc/path_manager.py`, `gnc/waypoint_guidance.py`, `gnc/fixedwing_autopilot.py`.
 - `navigation/` — `NavigationState` struct + perfect/estimated providers.
-- `simulation/backends/` — `VehicleBackend` ABC + internal / JSBSim / MAVLink(SITL) backends.
+- `simulation/waypoint_backends.py` — `VehicleBackend` ABC plus reduced and
+  coefficient-driven internal backends; JSBSim/MAVLink remain planned adapters.
 - `simulation/waypoint_mission.py` — the integrated GNC loop.
 - `visualisation/mission_planner_map.py` — interactive map planner.
 
@@ -111,8 +113,8 @@ consistently SI; degrees appear only in YAML/UI and are converted at the boundar
   (feature-flagged) so the core install stays lean and CI stays green without them.
 - Tk UI is excluded from coverage; new UI must keep logic in testable services and expose
   widget-construction smoke tests (match existing workbench test pattern).
-- Real-hardware output is a **safety risk**: gate behind `hardware.allow_real_vehicle_output:
-  false` and never command hardware from a default/test path.
+- Real-hardware output is outside the accepted scope and must remain structurally
+  unavailable; the configuration boundary rejects any request for it.
 - Numerical safety: enforce NaN/Inf guards in the new loop (repo already validates finiteness
   aggressively — keep that discipline).
 
