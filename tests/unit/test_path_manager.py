@@ -134,6 +134,17 @@ def test_from_mission_builds_expected_segments() -> None:
     assert manager.planned_path_ned().shape == (3, 3)  # home + 2 leg ends
 
 
+def test_air_start_uses_initial_position_for_first_altitude_ramp() -> None:
+    initial = np.array([0.0, 0.0, -80.0])
+    manager = PathManager.from_mission(_demo_mission(), initial_position_ned_m=initial)
+    first = manager.segments[0]
+
+    assert isinstance(first, LineSegment)
+    np.testing.assert_array_equal(first.start_ned_m, initial)
+    assert first.commanded_down_m(initial) == pytest.approx(-80.0)
+    np.testing.assert_array_equal(manager.planned_path_ned()[0], initial)
+
+
 def test_loiter_mission_segment_layout() -> None:
     mission = Mission(
         name="loiter_demo",

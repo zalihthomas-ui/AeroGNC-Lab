@@ -8,14 +8,23 @@ software verification, and portfolio demonstration. Every coefficient, dimension
 mass property, engine value and stall boundary is synthetic. Nothing in the model is
 type-certified data for a real aircraft.
 
-Two workflows use the same physical plant:
+Three workflows use the coefficient-driven physical plant:
 
 1. a deterministic hands-off batch run that writes numerical evidence and plots; and
 2. a live 3D player that converts keyboard or optional XInput commands into actuator
-   requests and propagates the resulting equations in real time.
+   requests and propagates the resulting equations in real time; and
+3. an internal waypoint backend that maps the same GNC actuator contract into the
+   plant and returns rotating-planet truth in the mission's initial local NED frame.
 
 The live motion is not scripted. The imported 3D object is transformed by the
 calculated position and quaternion attitude.
+
+The batch/live examples use the 4,200 kg fictional Aquila-X1 configuration. The
+waypoint comparison uses the separately configured 18 kg fictional Sparrow-X2 UAV in
+`configs/aircraft_waypoint_uav.yaml`, sized for the 20 m/s mission envelope. Both are
+wholly synthetic. The waypoint adapter supports an explicit three-axis steady-wind
+override, preserves aircraft-configuration SHA-256 provenance, and applies the
+mission actuator state directly so control lag is not counted twice.
 
 ## Frames, signs and state ordering
 

@@ -190,12 +190,18 @@ _Module: `mission/safety.py`. 8 tests; ruff + mypy strict clean. NaN/Inf enforce
 
 ## Phase 10 — Simulation backends & external interfaces  (spec §17, §18, §32 steps 18)
  
-_Internal backend + integrated runner done (`simulation/waypoint_backends.py`, `simulation/waypoint_mission.py`). Nominal demo mission flies navigate->loiter->return-home->complete. SITL/MAVLink backends deferred (optional deps). No real-hardware output path exists yet (gate is inherent)._
+_Reduced and nonlinear coefficient-driven internal backends plus the integrated
+runner are complete (`simulation/waypoint_backends.py`,
+`simulation/waypoint_mission.py`). Both fly the nominal demo mission through
+navigate->loiter->return-home->complete and pass a committed cross-model acceptance
+case. SITL adapters remain optional/deferred. No real-hardware output path exists._
 
 - [x] 10.1 `VehicleBackend` ABC (`initialize/read_state/send_actuator_commands/
   send_guidance_command/step/shutdown`) + declared command level per backend.
-- [x] 10.2 **Backend A — Internal sim** (reuse `simulation/aircraft_sandbox` /
-  `six_dof_simulator` + new actuator/dynamics loop). Primary, always available.
+- [x] 10.2 **Backend A — Internal sim:** reduced mission plant plus the 18-state
+  coefficient-driven fictional-aircraft plant, rotating-frame state conversion,
+  non-duplicated actuator dynamics, strict configuration, and provenance. Primary,
+  always available.
 - [~] 10.3 Backend B — JSBSim (optional import, feature-flagged).
 - [~] 10.4 Backend C — ArduPilot SITL via MAVLink (optional dep `pymavlink`).
 - [~] 10.5 Backend D — PX4 SITL via MAVLink.
@@ -203,7 +209,9 @@ _Internal backend + integrated runner done (`simulation/waypoint_backends.py`, `
   start/pause/resume/RTL/guided-wp/params/ack/timeout/reconnect.
 - [x] 10.7 **Hard safety gate:** `hardware.allow_real_vehicle_output: false` by default;
   no real actuator/mission command without explicit opt-in (spec §18, §34).
-- [~] 10.8 Backend contract tests (mock MAVLink); internal backend integration test.
+- [x] 10.8 Internal backend contract, full-mission, air-start, provenance, and
+  reduced-versus-coefficient comparison tests. Mock external-adapter contracts move
+  with 10.3–10.6.
 
 ---
 
@@ -254,8 +262,9 @@ _Per-step structured log (`MissionSample`) + CSV/JSON export; metadata carries t
 - [x] 13.1 Structured logging of all categories (sim/est state, guidance/control/actuator
   cmds, waypoint events, state transitions, safety, sensors, backend comms, timing).
 - [~] 13.2 Run metadata: configuration and mission SHA-256 plus guidance/navigation/
-  backend selection are recorded; git hash, aircraft identity, start time, and package
-  version remain. (Reuse `project/` manifest patterns.)
+  backend selection, aircraft identity/configuration SHA-256, model type, aerodynamic
+  backend, and wind are recorded; git hash, start time, and package version remain.
+  (Reuse `project/` manifest patterns.)
 - [~] 13.3 Replay tool reconstructing a mission from logs.
 
 ---
@@ -263,9 +272,10 @@ _Per-step structured log (`MissionSample`) + CSV/JSON export; metadata carries t
 ## Phase 14 — Configuration  (spec §25)
 
 - [x] 14.1 Add a versioned waypoint runtime configuration for mission reference,
-  solver, navigation/noise, environment, guidance, autopilot, safety, reduced vehicle,
-  actuators/failures, output, and the simulation-only hardware gate. Reuse the strict
-  `configuration/` boundary. → `configs/waypoint_gnc.yaml`
+  solver, navigation/noise, environment, guidance, autopilot, safety, selectable
+  reduced/coefficient internal vehicle, actuators/failures, output, and the
+  simulation-only hardware gate. Reuse the strict `configuration/` boundary. →
+  `configs/waypoint_gnc.yaml`, `configs/waypoint_gnc_coefficient.yaml`
 - [x] 14.2 Validate every runtime section at startup with contextual errors; reject
   unknown keys, unsupported versions/backends, invalid physics, and real output.
 - [ ] 14.3 Externalize optional planner UI preferences and structured logging policy
@@ -283,7 +293,7 @@ _Unit + integration (full chain) + scenario tests (nominal, all 4 guidance modes
 - [x] 15.2 Integration tests along the full chain (planner→manager→guidance→control→
   actuator→dynamics→nav→guidance).
 - [~] 15.3 Scenario tests (17 scenarios in spec §26) with fixed seeds.
-- [x] 15.4 Keep coverage ≥ 75% (repo threshold); 622 tests pass with 80.62%
+- [x] 15.4 Keep coverage ≥ 75% (repo threshold); 635 tests pass with 80.66%
   branch-aware package coverage under pytest 9.0.3 on 2026-07-23.
 
 ---
@@ -354,8 +364,8 @@ _`aerognc.api.fly_mission` façade done (lazily exposed as `aerognc.fly_mission`
   CI, typed clean-install distributions, immutable Action pins, CodeQL/dependency
   review/audit, Dependabot/CODEOWNERS, exact traceability audits, tag/version gating,
   provenance-attested release automation, roadmap, and release documentation. Local
-  wheel/sdist/Twine/clean-install/actionlint/security checks pass; **622 tests pass
-  with 80.62% branch coverage under pytest 9.0.3; Ruff and strict MyPy pass.** Remote
+  wheel/sdist/Twine/clean-install/actionlint/security checks pass; **635 tests pass
+  with 80.66% branch coverage under pytest 9.0.3; Ruff and strict MyPy pass.** Remote
   settings and PyPI trusted-publisher registration follow the green pull request.
 
 - 2026-07-21 (session 3) — Phase 11 interactive map planner + white-on-white fix (workbench +

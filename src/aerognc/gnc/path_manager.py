@@ -357,17 +357,24 @@ class PathManager:
         *,
         frame: LocalTangentFrame | None = None,
         config: PathManagerConfig | None = None,
+        initial_position_ned_m: FloatArray | None = None,
     ) -> "PathManager":
         """Build a path manager from a validated mission.
 
-        Home is the local NED origin. Each waypoint becomes a straight leg; loiter
-        and hold waypoints add an orbit after their approach leg. ``return_home``
-        targets the home horizontal position at the waypoint altitude.
+        Home is the local NED origin. The first leg starts at
+        ``initial_position_ned_m`` when an air-start is supplied, otherwise at home.
+        Each waypoint becomes a straight leg; loiter and hold waypoints add an orbit
+        after their approach leg. ``return_home`` targets the home horizontal
+        position at the waypoint altitude.
         """
         mission.validate()
         active_frame = frame if frame is not None else mission.local_frame()
         legs: list[_Leg] = []
-        start_ned = np.zeros(3, dtype=np.float64)  # home origin
+        start_ned = (
+            np.zeros(3, dtype=np.float64)
+            if initial_position_ned_m is None
+            else as_vector(initial_position_ned_m, 3, name="initial_position_ned_m")
+        )
 
         for waypoint in mission.waypoints:
             airspeed = mission.resolved_airspeed_mps(waypoint)
@@ -479,8 +486,11 @@ class PathManager:
         self._complete = False
 
     def planned_path_ned(self) -> FloatArray:
-        """Return the planned polyline vertices (home + leg terminals) in NED."""
-        vertices: list[FloatArray] = [np.zeros(3, dtype=np.float64)]
+        """Return the planned polyline vertices (initial point + terminals) in NED."""
+        first = self._legs[0].segment
+        if not isinstance(first, LineSegment):  # pragma: no cover - construction invariant
+            raise RuntimeError("path must begin with a line segment")
+        vertices: list[FloatArray] = [first.start_ned_m.copy()]
         for leg in self._legs:
             segment = leg.segment
             if isinstance(segment, LineSegment):

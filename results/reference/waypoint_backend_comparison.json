@@ -1,0 +1,67 @@
+{
+  "coefficient": {
+    "backend": {
+      "aerodynamic_backend": "analytic",
+      "aircraft_configuration": "aircraft_waypoint_uav.yaml",
+      "aircraft_configuration_sha256": "a19c70046d74799f83a87d647a68a7f96d9f180b90f5bbd3d47bb332ac079ae1",
+      "aircraft_name": "Sparrow-X2 Fictional Civilian Research UAV",
+      "command_level": "raw_actuator",
+      "implementation": "InternalCoefficientFixedWingBackend",
+      "model": "coefficient_driven_18_state",
+      "steady_wind_ned_mps": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "summary": {
+      "completed": true,
+      "duration_s": 180.3,
+      "final_cross_track_m": 0.239,
+      "final_state": "mission_complete",
+      "max_abs_cross_track_m": 96.631,
+      "max_airspeed_mps": 22.907,
+      "max_altitude_m": 177.453,
+      "min_airspeed_mps": 17.548,
+      "min_altitude_m": 99.446,
+      "outcome": "complete",
+      "samples": 3606
+    }
+  },
+  "interpretation": "Agreement means both independently structured simulation models satisfy the declared mission-level bounds; it is not aircraft certification or proof of model identity.",
+  "metrics": {
+    "duration_ratio": 1.37132556849702,
+    "final_airspeed_difference_mps": 0.21779942619550496,
+    "final_altitude_difference_m": 2.517419440088659,
+    "final_horizontal_separation_m": 0.403148755705048
+  },
+  "passed": true,
+  "reduced": {
+    "backend": {
+      "command_level": "raw_actuator",
+      "implementation": "InternalFixedWingBackend"
+    },
+    "summary": {
+      "completed": true,
+      "duration_s": 247.25,
+      "final_cross_track_m": 0.077,
+      "final_state": "mission_complete",
+      "max_abs_cross_track_m": 151.714,
+      "max_airspeed_mps": 24.073,
+      "max_altitude_m": 179.928,
+      "min_airspeed_mps": 19.65,
+      "min_altitude_m": 100.0,
+      "outcome": "complete",
+      "samples": 4945
+    }
+  },
+  "schema_version": "1.0",
+  "scope": "simulation-only fictional civilian fixed-wing waypoint backends",
+  "tolerances": {
+    "maximum_cross_track_m": 175.0,
+    "maximum_duration_ratio": 1.5,
+    "maximum_final_airspeed_difference_mps": 1.0,
+    "maximum_final_altitude_difference_m": 5.0,
+    "maximum_final_horizontal_separation_m": 5.0
+  }
+}

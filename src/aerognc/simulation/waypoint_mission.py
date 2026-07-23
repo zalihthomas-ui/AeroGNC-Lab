@@ -21,6 +21,7 @@ from pathlib import Path
 
 import numpy as np
 
+from aerognc.configuration.aircraft_loader import AircraftSandboxConfiguration
 from aerognc.gnc.fixedwing_autopilot import (
     AutopilotGains,
     FixedWingAutopilot,
@@ -37,7 +38,13 @@ from aerognc.mission.mission_manager import MissionManager, MissionState
 from aerognc.mission.safety import SafetyLimits, SafetyManager
 from aerognc.navigation.providers import NavigationProvider, PerfectStateProvider
 from aerognc.navigation.state import FlightEnvironment, NavigationState
-from aerognc.simulation.waypoint_backends import InternalFixedWingBackend, ReducedFixedWingParams
+from aerognc.simulation.waypoint_backends import (
+    InternalCoefficientFixedWingBackend,
+    InternalFixedWingBackend,
+    ReducedFixedWingParams,
+    VehicleBackend,
+    VehicleBackendKind,
+)
 from aerognc.vehicle.control_surfaces import (
     ControlSurface,
     ControlSurfaceConfig,
@@ -45,6 +52,7 @@ from aerognc.vehicle.control_surfaces import (
     SurfaceDeflections,
     SurfaceFailureMode,
 )
+from aerognc.vehicle.fixed_wing import STANDARD_GRAVITY_MPS2
 
 _TERMINAL_STATES = frozenset(
     {
@@ -68,7 +76,9 @@ class WaypointMissionConfig:
     guidance_gains: GuidanceGains = field(default_factory=GuidanceGains)
     autopilot_gains: AutopilotGains = field(default_factory=AutopilotGains)
     safety_limits: SafetyLimits = field(default_factory=SafetyLimits)
+    vehicle_backend: VehicleBackendKind = VehicleBackendKind.INTERNAL_REDUCED
     reduced_params: ReducedFixedWingParams = field(default_factory=ReducedFixedWingParams)
+    coefficient_configuration: AircraftSandboxConfiguration | None = None
     wind_ned_mps: tuple[float, float, float] = (0.0, 0.0, 0.0)
     gravity_mps2: float = 9.80665
     aileron_limit_rad: float = float(np.deg2rad(22.0))
@@ -106,6 +116,48 @@ class WaypointMissionConfig:
         unknown = set(self.surface_failures) - allowed
         if unknown:
             raise ValueError(f"unknown surface_failures channels: {sorted(unknown)}")
+        if not isinstance(self.vehicle_backend, VehicleBackendKind):
+            raise ValueError("vehicle_backend must be a VehicleBackendKind")
+        if (
+            self.vehicle_backend is VehicleBackendKind.INTERNAL_COEFFICIENT
+            and self.coefficient_configuration is None
+        ):
+            raise ValueError("internal_coefficient backend requires an aircraft configuration")
+        if (
+            self.vehicle_backend is VehicleBackendKind.INTERNAL_REDUCED
+            and self.coefficient_configuration is not None
+        ):
+            raise ValueError("reduced backend cannot carry a coefficient aircraft configuration")
+        if self.coefficient_configuration is not None:
+            if self.dt_s > 0.1:
+                raise ValueError("coefficient backend step cannot exceed 0.1 s")
+            if not np.isclose(
+                self.gravity_mps2,
+                STANDARD_GRAVITY_MPS2,
+                rtol=0.0,
+                atol=1.0e-9,
+            ):
+                raise ValueError(
+                    "coefficient backend derives planet gravity and requires the standard "
+                    "waypoint interface value"
+                )
+            geometry = self.coefficient_configuration.geometry
+            configured_limits = np.array(
+                [
+                    self.aileron_limit_rad,
+                    self.elevator_limit_rad,
+                    self.rudder_limit_rad,
+                ]
+            )
+            plant_limits = np.array(
+                [
+                    geometry.aileron_limit_rad,
+                    geometry.elevator_limit_rad,
+                    geometry.rudder_limit_rad,
+                ]
+            )
+            if np.any(configured_limits > plant_limits + 1.0e-12):
+                raise ValueError("waypoint actuator limits exceed coefficient-plant limits")
         if self.configuration_name is not None and not self.configuration_name.strip():
             raise ValueError("configuration_name must not be blank")
         if self.configuration_schema_version is not None and self.configuration_schema_version < 1:
@@ -253,11 +305,16 @@ def _build_surfaces(config: WaypointMissionConfig) -> ControlSurfaceSet:
             failure=config.surface_failures.get(channel, SurfaceFailureMode.NONE),
         )
 
+    coefficient_configuration = config.coefficient_configuration
+    initial_throttle = (
+        coefficient_configuration.initial_throttle if coefficient_configuration is not None else 0.0
+    )
     return ControlSurfaceSet(
         make("aileron", config.aileron_limit_rad),
         make("elevator", config.elevator_limit_rad),
         make("rudder", config.rudder_limit_rad),
         throttle_time_constant_s=config.throttle_time_constant_s,
+        initial_throttle=initial_throttle,
     )
 
 
@@ -269,6 +326,19 @@ def _initial_heading_rad(path_manager: PathManager) -> float:
     return 0.0
 
 
+def _build_backend(config: WaypointMissionConfig) -> VehicleBackend:
+    if config.vehicle_backend is VehicleBackendKind.INTERNAL_REDUCED:
+        return InternalFixedWingBackend(config.reduced_params)
+    coefficient_configuration = config.coefficient_configuration
+    if coefficient_configuration is None:  # pragma: no cover - dataclass invariant
+        raise ValueError("coefficient backend has no aircraft configuration")
+    return InternalCoefficientFixedWingBackend(
+        coefficient_configuration,
+        steady_wind_ned_mps=config.wind_ned_mps,
+        wind_horizon_s=config.max_time_s + config.dt_s,
+    )
+
+
 def run_waypoint_mission(
     mission: Mission, config: WaypointMissionConfig | None = None
 ) -> WaypointMissionResult:
@@ -276,19 +346,24 @@ def run_waypoint_mission(
     cfg = config or WaypointMissionConfig()
     mission.validate()
     frame = mission.local_frame()
-    path_manager = PathManager.from_mission(mission, frame=frame)
+    initial_position_ned_m = np.array([0.0, 0.0, -cfg.initial_altitude_m])
+    path_manager = PathManager.from_mission(
+        mission,
+        frame=frame,
+        initial_position_ned_m=initial_position_ned_m,
+    )
     manager = MissionManager(mission, path_manager)
     guidance = PathFollowingGuidance(cfg.guidance_mode, cfg.guidance_gains)
     autopilot = FixedWingAutopilot(cfg.autopilot_gains)
     surfaces = _build_surfaces(cfg)
-    backend = InternalFixedWingBackend(cfg.reduced_params)
+    backend = _build_backend(cfg)
     provider = cfg.provider or PerfectStateProvider()
     provider.reset()
     safety = SafetyManager(cfg.safety_limits)
     environment = FlightEnvironment(np.asarray(cfg.wind_ned_mps, dtype=float), cfg.gravity_mps2)
 
     backend.initialize(
-        position_ned_m=np.array([0.0, 0.0, -cfg.initial_altitude_m]),
+        position_ned_m=initial_position_ned_m,
         heading_rad=_initial_heading_rad(path_manager),
         airspeed_mps=cfg.initial_airspeed_mps,
     )
@@ -353,6 +428,7 @@ def run_waypoint_mission(
         "guidance_mode": cfg.guidance_mode.value,
         "navigation_provider": type(provider).__name__,
         "vehicle_backend": type(backend).__name__,
+        "vehicle_backend_details": dict(backend.provenance()),
         "dt_s": cfg.dt_s,
         "wind_ned_mps": list(cfg.wind_ned_mps),
         "surface_failures": {k: v.value for k, v in cfg.surface_failures.items()},

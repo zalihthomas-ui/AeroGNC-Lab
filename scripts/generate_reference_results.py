@@ -29,7 +29,9 @@ from aerognc.configuration import (
     load_six_dof_configuration,
     load_three_dof_configuration,
 )
+from aerognc.configuration.waypoint_loader import load_waypoint_runtime_configuration
 from aerognc.gnc.flight_envelope import analyze_flight_envelope
+from aerognc.mission import load_mission
 from aerognc.simulation.advanced_navigation import (
     run_navigation_consistency,
     simulate_advanced_navigation,
@@ -80,6 +82,10 @@ from aerognc.verification.launch_window import (
     launch_window_payload,
     run_launch_window_optimization,
 )
+from aerognc.verification.waypoint_backends import (
+    compare_waypoint_vehicle_models,
+    write_waypoint_cross_model_comparison,
+)
 from aerognc.visualisation import plot_three_dof_results
 from aerognc.visualisation.advanced_navigation import plot_advanced_navigation
 from aerognc.visualisation.aero_database import plot_aerodynamic_database
@@ -118,6 +124,21 @@ def main() -> int:
     configuration = load_three_dof_configuration(root / "configs" / "three_dof_nominal.yaml")
     result = simulate_three_dof(configuration)
     output = root / "results" / "reference"
+    reduced_waypoint = load_waypoint_runtime_configuration(root / "configs" / "waypoint_gnc.yaml")
+    coefficient_waypoint = load_waypoint_runtime_configuration(
+        root / "configs" / "waypoint_gnc_coefficient.yaml"
+    )
+    waypoint_comparison = compare_waypoint_vehicle_models(
+        load_mission(reduced_waypoint.mission_path),
+        reduced_waypoint.build_mission_config(),
+        coefficient_waypoint.build_mission_config(),
+    )
+    if not waypoint_comparison.passed:
+        raise RuntimeError("waypoint backend reference comparison failed acceptance")
+    write_waypoint_cross_model_comparison(
+        waypoint_comparison,
+        output / "waypoint_backend_comparison.json",
+    )
     orbit_sandbox_configuration = load_orbit_sandbox_configuration(
         root / "configs" / "orbit_sandbox.yaml"
     )

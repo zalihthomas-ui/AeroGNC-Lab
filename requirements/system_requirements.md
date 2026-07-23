@@ -516,7 +516,7 @@ defined in `verification_plan.md`.
   while reporting that the crossing is neither orbital insertion nor design proof.
 - **SYS-SIM-021 (T,A):** The integrated fixed-wing waypoint workflow shall load a
   versioned runtime configuration covering the mission reference, solver,
-  environment, navigation, guidance, autopilot, safety, reduced internal vehicle,
+  environment, navigation, guidance, autopilot, safety, selectable internal vehicle,
   actuator dynamics/failures, and output directory; it shall reject missing or
   unknown keys, unsupported schema versions or vehicle backends, invalid values, and
   any request for real-vehicle output before propagation begins.
@@ -524,6 +524,14 @@ defined in `verification_plan.md`.
   runtime configuration with a fresh navigation provider for each run, preserve the
   explicit mission-only CLI form, and record both runtime-configuration and mission
   SHA-256 provenance in configured-run output.
+- **SYS-SIM-023 (T,C,D,A):** The simulation-only waypoint runtime shall select either
+  the reduced mission plant or a nonlinear coefficient-driven 18-state fictional-
+  aircraft plant through the same physical-actuator contract; start the first path
+  leg at the configured air-start altitude; preserve aircraft identity and
+  configuration SHA-256 provenance; and pass the bundled matched-mission comparison
+  with both models complete and no safety intervention, cross-track at most 175 m,
+  duration ratio at most 1.5, terminal horizontal separation at most 5 m, terminal
+  altitude difference at most 5 m, and terminal airspeed difference at most 1 m/s.
 
 ### Astrodynamics
 

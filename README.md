@@ -26,7 +26,7 @@ traceable from equation to test.
 | Core domains | Flight dynamics, GNC, astrodynamics, simulation, and verification |
 | Models | 3-DOF and 6-DOF flight, rotating planets, fixed-wing aircraft, and orbital missions |
 | Interfaces | Python API, command-line tools, YAML projects, and a desktop engineering workbench |
-| Evidence | 622 deterministic tests and 80.62% branch-aware coverage on the current branch |
+| Evidence | 635 deterministic tests and 80.66% branch-aware coverage on the current branch |
 | Runtime | Python 3.12 or newer |
 | License | MIT |
 
@@ -73,7 +73,7 @@ telemetry boundaries, robust experiment design, a project-aware eight-page deskt
 workbench, localhost UDP packet verification, and an actionable one-click diagnostic.
 The checksummed snapshot contains all 6,324 NASA-confirmed exoplanets available at
 retrieval, explicitly as observational context rather than transfer ephemerides.
-Automated lint, strict typing, 622 tests, and 80.62% branch-aware coverage pass; two
+Automated lint, strict typing, 635 tests, and 80.66% branch-aware coverage pass; two
 MATLAB benchmarks were executed independently. No FMU binary was built or imported,
 and GMAT, SPICE, Simulink, and physical HIL remain explicitly unexecuted where
 unavailable. Build and generation commands remain local-only and never publish or
@@ -512,21 +512,26 @@ a safety envelope (airspeed/bank/pitch/altitude/geofence/GPS-loss).
 ```bash
 python -m aerognc.cli mission validate missions/waypoint_demo.mission.yaml
 python -m aerognc.cli waypoint --config configs/waypoint_gnc.yaml
+python -m aerognc.cli waypoint --config configs/waypoint_gnc_coefficient.yaml
+python scripts/compare_waypoint_backends.py
 ```
 
 The concise form remains available with `--mission`; guidance, wind, step, time-limit,
 and output flags can override either form explicitly. Library users can call
 `aerognc.fly_configured_mission("configs/waypoint_gnc.yaml")`. The runtime schema
-accepts only the internal simulation backend, rejects real-vehicle output, and
-records runtime-file and mission SHA-256 provenance in configured JSON results.
+selects either the reduced mission-level plant or the nonlinear coefficient-driven
+18-state fictional UAV plant, rejects external/real-vehicle output, and records
+runtime, mission, backend, aircraft, and aircraft-configuration provenance in the
+structured result.
 
 Selectable guidance (`direct_bearing`, `line_of_sight`, `l1_guidance`,
 `vector_field`) feeds a cascaded autopilot; a `VehicleBackend` interface and a
-`NavigationProvider` abstraction let the same GNC logic later drive JSBSim,
-ArduPilot/PX4 SITL, or hardware without rewrites. It is **designed for simulation,
-SITL validation, and progressive preparation for hardware integration** — it is not
-flight-certified, commands no real hardware by default, and autonomous landing is
-disabled. See the [waypoint GNC user & developer guide](docs/waypoint_gnc/user_guide.md),
+`NavigationProvider` abstraction keep both internal plants interchangeable and form
+the boundary for future local JSBSim or ArduPilot/PX4 SITL adapters. Real-aircraft
+output is structurally unavailable, the models are not flight-certified, and
+autonomous landing is disabled. The committed matched-mission evidence reports both
+models completing without safety intervention and meeting declared cross-model
+bounds. See the [waypoint GNC user & developer guide](docs/waypoint_gnc/user_guide.md),
 the [SITL/hardware roadmap](docs/waypoint_gnc/sitl_hardware_roadmap.md), and the
 task tracker in [`TODO.md`](TODO.md).
 
@@ -583,8 +588,8 @@ acceptance. Evidence is mapped in
 
 | Evidence | Executed result |
 |---|---|
-| Python suite | 622 deterministic unit, integration, and validation tests pass |
-| Coverage | 80.62% branch-aware core/package coverage; enforced threshold 75% |
+| Python suite | 635 deterministic unit, integration, and validation tests pass |
+| Coverage | 80.66% branch-aware core/package coverage; enforced threshold 75% |
 | RK4 | Fourth-order convergence and independent SciPy agreement below \(10^{-6}\) |
 | Adaptive numerics | Dormand--Prince convergence/reference agreement, dense events, checkpoints, scheduler order, and variational derivatives pass |
 | Nominal 3-DOF | 1101.49 m apogee; burnout/apogee/impact events ordered and bounded |
@@ -634,7 +639,7 @@ Executed evidence, assumptions, and gaps are recorded in the
 - `docs/`: conventions, equations, subsystem designs, and reports
 - `examples/` and `scripts/`: reproducible engineering workflows
 - `matlab_validation/`, `simulink_validation/`, `gmat_validation/`, and `fmi_validation/`: optional independent checks and truthful execution status
-- `results/reference/`: 51 compact, reproducible representative PNG/JSON artifacts
+- `results/reference/`: 52 compact, reproducible representative PNG/JSON artifacts
 
 The branch-coverage metric excludes the native Tk Mission Designer and Simulation
 Workbench event-loop adapters, which are exercised with CLI dispatch tests and

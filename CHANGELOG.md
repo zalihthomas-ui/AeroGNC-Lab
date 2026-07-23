@@ -13,6 +13,9 @@ and the project uses Semantic Versioning.
   Dependabot, CODEOWNERS, release provenance, and trusted-publishing automation.
 - An auditable release process, public roadmap, and automated requirement-to-
   traceability integrity checks.
+- A selectable nonlinear coefficient-driven 18-state waypoint backend, the wholly
+  synthetic Sparrow-X2 civilian research-UAV configuration, backend/aircraft SHA-256
+  provenance, and a deterministic reduced-versus-coefficient acceptance report.
 
 - Mission-planner **flight simulation playback** (Simulate/Play/Pause/Reset) that
   animates the aircraft flying the mission with a heading glyph and a live HUD,
@@ -60,6 +63,9 @@ and the project uses Semantic Versioning.
 
 ### Changed
 
+- Air-started waypoint paths now begin at the configured initial NED altitude rather
+  than commanding a transient descent toward the home datum; both internal plants
+  consequently follow the same physically coherent first-leg altitude ramp.
 - Raised the development test floor to the security-fixed pytest 9 line and made the
   security workflow audit both runtime and development dependencies with a
   security-fixed packaging toolchain.
@@ -81,7 +87,7 @@ and the project uses Semantic Versioning.
 
 ### Verification
 
-- The current suite passes 622 deterministic tests with 80.62% branch-aware package
+- The current suite passes 635 deterministic tests with 80.66% branch-aware package
   coverage against the enforced 75% floor. Ruff lint/format and strict MyPy checks
   pass on Python 3.13, the workflow definitions pass actionlint 1.7.12, the built
   distributions pass Twine and clean-install validation, and the installed
@@ -131,7 +137,7 @@ and the project uses Semantic Versioning.
   actuator/controller mapping, mesh parsing, live-input neutrality, batch/CLI output,
   and the calculated 100 km research-ascent boundary pass automated tests.
 - The full hidden eight-page workbench constructs with specialist inputs initially
-  hidden. The canonical reference generator completes and produces 51 compact
+  hidden. The canonical reference generator completes and produces 52 compact
   PNG/JSON artifacts; the four new figures were inspected locally.
 - The complete suite passes 402 deterministic tests with 80.23% branch-aware package
   coverage against the enforced 75% floor; Ruff check/format, strict source typing,

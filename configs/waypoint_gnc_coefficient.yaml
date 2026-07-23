@@ -1,0 +1,90 @@
+# Versioned, simulation-only runtime using the nonlinear coefficient-driven plant.
+schema_version: 1
+
+metadata:
+  name: waypoint_demo_coefficient
+  safety_scope: >-
+    Fictional civilian research-aircraft waypoint study using simulation only,
+    synthetic parameters, and no operational or real-vehicle output.
+  fictional: true
+
+mission_file: ../missions/waypoint_demo.mission.yaml
+output_directory: results/waypoint_coefficient
+
+simulation:
+  dt_s: 0.05
+  max_time_s: 900.0
+  initial_altitude_m: 100.0
+  initial_airspeed_mps: 20.0
+
+environment:
+  wind_ned_mps: [0.0, 0.0, 0.0]
+  gravity_mps2: 9.80665
+
+navigation:
+  mode: perfect
+  noisy:
+    seed: 3
+    position_sigma_m: 1.5
+    velocity_sigma_mps: 0.3
+    airspeed_sigma_mps: 0.4
+    gps_dropout_window_s: null
+
+guidance:
+  mode: vector_field
+  vector_field_gain_per_m: 0.05
+  vector_field_max_approach_deg: 80.0
+  orbit_gain_per_m: 0.02
+  l1_distance_m: 80.0
+  altitude_error_to_climb_rate_per_s: 0.4
+  max_climb_rate_mps: 6.0
+  max_roll_feedforward_deg: 45.0
+
+autopilot:
+  course_kp: 1.2
+  course_ki: 0.1
+  altitude_kp_rad_per_m: 0.03
+  altitude_ki: 0.002
+  airspeed_kp: 0.06
+  airspeed_ki: 0.02
+  roll_kp: 1.6
+  roll_rate_kd: 0.35
+  pitch_kp: 2.2
+  pitch_rate_kd: 0.4
+  yaw_damper_kd: 0.5
+  bank_limit_deg: 35.0
+  pitch_limit_deg: 20.0
+  integral_bank_limit_deg: 15.0
+  integral_pitch_limit_deg: 10.0
+  throttle_trim: 0.28
+  throttle_delta_limit: 0.5
+  elevator_trim: 0.10
+
+safety:
+  min_airspeed_mps: 12.0
+  max_airspeed_mps: 45.0
+  max_bank_deg: 60.0
+  max_pitch_deg: 45.0
+  min_altitude_m: 5.0
+  max_altitude_m: 3000.0
+  geofence_radius_m: 5000.0
+  max_cross_track_m: 500.0
+
+vehicle:
+  backend: internal_coefficient
+  aircraft_config: aircraft_waypoint_uav.yaml
+
+actuators:
+  aileron_limit_deg: 22.0
+  elevator_limit_deg: 25.0
+  rudder_limit_deg: 28.0
+  surface_time_constant_s: 0.12
+  surface_rate_limit_degps: 120.0
+  throttle_time_constant_s: 0.6
+  failures:
+    aileron: none
+    elevator: none
+    rudder: none
+
+hardware:
+  allow_real_vehicle_output: false

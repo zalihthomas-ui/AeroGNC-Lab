@@ -12,23 +12,23 @@
   "maxima": {
     "maximum_airspeed": {
       "unit": "m/s",
-      "value": 82.34326963101554
+      "value": 84.76095907945059
     },
     "maximum_altitude": {
       "unit": "m",
-      "value": 1537.0583133716136
+      "value": 1552.546741019003
     },
     "maximum_load_factor": {
       "unit": "g",
-      "value": 1.0097629848986194
+      "value": 1.0730106875822978
     },
     "maximum_mach": {
       "unit": "1",
-      "value": 0.246176699220298
+      "value": 0.2534892669651033
     },
     "maximum_turn_rate": {
       "unit": "deg/s",
-      "value": 0.00025425678718307926
+      "value": 2.1613097406718276
     },
     "stall_duration": {
       "unit": "s",
