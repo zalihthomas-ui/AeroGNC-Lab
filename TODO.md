@@ -80,9 +80,10 @@ _Module: `src/aerognc/gnc/path_manager.py` (exported via `aerognc.gnc`). 18 test
 - [x] 3.4 Robust completion: acceptance radius + altitude tolerance + half-plane switching
   (fly-through) vs proximity (fly-over) + min-dwell + monotonic advance (no chatter; verified
   under seeded position noise).
-- [~] 3.5 Fillet geometry done & tested (`fillet_geometry` → tangent points, centre, turn
-  angle, direction). Wiring fillet arcs into the switcher as inserted `OrbitSegment`s and
-  Dubins paths are the next refinement (deferred, noted in module docstring).
+- [x] 3.5 Fillet geometry and arc following (`FilletSegment`) with coordinated-turn/
+  leg-length radius bounds, tangent half-plane switching, altitude/airspeed
+  interpolation, and direction-consistent line/loiter entry and exit. Full Dubins
+  routing remains an optional future planner rather than a waypoint-loop dependency.
 - [x] 3.6 Unit tests: turn geometry, line/orbit geometry, fillet, segment layout, turn
   anticipation, fly-over proximity, march-to-completion without chatter, loiter dwell.
 
@@ -115,15 +116,17 @@ _Module: `gnc/fixedwing_autopilot.py`. 10 tests; ruff + mypy strict clean._
   (roll error + roll-rate damping); yaw damper→rudder. Reuses `gnc/pid.PIDController`.
 - [x] 5.2 Longitudinal: altitude→pitch (PI, pitch-limited)→elevator (+pitch-rate damping);
   airspeed→throttle (PI about trim). Reuses PID.
-- [~] 5.3 TECS-style total-energy mode — deferred (standard altitude/airspeed loops in place).
+- [x] 5.3 Selectable TECS-style specific-energy sum/balance mode with reference slew,
+  feedforward, output tracking, anti-windup, limits, and deterministic tuning.
 - [x] 5.4 Anti-windup, output/integral limits (PID), integrator reset / bumpless re-engage
   (`reset()`), trim feedforward; gain-scheduling hook = injectable `AutopilotGains`.
-- [~] 5.5 Trim integration with `flight_analysis.solve_trim` — deferred; trim throttle/
-  elevator provided as gains for now.
+- [x] 5.5 Bounded coefficient-plant trim integration with `flight_analysis.solve_trim`,
+  analytic reduced-plant equilibrium, explicit reject/configured-fallback policy,
+  residual provenance, and trim-initialized actuator/controller state.
 - [x] 5.6 Normalized surface commands ([-1,1]) + throttle ([0,1]); documented sign
   convention shared with the internal backend and `vehicle/control_surfaces.py`.
-- [~] 5.7 Config-selectable controllers — deferred; existing LQR/state-feedback untouched
-  (this is an added autopilot, not a replacement).
+- [x] 5.7 Strict runtime selection between legacy altitude/airspeed loops and total-
+  energy control; existing LQR/state-feedback analysis remains independent.
 - [x] 5.8 Unit tests: course→roll sign & bank limit, roll-rate damping, altitude→pitch &
   limit, airspeed→throttle bounds, yaw damper, output clipping, reset.
 
@@ -298,7 +301,7 @@ _Unit + integration (full chain) + scenario tests (nominal, all 4 guidance modes
 - [x] 15.2 Integration tests along the full chain (planner→manager→guidance→control→
   actuator→dynamics→nav→guidance).
 - [~] 15.3 Scenario tests (17 scenarios in spec §26) with fixed seeds.
-- [x] 15.4 Keep coverage ≥ 75% (repo threshold); 641 tests pass with 80.86%
+- [x] 15.4 Keep coverage ≥ 75% (repo threshold); 668 tests pass with 81.15%
   branch-aware package coverage under pytest 9.0.3 on 2026-07-23.
 
 ---
@@ -364,6 +367,13 @@ _`aerognc.api.fly_mission` façade done (lazily exposed as `aerognc.fly_mission`
 ---
 
 ## Running log (newest first)
+
+- 2026-07-23 — Trim-aware waypoint control completed: bounded nonlinear/analytic
+  initialization with explicit failure policy, selectable total-energy control,
+  tangent line fillets and loiter transitions, bounded command slew, controller-
+  facing envelope margins, and a provenance-stamped two-backend 1 m/s-crosswind
+  campaign. All 54 reference artifacts reproduce byte-for-byte. **668 tests pass
+  with 81.15% branch coverage; Ruff and strict MyPy pass.**
 
 - 2026-07-23 — Truth-isolated estimated waypoint navigation integrated with seeded
   timestamped IMU/GNSS/barometer/airspeed, fixed-lag 15-state ESKF replay, NIS

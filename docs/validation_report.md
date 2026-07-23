@@ -41,10 +41,11 @@ validation.
 
 | Area | Executed result | Acceptance |
 |---|---|---|
-| Automated suite | 641 deterministic tests | All pass |
-| Branch coverage | 80.86% core/package coverage | Enforced minimum 75% |
+| Automated suite | 668 deterministic tests | All pass |
+| Branch coverage | 81.15% core/package coverage | Enforced minimum 75% |
 | Waypoint backend comparison | Reduced 247.25 s / 151.714 m max cross-track; coefficient 180.30 s / 96.631 m; 0.403 m terminal horizontal separation; 1.371 duration ratio | Both complete without safety intervention; every declared cross-model bound passes |
 | Waypoint estimated navigation | 20 s GNSS outage; 0.376 m pre-outage RMS; 9.109 m maximum outage error; 0.355 m recovery RMS; 0.061 m/s recovery velocity RMS; 20.45 s maximum aiding age | Full coefficient-plant mission completes without safety intervention; estimates remain valid and covariance positive semidefinite; every declared dropout/recovery bound passes |
+| Waypoint trim/TECS/path control | 1 m/s crosswind; coefficient/reduced complete in 170.80/178.45 s; 10.673/20.831 m max cross-track; 8.224/8.000 m/s min stall margin; 71.66%/70.14% min surface margin; 1.346 m terminal separation | Both internal plants exercise line/fillet/orbit, strict trim, bumpless total-energy control, and tangent loiter transitions with zero safety events or saturation; every declared bound passes |
 | Adaptive numerical core | DP5(4) convergence/reference cases, dense directed events, checkpoint hashes, deterministic task order, and finite-difference sensitivities | Every numerical/tolerance/integrity assertion passes |
 | Nominal 3-DOF | Burnout 3.350 s; apogee 1101.49 m at 15.569 s; impact 31.794 s | Ordered events and bounded mass |
 | Interactive playback | Pause/restart/seek/speed state tests, PNG frame, and headless GIF export pass | Source trajectory remains unchanged |
@@ -174,16 +175,16 @@ hiding it.
   bounded socket timeout, and fail-silent watchdog behavior. FMI evidence checks the
   project XML contract without treating it as an executable FMU.
 
-The final branch-aware report is 80.86% against an enforced 75% threshold. It
+The final branch-aware report is 81.15% against an enforced 75% threshold. It
 excludes `visualisation/mission_designer.py` and `visualisation/workbench.py`, whose Tk
 event loops are exercised by CLI dispatch and live-window/widget-construction smoke
 checks. The input, planning, propagation, catalog, uncertainty, and plotting services
 behind the UIs remain in automated coverage. Ruff format/check, strict practical
 mypy, editable installation, and `pip check` pass.
 
-The reference-generation entry point now produces 53 compact PNG/JSON artifacts,
+The reference-generation entry point now produces 54 compact PNG/JSON artifacts,
 including the v0.3 through v0.8 workflows. Two consecutive complete generations
-produced identical SHA-256 hashes for all 53 artifacts. Numerical reference records
+produced identical SHA-256 hashes for all 54 artifacts. Numerical reference records
 omit measured runtime and workspace-dependent paths. GitHub Actions is configured to
 repeat lint, formatting, strict typing, one canonical branch-aware coverage run,
 deterministic unit and CLI smoke tests on Python 3.12, 3.13, and 3.14 plus Windows,

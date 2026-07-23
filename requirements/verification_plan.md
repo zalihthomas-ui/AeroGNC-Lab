@@ -76,6 +76,9 @@ support interpretation but never constitute the sole pass criterion.
 - Nonlinear trim and finite-difference Jacobian analytical cases; Hamiltonian LQR
   comparison with SciPy; known SISO phase margin; oscillator system identification;
   and measured SIL deadline statistics.
+- Waypoint straight-flight trim convergence/failure policy, bumpless total-energy
+  control, reference and actuator limits, tangent fillet/orbit geometry, estimated-
+  state envelope margins, and a deterministic two-plant mission in steady crosswind.
 - Stationary and rotating 15-state ESKF propagation plus GNSS/barometer covariance
   reduction and positive-semidefinite checks.
 - Mission Designer backend path/mass/event effects and CLI dispatch; visual desktop

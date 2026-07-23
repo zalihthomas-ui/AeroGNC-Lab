@@ -6,23 +6,21 @@ local NED frame, tracks which segment is active, and decides when the aircraft
 has reached a waypoint. Guidance (Phase 4) consumes the active segment; it does
 not need to know how switching is decided.
 
-Two segment primitives are provided, following Beard & McLain, *Small Unmanned
+Three segment primitives are provided, following Beard & McLain, *Small Unmanned
 Aircraft* (2012):
 
-* :class:`LineSegment` — a straight leg between two points, with linear altitude
+* :class:`LineSegment` -- a straight leg between two points, with linear altitude
   interpolation along the leg.
-* :class:`OrbitSegment` — a loiter circle of fixed radius and turn direction.
+* :class:`FilletSegment` -- a finite circular arc that rounds a fly-through corner.
+* :class:`OrbitSegment` -- a loiter circle of fixed radius and turn direction.
 
 Fixed-wing aircraft cannot change heading instantaneously, so *fly-through*
-waypoints use **half-plane turn anticipation**: the switch happens when the
-vehicle crosses the plane through the waypoint whose normal bisects the incoming
-and outgoing legs. *Fly-over* waypoints (loiter fixes, return-home, landing)
-instead require actual proximity plus altitude agreement.
-
-Fillet-arc geometry (:func:`fillet_geometry`) and the coordinated-turn radius
-(:func:`coordinated_turn_radius_m`) are provided as the tested building blocks
-for fillet/Dubins arc-following, which is the next planned refinement (see
-``TODO.md`` Phase 3.5); the current switcher uses half-plane anticipation.
+waypoints can use coordinated-turn fillets sized by airspeed, bank limit, and
+available leg length. The switcher advances at tangent half-planes. Loiter
+approach and departure lines are also moved to direction-consistent orbit tangent
+points, and loiter exit waits for the aircraft to reach the departure region.
+*Fly-over* waypoints without a rounded transition instead require actual
+proximity plus altitude agreement.
 """
 
 from abc import ABC, abstractmethod
@@ -66,6 +64,7 @@ class SegmentKind(StrEnum):
 
     LINE = "line"
     ORBIT = "orbit"
+    FILLET = "fillet"
 
 
 class PathSegment(ABC):
@@ -97,6 +96,11 @@ class PathSegment(ABC):
     @abstractmethod
     def horizontal_distance_to_waypoint_m(self, position_ned_m: FloatArray) -> float:
         """Return the horizontal distance to the segment's terminal point [m]."""
+
+    def commanded_airspeed_mps(self, position_ned_m: FloatArray) -> float:
+        """Return the local airspeed reference; constant for ordinary segments."""
+        as_vector(position_ned_m, 3, name="position_ned_m")
+        return self.airspeed_mps
 
 
 @dataclass(frozen=True, slots=True)
@@ -221,6 +225,128 @@ class OrbitSegment(PathSegment):
 
 
 @dataclass(frozen=True, slots=True)
+class FilletSegment(PathSegment):
+    """Finite tangent circular arc joining two fly-through line segments."""
+
+    _waypoint_id: int
+    center_ne_m: FloatArray
+    radius_m: float
+    direction: int
+    entry_ned_m: FloatArray
+    exit_ned_m: FloatArray
+    turn_angle_rad: float
+    entry_airspeed_mps: float
+    exit_airspeed_mps: float
+
+    def __post_init__(self) -> None:
+        center = as_vector(self.center_ne_m, 2, name="center_ne_m")
+        entry = as_vector(self.entry_ned_m, 3, name="entry_ned_m")
+        exit_point = as_vector(self.exit_ned_m, 3, name="exit_ned_m")
+        values = np.asarray(
+            [
+                self.radius_m,
+                self.turn_angle_rad,
+                self.entry_airspeed_mps,
+                self.exit_airspeed_mps,
+            ]
+        )
+        if not np.all(np.isfinite(values)) or np.any(values <= 0.0):
+            raise ValueError("fillet radius, turn angle, and airspeeds must be positive")
+        if self.turn_angle_rad >= np.pi:
+            raise ValueError("fillet turn angle must be below pi")
+        if self.direction not in (-1, 1):
+            raise ValueError("fillet direction must be +1 or -1")
+        radii = np.asarray(
+            [
+                np.linalg.norm(entry[:2] - center),
+                np.linalg.norm(exit_point[:2] - center),
+            ]
+        )
+        if not np.allclose(radii, self.radius_m, rtol=1.0e-8, atol=1.0e-8):
+            raise ValueError("fillet entry and exit must lie on the declared circle")
+        object.__setattr__(self, "center_ne_m", center)
+        object.__setattr__(self, "entry_ned_m", entry)
+        object.__setattr__(self, "exit_ned_m", exit_point)
+
+    @property
+    def kind(self) -> SegmentKind:
+        return SegmentKind.FILLET
+
+    @property
+    def waypoint_id(self) -> int:
+        return self._waypoint_id
+
+    @property
+    def airspeed_mps(self) -> float:
+        return self.entry_airspeed_mps
+
+    @property
+    def entry_angle_rad(self) -> float:
+        delta = self.entry_ned_m[:2] - self.center_ne_m
+        return float(np.arctan2(delta[1], delta[0]))
+
+    @property
+    def exit_angle_rad(self) -> float:
+        delta = self.exit_ned_m[:2] - self.center_ne_m
+        return float(np.arctan2(delta[1], delta[0]))
+
+    @property
+    def exit_tangent_ne(self) -> FloatArray:
+        angle = self.exit_angle_rad
+        return self.direction * np.asarray([-np.sin(angle), np.cos(angle)])
+
+    @property
+    def entry_tangent_ne(self) -> FloatArray:
+        angle = self.entry_angle_rad
+        return self.direction * np.asarray([-np.sin(angle), np.cos(angle)])
+
+    def radial_distance_m(self, position_ned_m: FloatArray) -> float:
+        position = as_vector(position_ned_m, 3, name="position_ned_m")
+        return float(np.linalg.norm(position[:2] - self.center_ne_m))
+
+    def along_track_fraction(self, position_ned_m: FloatArray) -> float:
+        position = as_vector(position_ned_m, 3, name="position_ned_m")
+        delta = position[:2] - self.center_ne_m
+        angle = float(np.arctan2(delta[1], delta[0]))
+        if self.direction > 0:
+            swept = (angle - self.entry_angle_rad) % (2.0 * np.pi)
+        else:
+            swept = (self.entry_angle_rad - angle) % (2.0 * np.pi)
+        return float(np.clip(swept / self.turn_angle_rad, 0.0, 1.0))
+
+    def commanded_down_m(self, position_ned_m: FloatArray) -> float:
+        fraction = self.along_track_fraction(position_ned_m)
+        return float(self.entry_ned_m[2] + fraction * (self.exit_ned_m[2] - self.entry_ned_m[2]))
+
+    def commanded_airspeed_mps(self, position_ned_m: FloatArray) -> float:
+        fraction = self.along_track_fraction(position_ned_m)
+        return float(
+            self.entry_airspeed_mps + fraction * (self.exit_airspeed_mps - self.entry_airspeed_mps)
+        )
+
+    def cross_track_error_m(self, position_ned_m: FloatArray) -> float:
+        return self.radial_distance_m(position_ned_m) - self.radius_m
+
+    def horizontal_distance_to_waypoint_m(self, position_ned_m: FloatArray) -> float:
+        position = as_vector(position_ned_m, 3, name="position_ned_m")
+        return float(np.linalg.norm(position[:2] - self.exit_ned_m[:2]))
+
+    def sample_ned(self, count: int = 16) -> FloatArray:
+        """Return deterministic arc samples for planned-path rendering."""
+        if isinstance(count, bool) or not isinstance(count, int) or count < 2:
+            raise ValueError("fillet sample count must be an integer of at least two")
+        fraction = np.linspace(0.0, 1.0, count)
+        angle = self.entry_angle_rad + self.direction * self.turn_angle_rad * fraction
+        return np.column_stack(
+            (
+                self.center_ne_m[0] + self.radius_m * np.cos(angle),
+                self.center_ne_m[1] + self.radius_m * np.sin(angle),
+                self.entry_ned_m[2] + fraction * (self.exit_ned_m[2] - self.entry_ned_m[2]),
+            )
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class FilletGeometry:
     """Circular fillet joining two legs at a corner (turn-anticipation arc)."""
 
@@ -297,10 +423,36 @@ class PathManagerConfig:
 
     min_dwell_s: float = 0.0
     require_altitude_on_flyover: bool = True
+    fillet_bank_rad: float | None = None
+    fillet_max_radius_m: float = 200.0
+    fillet_leg_fraction: float = 0.45
+    minimum_fillet_radius_m: float = 5.0
+    tangent_orbit_transitions: bool = False
 
     def __post_init__(self) -> None:
+        if not isinstance(self.require_altitude_on_flyover, bool) or not isinstance(
+            self.tangent_orbit_transitions, bool
+        ):
+            raise ValueError("path-manager switching flags must be boolean")
         if not np.isfinite(self.min_dwell_s) or self.min_dwell_s < 0.0:
             raise ValueError("min_dwell_s must be nonnegative and finite")
+        values = np.asarray(
+            [
+                self.fillet_max_radius_m,
+                self.fillet_leg_fraction,
+                self.minimum_fillet_radius_m,
+            ]
+        )
+        if not np.all(np.isfinite(values)) or np.any(values <= 0.0):
+            raise ValueError("fillet radius/fraction settings must be positive and finite")
+        if self.fillet_leg_fraction >= 0.5:
+            raise ValueError("fillet_leg_fraction must be below 0.5")
+        if self.minimum_fillet_radius_m > self.fillet_max_radius_m:
+            raise ValueError("minimum fillet radius must not exceed its maximum")
+        if self.fillet_bank_rad is not None and (
+            not np.isfinite(self.fillet_bank_rad) or not 0.0 < self.fillet_bank_rad < 0.5 * np.pi
+        ):
+            raise ValueError("fillet_bank_rad must lie in (0, pi/2) when enabled")
 
 
 @dataclass(frozen=True, slots=True)
@@ -313,12 +465,14 @@ class _Leg:
     fly_over: bool
     switch_normal_ne: FloatArray | None = None
     loiter_duration_s: float | None = None
+    orbit_exit_ne_m: FloatArray | None = None
 
 
 class MissionPhase(StrEnum):
     """Coarse path-following phase, exposed to the UI and logger."""
 
     NAVIGATE = "navigate"
+    TURN = "turn"
     LOITER = "loiter"
     COMPLETE = "complete"
 
@@ -368,6 +522,7 @@ class PathManager:
         position at the waypoint altitude.
         """
         mission.validate()
+        active_config = config or PathManagerConfig()
         active_frame = frame if frame is not None else mission.local_frame()
         legs: list[_Leg] = []
         start_ned = (
@@ -415,8 +570,12 @@ class PathManager:
                 )
             start_ned = target_ned
 
+        if active_config.tangent_orbit_transitions:
+            legs = _insert_orbit_tangencies(legs)
+        if active_config.fillet_bank_rad is not None:
+            legs = _insert_fillet_legs(legs, active_config)
         _assign_switch_normals(legs)
-        return cls(legs, config)
+        return cls(legs, active_config)
 
     # -- runtime --------------------------------------------------------------
     def reset(self) -> None:
@@ -453,7 +612,9 @@ class PathManager:
         leg = self._legs[self._active]
         segment = leg.segment
         fraction = (
-            segment.along_track_fraction(position) if isinstance(segment, LineSegment) else 0.0
+            segment.along_track_fraction(position)
+            if isinstance(segment, (LineSegment, FilletSegment))
+            else 0.0
         )
         phase = self._phase(leg)
         return PathManagerStatus(
@@ -486,7 +647,7 @@ class PathManager:
         self._complete = False
 
     def planned_path_ned(self) -> FloatArray:
-        """Return the planned polyline vertices (initial point + terminals) in NED."""
+        """Return line vertices and sampled fillet arcs in NED."""
         first = self._legs[0].segment
         if not isinstance(first, LineSegment):  # pragma: no cover - construction invariant
             raise RuntimeError("path must begin with a line segment")
@@ -495,6 +656,8 @@ class PathManager:
             segment = leg.segment
             if isinstance(segment, LineSegment):
                 vertices.append(segment.end_ned_m)
+            elif isinstance(segment, FilletSegment):
+                vertices.extend(segment.sample_ned()[1:])
             elif isinstance(segment, OrbitSegment):
                 vertices.append(segment.center_ned_m)
         return np.asarray(vertices, dtype=np.float64)
@@ -503,13 +666,34 @@ class PathManager:
         """Return the loiter/orbit segments (for map rendering)."""
         return [leg.segment for leg in self._legs if isinstance(leg.segment, OrbitSegment)]
 
+    def fillet_arcs(self) -> list[FilletSegment]:
+        """Return inserted finite turn arcs for rendering and verification."""
+        return [leg.segment for leg in self._legs if isinstance(leg.segment, FilletSegment)]
+
     # -- internals ------------------------------------------------------------
     def _arrived(self, leg: _Leg, position: FloatArray, dt_s: float) -> bool:
         segment = leg.segment
+        if isinstance(segment, FilletSegment):
+            return self._fillet_arrived(leg, segment, position, dt_s)
         if isinstance(segment, OrbitSegment):
             return self._orbit_arrived(leg, segment, position, dt_s)
         assert isinstance(segment, LineSegment)
         return self._line_arrived(leg, segment, position, dt_s)
+
+    def _fillet_arrived(
+        self,
+        leg: _Leg,
+        segment: FilletSegment,
+        position: FloatArray,
+        dt_s: float,
+    ) -> bool:
+        normal = segment.exit_tangent_ne if leg.switch_normal_ne is None else leg.switch_normal_ne
+        crossed_exit = float(np.dot(position[:2] - segment.exit_ned_m[:2], normal)) >= 0.0
+        if crossed_exit:
+            self._dwell_s += dt_s
+        else:
+            self._dwell_s = 0.0
+        return crossed_exit and self._dwell_s >= self.config.min_dwell_s
 
     def _line_arrived(
         self, leg: _Leg, segment: LineSegment, position: FloatArray, dt_s: float
@@ -547,7 +731,14 @@ class PathManager:
         # explicit mission command (pause/RTH/skip) handled by the mission manager.
         if leg.loiter_duration_s is None:
             return False
-        return self._loiter_elapsed_s >= leg.loiter_duration_s
+        if self._loiter_elapsed_s < leg.loiter_duration_s:
+            return False
+        if leg.orbit_exit_ne_m is None:
+            return True
+        return (
+            float(np.linalg.norm(position[:2] - leg.orbit_exit_ne_m)) <= leg.acceptance_radius_m
+            and altitude_ok
+        )
 
     def _advance(self) -> bool:
         self._dwell_s = 0.0
@@ -561,6 +752,8 @@ class PathManager:
     def _phase(self, leg: _Leg) -> MissionPhase:
         if self._complete:
             return MissionPhase.COMPLETE
+        if isinstance(leg.segment, FilletSegment):
+            return MissionPhase.TURN
         if isinstance(leg.segment, OrbitSegment):
             return MissionPhase.LOITER
         return MissionPhase.NAVIGATE
@@ -590,7 +783,245 @@ def _assign_switch_normals(legs: list[_Leg]) -> None:
             fly_over=current.fly_over,
             switch_normal_ne=bisector / norm,
             loiter_duration_s=current.loiter_duration_s,
+            orbit_exit_ne_m=current.orbit_exit_ne_m,
         )
+
+
+def _insert_fillet_legs(legs: list[_Leg], config: PathManagerConfig) -> list[_Leg]:
+    """Insert feasible tangent arcs at fly-through line-to-line corners."""
+    if config.fillet_bank_rad is None:
+        return legs
+    output: list[_Leg] = []
+    start_overrides: dict[int, FloatArray] = {}
+    for index, original in enumerate(legs):
+        current = original
+        if index in start_overrides and isinstance(original.segment, LineSegment):
+            line = original.segment
+            current = _replace_leg_segment(
+                original,
+                LineSegment(
+                    line.waypoint_id,
+                    start_overrides[index],
+                    line.end_ned_m,
+                    line.airspeed_mps,
+                ),
+            )
+        if index + 1 >= len(legs):
+            output.append(current)
+            continue
+        following = legs[index + 1]
+        if (
+            current.fly_over
+            or not isinstance(current.segment, LineSegment)
+            or not isinstance(following.segment, LineSegment)
+        ):
+            output.append(current)
+            continue
+        inserted = _fillet_at_corner(current, following, config)
+        if inserted is None:
+            output.append(current)
+            continue
+        shortened, fillet, next_start = inserted
+        output.extend((shortened, fillet))
+        start_overrides[index + 1] = next_start
+    return output
+
+
+def _insert_orbit_tangencies(legs: list[_Leg]) -> list[_Leg]:
+    """Move loiter approach/departure line endpoints to tangent circle points."""
+    adjusted = list(legs)
+    for index, leg in enumerate(tuple(adjusted)):
+        orbit = leg.segment
+        if not isinstance(orbit, OrbitSegment):
+            continue
+        entry_ne: FloatArray | None = None
+        if index > 0 and isinstance(adjusted[index - 1].segment, LineSegment):
+            approach_leg = adjusted[index - 1]
+            approach = approach_leg.segment
+            assert isinstance(approach, LineSegment)
+            entry_ne = _orbit_tangent_point(
+                orbit.center_ned_m[:2],
+                approach.start_ned_m[:2],
+                orbit.radius_m,
+                orbit.direction,
+                entering=True,
+            )
+            if entry_ne is not None:
+                entry = np.asarray([*entry_ne, orbit.center_ned_m[2]], dtype=np.float64)
+                adjusted[index - 1] = _replace_leg_segment(
+                    approach_leg,
+                    LineSegment(
+                        approach.waypoint_id,
+                        approach.start_ned_m,
+                        entry,
+                        approach.airspeed_mps,
+                    ),
+                )
+
+        exit_ne: FloatArray | None = None
+        if index + 1 < len(adjusted) and isinstance(adjusted[index + 1].segment, LineSegment):
+            departure_leg = adjusted[index + 1]
+            departure = departure_leg.segment
+            assert isinstance(departure, LineSegment)
+            exit_ne = _orbit_tangent_point(
+                orbit.center_ned_m[:2],
+                departure.end_ned_m[:2],
+                orbit.radius_m,
+                orbit.direction,
+                entering=False,
+            )
+            if exit_ne is not None:
+                exit_point = np.asarray([*exit_ne, orbit.center_ned_m[2]], dtype=np.float64)
+                adjusted[index + 1] = _replace_leg_segment(
+                    departure_leg,
+                    LineSegment(
+                        departure.waypoint_id,
+                        exit_point,
+                        departure.end_ned_m,
+                        departure.airspeed_mps,
+                    ),
+                )
+        adjusted[index] = _Leg(
+            segment=orbit,
+            acceptance_radius_m=leg.acceptance_radius_m,
+            altitude_tolerance_m=leg.altitude_tolerance_m,
+            fly_over=leg.fly_over,
+            switch_normal_ne=leg.switch_normal_ne,
+            loiter_duration_s=leg.loiter_duration_s,
+            orbit_exit_ne_m=exit_ne,
+        )
+    return adjusted
+
+
+def _orbit_tangent_point(
+    center_ne_m: FloatArray,
+    external_ne_m: FloatArray,
+    radius_m: float,
+    direction: int,
+    *,
+    entering: bool,
+) -> FloatArray | None:
+    delta = external_ne_m - center_ne_m
+    distance_m = float(np.linalg.norm(delta))
+    if distance_m <= radius_m + 1.0e-9:
+        return None
+    base_angle = float(np.arctan2(delta[1], delta[0]))
+    offset = float(np.arccos(radius_m / distance_m))
+    best_point: FloatArray | None = None
+    best_alignment = -np.inf
+    for angle in (base_angle - offset, base_angle + offset):
+        point = center_ne_m + radius_m * np.asarray([np.cos(angle), np.sin(angle)])
+        travel = point - external_ne_m if entering else external_ne_m - point
+        travel /= float(np.linalg.norm(travel))
+        tangent = direction * np.asarray([-np.sin(angle), np.cos(angle)])
+        alignment = float(np.dot(travel, tangent))
+        if alignment > best_alignment:
+            best_point = point
+            best_alignment = alignment
+    return best_point
+
+
+def _fillet_at_corner(
+    current: _Leg,
+    following: _Leg,
+    config: PathManagerConfig,
+) -> tuple[_Leg, _Leg, FloatArray] | None:
+    if config.fillet_bank_rad is None:
+        return None
+    assert isinstance(current.segment, LineSegment)
+    assert isinstance(following.segment, LineSegment)
+    line = current.segment
+    next_line = following.segment
+    try:
+        unit_geometry = fillet_geometry(
+            line.start_ned_m[:2],
+            line.end_ned_m[:2],
+            next_line.end_ned_m[:2],
+            1.0,
+        )
+    except ValueError:
+        return None
+    unit_tangent_m = float(np.linalg.norm(line.end_ned_m[:2] - unit_geometry.entry_ne_m))
+    if unit_tangent_m <= 0.0:  # pragma: no cover - valid geometry invariant
+        return None
+    tangent_cap_m = config.fillet_leg_fraction * min(
+        line.horizontal_length_m,
+        next_line.horizontal_length_m,
+    )
+    desired_radius_m = coordinated_turn_radius_m(
+        line.airspeed_mps,
+        config.fillet_bank_rad,
+    )
+    radius_m = min(
+        desired_radius_m,
+        config.fillet_max_radius_m,
+        tangent_cap_m / unit_tangent_m,
+    )
+    if radius_m < config.minimum_fillet_radius_m:
+        return None
+    geometry = fillet_geometry(
+        line.start_ned_m[:2],
+        line.end_ned_m[:2],
+        next_line.end_ned_m[:2],
+        radius_m,
+    )
+    entry_probe = np.asarray([geometry.entry_ne_m[0], geometry.entry_ne_m[1], 0.0])
+    exit_probe = np.asarray([geometry.exit_ne_m[0], geometry.exit_ne_m[1], 0.0])
+    entry = np.asarray(
+        [*geometry.entry_ne_m, line.commanded_down_m(entry_probe)],
+        dtype=np.float64,
+    )
+    exit_point = np.asarray(
+        [*geometry.exit_ne_m, next_line.commanded_down_m(exit_probe)],
+        dtype=np.float64,
+    )
+    shortened_line = LineSegment(
+        line.waypoint_id,
+        line.start_ned_m,
+        entry,
+        line.airspeed_mps,
+    )
+    fillet_segment = FilletSegment(
+        line.waypoint_id,
+        geometry.center_ne_m,
+        geometry.radius_m,
+        geometry.direction,
+        entry,
+        exit_point,
+        geometry.turn_angle_rad,
+        line.airspeed_mps,
+        next_line.airspeed_mps,
+    )
+    shortened = _replace_leg_segment(
+        current,
+        shortened_line,
+        switch_normal_ne=line.horizontal_direction_ne,
+    )
+    fillet_leg = _Leg(
+        segment=fillet_segment,
+        acceptance_radius_m=current.acceptance_radius_m,
+        altitude_tolerance_m=current.altitude_tolerance_m,
+        fly_over=False,
+        switch_normal_ne=fillet_segment.exit_tangent_ne,
+    )
+    return shortened, fillet_leg, exit_point
+
+
+def _replace_leg_segment(
+    leg: _Leg,
+    segment: PathSegment,
+    *,
+    switch_normal_ne: FloatArray | None = None,
+) -> _Leg:
+    return _Leg(
+        segment=segment,
+        acceptance_radius_m=leg.acceptance_radius_m,
+        altitude_tolerance_m=leg.altitude_tolerance_m,
+        fly_over=leg.fly_over,
+        switch_normal_ne=switch_normal_ne,
+        loiter_duration_s=leg.loiter_duration_s,
+        orbit_exit_ne_m=leg.orbit_exit_ne_m,
+    )
 
 
 def _home_geodetic_at_altitude(mission: Mission, waypoint: Waypoint) -> GeodeticPosition:
@@ -602,6 +1033,17 @@ def _home_geodetic_at_altitude(mission: Mission, waypoint: Waypoint) -> Geodetic
     )
 
 
-# Reserved for the planned fillet/Dubins arc-following refinement (TODO 3.5):
-# `fillet_geometry` above already produces the arc; wiring it into the switcher
-# as inserted OrbitSegments is the next step and is intentionally not stubbed.
+__all__ = [
+    "FilletGeometry",
+    "FilletSegment",
+    "LineSegment",
+    "MissionPhase",
+    "OrbitSegment",
+    "PathManager",
+    "PathManagerConfig",
+    "PathManagerStatus",
+    "PathSegment",
+    "SegmentKind",
+    "coordinated_turn_radius_m",
+    "fillet_geometry",
+]

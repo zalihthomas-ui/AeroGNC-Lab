@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from aerognc.gnc.path_manager import (
+    FilletSegment,
     LineSegment,
     OrbitSegment,
     PathManager,
@@ -267,3 +268,120 @@ def test_from_mission_rejects_invalid_mission() -> None:
     )
     with pytest.raises(ValueError):
         PathManager.from_mission(bad)
+
+
+def test_enabled_fillet_inserts_tangent_continuous_turn_segment() -> None:
+    manager = PathManager.from_mission(
+        _demo_mission(),
+        config=PathManagerConfig(fillet_bank_rad=np.deg2rad(25.0)),
+    )
+    first, fillet, second = manager.segments
+    assert isinstance(first, LineSegment)
+    assert isinstance(fillet, FilletSegment)
+    assert isinstance(second, LineSegment)
+    assert [segment.kind.value for segment in manager.segments] == [
+        "line",
+        "fillet",
+        "line",
+    ]
+    np.testing.assert_allclose(first.horizontal_direction_ne, fillet.entry_tangent_ne, atol=1e-10)
+    np.testing.assert_allclose(second.horizontal_direction_ne, fillet.exit_tangent_ne, atol=1e-10)
+    np.testing.assert_allclose(first.end_ned_m, fillet.entry_ned_m, atol=1e-10)
+    np.testing.assert_allclose(second.start_ned_m, fillet.exit_ned_m, atol=1e-10)
+    assert fillet.commanded_down_m(fillet.entry_ned_m) == pytest.approx(first.end_ned_m[2])
+    assert fillet.commanded_down_m(fillet.exit_ned_m) == pytest.approx(second.start_ned_m[2])
+    assert fillet.commanded_airspeed_mps(fillet.entry_ned_m) == pytest.approx(first.airspeed_mps)
+    assert fillet.commanded_airspeed_mps(fillet.exit_ned_m) == pytest.approx(second.airspeed_mps)
+    assert len(manager.fillet_arcs()) == 1
+    assert manager.planned_path_ned().shape[0] > 3
+
+
+def test_fillet_switches_at_entry_and_exit_half_planes() -> None:
+    manager = PathManager.from_mission(
+        _demo_mission(),
+        config=PathManagerConfig(fillet_bank_rad=np.deg2rad(25.0)),
+    )
+    first, fillet, _second = manager.segments
+    assert isinstance(first, LineSegment)
+    assert isinstance(fillet, FilletSegment)
+
+    entered = manager.update(fillet.entry_ned_m + np.r_[fillet.entry_tangent_ne, 0.0], 0.1)
+    assert entered.just_advanced
+    assert entered.phase.value == "turn"
+    exited = manager.update(fillet.exit_ned_m + np.r_[fillet.exit_tangent_ne, 0.0], 0.1)
+    assert exited.just_advanced
+    assert exited.phase.value == "navigate"
+
+
+def test_fillet_configuration_rejects_invalid_geometry_limits() -> None:
+    with pytest.raises(ValueError, match=r"below 0\.5"):
+        PathManagerConfig(fillet_leg_fraction=0.5)
+    with pytest.raises(ValueError, match="pi/2"):
+        PathManagerConfig(fillet_bank_rad=np.pi)
+    with pytest.raises(ValueError, match="boolean"):
+        PathManagerConfig(tangent_orbit_transitions=1)  # type: ignore[arg-type]
+
+
+def test_loiter_entry_and_exit_lines_are_tangent_when_enabled() -> None:
+    mission = Mission(
+        name="tangent_loiter",
+        home=HomePosition(0.0, 0.0, 0.0),
+        defaults=MissionDefaults(airspeed_mps=20.0, acceptance_radius_m=5.0),
+        waypoints=(
+            Waypoint(
+                id=1,
+                name="LOITER",
+                latitude_deg=0.01,
+                longitude_deg=0.0,
+                altitude_m=100.0,
+                action=WaypointAction.LOITER,
+                loiter_radius_m=80.0,
+                loiter_duration_s=0.2,
+            ),
+            Waypoint(
+                id=2,
+                name="EXIT",
+                latitude_deg=0.01,
+                longitude_deg=0.01,
+                altitude_m=100.0,
+            ),
+        ),
+    )
+    manager = PathManager.from_mission(
+        mission,
+        config=PathManagerConfig(tangent_orbit_transitions=True),
+    )
+    approach, orbit, departure = manager.segments
+    assert isinstance(approach, LineSegment)
+    assert isinstance(orbit, OrbitSegment)
+    assert isinstance(departure, LineSegment)
+
+    def orbit_tangent(point: np.ndarray) -> np.ndarray:
+        radial = point[:2] - orbit.center_ned_m[:2]
+        radial /= np.linalg.norm(radial)
+        return orbit.direction * np.array([-radial[1], radial[0]])
+
+    np.testing.assert_allclose(
+        approach.horizontal_direction_ne,
+        orbit_tangent(approach.end_ned_m),
+        atol=1.0e-10,
+    )
+    np.testing.assert_allclose(
+        departure.horizontal_direction_ne,
+        orbit_tangent(departure.start_ned_m),
+        atol=1.0e-10,
+    )
+    assert np.linalg.norm(approach.end_ned_m[:2] - orbit.center_ned_m[:2]) == pytest.approx(
+        orbit.radius_m
+    )
+    assert np.linalg.norm(departure.start_ned_m[:2] - orbit.center_ned_m[:2]) == pytest.approx(
+        orbit.radius_m
+    )
+
+    entered = manager.update(approach.end_ned_m, 0.1)
+    assert entered.just_advanced and entered.phase.value == "loiter"
+    opposite = orbit.center_ned_m.copy()
+    opposite[:2] -= departure.start_ned_m[:2] - orbit.center_ned_m[:2]
+    assert not manager.update(opposite, 0.2).just_advanced
+    exited = manager.update(departure.start_ned_m, 0.1)
+    assert exited.just_advanced and exited.phase.value == "navigate"

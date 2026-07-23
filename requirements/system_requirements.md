@@ -504,6 +504,16 @@ defined in `verification_plan.md`.
   map to normalized roll, pitch, yaw, throttle, and rocket-assist requests; physical
   surface states shall retain configured position, rate, and first-order response
   limits, and unavailable/disconnected gamepads shall not block keyboard flight.
+- **SYS-CTL-011 (T,C,D,A):** The simulation-only waypoint controller shall expose
+  bounded trim convergence and explicit reject/fallback policy; a selectable
+  total-energy altitude/airspeed mode with reference-rate limits, anti-windup, and
+  bumpless activation; coordinated-turn line fillets and direction-consistent loiter
+  tangencies; and controller-facing stall, load, attitude, actuator, and energy
+  margins. The committed 1 m/s-crosswind campaign shall complete on both internal
+  plants without safety intervention or actuator saturation, retain at least 7.5 m/s
+  stall margin and 65% surface margin, limit load factor to 1.3, course-command steps
+  to 3.01 degrees, cross-track to 15 m (coefficient) and 25 m (reduced), trim residual
+  to 1e-8, terminal separation to 3 m, and duration ratio to 1.1.
 
 ### Simulation
 

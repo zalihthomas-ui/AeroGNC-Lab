@@ -60,6 +60,14 @@ from aerognc.verification.waypoint_backends import (
     compare_waypoint_vehicle_models,
     write_waypoint_cross_model_comparison,
 )
+from aerognc.verification.waypoint_control import (
+    WaypointControlBackendMetrics,
+    WaypointControlCampaignLimits,
+    WaypointControlCampaignResult,
+    WaypointControlScenario,
+    run_waypoint_control_campaign,
+    write_waypoint_control_campaign,
+)
 from aerognc.verification.waypoint_navigation import (
     WaypointNavigationCampaignLimits,
     WaypointNavigationCampaignResult,
@@ -85,6 +93,10 @@ __all__ = [
     "MorrisDesign",
     "MorrisEffect",
     "StepResponseMetrics",
+    "WaypointControlBackendMetrics",
+    "WaypointControlCampaignLimits",
+    "WaypointControlCampaignResult",
+    "WaypointControlScenario",
     "WaypointCrossModelComparison",
     "WaypointCrossModelTolerances",
     "WaypointNavigationCampaignLimits",
@@ -107,12 +119,14 @@ __all__ = [
     "morris_elementary_effects",
     "run_benchmark",
     "run_launch_window_optimization",
+    "run_waypoint_control_campaign",
     "run_waypoint_navigation_campaign",
     "sensitivity_correlations",
     "sobol_design",
     "step_response_metrics",
     "validate_samples_in_domain",
     "write_benchmark_report",
+    "write_waypoint_control_campaign",
     "write_waypoint_cross_model_comparison",
     "write_waypoint_navigation_campaign",
 ]

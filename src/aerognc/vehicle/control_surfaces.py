@@ -56,6 +56,7 @@ class ControlSurface:
         reduced_authority_fraction: float = 0.3,
         oscillation_amplitude_rad: float = float(np.deg2rad(5.0)),
         oscillation_frequency_hz: float = 3.0,
+        initial_position_rad: float | None = None,
     ) -> None:
         # Position limit spans neutral+trim plus full authority in either sense.
         position_limit = abs(config.neutral_rad) + abs(config.trim_rad) + config.max_deflection_rad
@@ -64,6 +65,14 @@ class ControlSurface:
         self.reduced_authority_fraction = float(np.clip(reduced_authority_fraction, 0.0, 1.0))
         self.oscillation_amplitude_rad = oscillation_amplitude_rad
         self.oscillation_frequency_hz = oscillation_frequency_hz
+        initial_position = (
+            config.neutral_rad + config.trim_rad
+            if initial_position_rad is None
+            else float(initial_position_rad)
+        )
+        if not np.isfinite(initial_position) or abs(initial_position) > position_limit:
+            raise ValueError("initial surface position must be finite and within its limit")
+        self._initial_position_rad = initial_position
         self._actuator = FirstOrderActuator(
             ActuatorLimits(
                 time_constant_s=config.time_constant_s,
@@ -71,7 +80,7 @@ class ControlSurface:
                 rate_limit_radps=config.rate_limit_radps,
                 command_delay_s=config.command_delay_s,
             ),
-            initial_position_rad=config.neutral_rad + config.trim_rad,
+            initial_position_rad=initial_position,
         )
 
     @property
@@ -86,7 +95,7 @@ class ControlSurface:
 
     def reset(self) -> None:
         """Reset to the neutral+trim position."""
-        self._actuator.reset(self.config.neutral_rad + self.config.trim_rad)
+        self._actuator.reset(self._initial_position_rad)
 
     def update(self, normalized_command: float, step_s: float) -> float:
         """Advance one step and return the physical deflection [rad]."""

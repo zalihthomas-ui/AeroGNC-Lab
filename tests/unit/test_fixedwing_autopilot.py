@@ -3,7 +3,12 @@
 import numpy as np
 import pytest
 
-from aerognc.gnc.fixedwing_autopilot import AutopilotGains, FixedWingAutopilot
+from aerognc.gnc.fixedwing_autopilot import (
+    AutopilotGains,
+    AutopilotTrim,
+    FixedWingAutopilot,
+    LongitudinalControlMode,
+)
 from aerognc.gnc.waypoint_guidance import GuidanceCommand
 from aerognc.mathematics.quaternion import euler321_to_quaternion
 from aerognc.navigation.state import NavigationState
@@ -103,3 +108,45 @@ def test_reset_clears_integrators() -> None:
     out = autopilot.update(_guidance(course=0.0), _state(), dt_s=0.1)
     # With zero error immediately after reset the roll command is only feedforward (0).
     assert out.control.roll_command_rad == pytest.approx(0.0, abs=1e-9)
+
+
+def test_total_energy_mode_starts_at_trim_then_coordinates_climb() -> None:
+    trim = AutopilotTrim(pitch_rad=0.04, elevator_command=0.12, throttle=0.30)
+    autopilot = FixedWingAutopilot(
+        longitudinal_mode=LongitudinalControlMode.TOTAL_ENERGY,
+        trim=trim,
+    )
+    guidance = _guidance(altitude=200.0)
+    first = autopilot.update(guidance, _state(pitch=0.04), dt_s=0.1)
+    second = autopilot.update(guidance, _state(pitch=0.04), dt_s=0.1)
+
+    assert first.control.pitch_command_rad == pytest.approx(trim.pitch_rad)
+    assert first.control.throttle_command == pytest.approx(trim.throttle)
+    assert first.longitudinal.mode == "total_energy"
+    assert second.longitudinal.total_energy_error_m2ps2 > 0.0
+    assert second.control.pitch_command_rad > trim.pitch_rad
+    assert second.control.throttle_command > trim.throttle
+    assert first.actuator.elevator == pytest.approx(trim.elevator_command)
+
+
+def test_longitudinal_mode_switch_is_bumpless() -> None:
+    autopilot = FixedWingAutopilot()
+    before = autopilot.update(_guidance(altitude=120.0, airspeed=22.0), _state(), 0.1)
+    autopilot.set_longitudinal_mode(LongitudinalControlMode.TOTAL_ENERGY)
+    after = autopilot.update(_guidance(altitude=120.0, airspeed=22.0), _state(), 0.1)
+
+    assert after.control.pitch_command_rad == pytest.approx(before.control.pitch_command_rad)
+    assert after.control.throttle_command == pytest.approx(before.control.throttle_command)
+    assert autopilot.provenance()["longitudinal_mode"] == "total_energy"
+
+
+def test_autopilot_rejects_invalid_trim_and_mode() -> None:
+    with pytest.raises(ValueError, match="elevator trim"):
+        AutopilotTrim(elevator_command=2.0)
+    with pytest.raises(ValueError, match="pitch trim exceeds"):
+        FixedWingAutopilot(
+            AutopilotGains(pitch_limit_rad=0.1),
+            trim=AutopilotTrim(pitch_rad=0.2),
+        )
+    with pytest.raises(ValueError, match="LongitudinalControlMode"):
+        FixedWingAutopilot(longitudinal_mode="total_energy")  # type: ignore[arg-type]

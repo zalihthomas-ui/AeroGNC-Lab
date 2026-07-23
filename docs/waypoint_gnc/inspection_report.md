@@ -30,7 +30,7 @@ scoped future work; real-hardware output is structurally unavailable.
   Pillow. Dev: mypy (strict), ruff, pytest, pytest-cov. Console script `aerognc`.
 - **Entry points:** `python -m aerognc.cli <subcommand>` (41 subcommands) and Windows
   `run_*.bat` launchers. GUI via `aerognc workbench` (Tk) and `aerognc mission-designer`.
-- **Tests:** 159 test files in `tests/{unit,integration,validation}`; 641 tests, 80.86%
+- **Tests:** 162 test files in `tests/{unit,integration,validation}`; 668 tests, 81.15%
   branch coverage, threshold 75%. Tk event-loop files omitted from coverage.
 - **Quality gates:** ruff (E,F,I,N,UP,B,SIM,RUF), mypy strict, CI in `.github/workflows/ci.yml`.
 

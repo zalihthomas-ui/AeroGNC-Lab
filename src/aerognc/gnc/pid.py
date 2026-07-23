@@ -56,6 +56,36 @@ class PIDController:
         self.filtered_derivative = 0.0
         self.saturated = False
 
+    def track_output(self, error: float, output: float) -> float:
+        """Preload state to reproduce ``output`` without a derivative kick.
+
+        This bumpless-transfer operation is used when a loop is enabled or control
+        modes are switched. The requested output is clipped to the controller
+        limits; an available integral channel cancels the proportional contribution
+        as far as its declared bounds allow. The reproducible bounded output is
+        returned.
+        """
+        if not np.all(np.isfinite([error, output])):
+            raise ValueError("tracked PID error and output must be finite")
+        target = float(np.clip(output, self.gains.output_min, self.gains.output_max))
+        if self.gains.integral == 0.0:
+            integral_state = 0.0
+        else:
+            integral_state = float(
+                np.clip(
+                    (target - self.gains.proportional * error) / self.gains.integral,
+                    self.gains.integral_min,
+                    self.gains.integral_max,
+                )
+            )
+        self.integral_state = integral_state
+        self.previous_error = float(error)
+        self.filtered_derivative = 0.0
+        unconstrained = self._unconstrained(float(error), integral_state)
+        actual = float(np.clip(unconstrained, self.gains.output_min, self.gains.output_max))
+        self.saturated = not np.isclose(actual, unconstrained) or not np.isclose(actual, output)
+        return actual
+
     def update(self, error: float, step_s: float) -> float:
         """Advance one sample and return the bounded controller output."""
         if not np.isfinite(error):
