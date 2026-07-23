@@ -8,7 +8,14 @@ import pytest
 
 from aerognc.configuration.waypoint_loader import load_waypoint_runtime_configuration
 from aerognc.gnc.waypoint_guidance import GuidanceMode
-from aerognc.mission import HomePosition, Mission, MissionDefaults, Waypoint, WaypointAction
+from aerognc.mission import (
+    HomePosition,
+    Mission,
+    MissionDefaults,
+    Waypoint,
+    WaypointAction,
+    load_mission,
+)
 from aerognc.mission.mission_manager import MissionState
 from aerognc.navigation.providers import NoisyStateProvider
 from aerognc.simulation.waypoint_mission import (
@@ -19,6 +26,10 @@ from aerognc.vehicle.control_surfaces import SurfaceFailureMode
 from aerognc.verification.waypoint_backends import (
     compare_waypoint_vehicle_models,
     write_waypoint_cross_model_comparison,
+)
+from aerognc.verification.waypoint_control import (
+    run_waypoint_control_campaign,
+    write_waypoint_control_campaign,
 )
 from aerognc.verification.waypoint_navigation import (
     run_waypoint_navigation_campaign,
@@ -111,8 +122,6 @@ def test_coefficient_backend_completes_and_passes_cross_model_bounds(tmp_path: P
 def test_estimated_navigation_completes_outage_and_recovers_with_bounded_error(
     tmp_path: Path,
 ) -> None:
-    from aerognc.mission import load_mission
-
     runtime = load_waypoint_runtime_configuration(
         REPO_ROOT / "configs" / "waypoint_gnc_estimated.yaml"
     )
@@ -145,6 +154,27 @@ def test_estimated_navigation_completes_outage_and_recovers_with_bounded_error(
             allow_nan=False,
         ).lower()
     )
+
+
+def test_trim_tecs_and_geometric_transitions_pass_on_both_internal_backends(
+    tmp_path: Path,
+) -> None:
+    runtime = load_waypoint_runtime_configuration(REPO_ROOT / "configs" / "waypoint_gnc_tecs.yaml")
+    campaign = run_waypoint_control_campaign(
+        load_mission(runtime.mission_path),
+        runtime.build_mission_config(),
+    )
+    assert campaign.passed
+    assert campaign.scenario.horizontal_wind_mps == pytest.approx(1.0)
+    assert campaign.coefficient.maximum_cross_track_m < 11.0
+    assert campaign.reduced.maximum_cross_track_m < 21.0
+    assert campaign.coefficient.actuator_saturation_samples == 0
+    assert campaign.reduced.actuator_saturation_samples == 0
+    assert campaign.terminal_separation_m < 1.5
+    assert campaign.coefficient.maximum_course_command_step_rad <= np.deg2rad(3.0) + 1.0e-12
+    assert campaign.reduced.maximum_course_command_step_rad <= np.deg2rad(3.0) + 1.0e-12
+    report = write_waypoint_control_campaign(campaign, tmp_path / "control.json")
+    assert '"passed": true' in report.read_text(encoding="utf-8")
 
 
 @pytest.mark.parametrize("mode", list(GuidanceMode))

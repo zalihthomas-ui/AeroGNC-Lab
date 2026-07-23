@@ -15,15 +15,22 @@
       ]
     },
     "summary": {
+      "actuator_saturation_samples": 1,
       "completed": true,
       "duration_s": 180.3,
       "final_cross_track_m": 0.239,
       "final_state": "mission_complete",
       "max_abs_cross_track_m": 96.631,
+      "max_abs_total_energy_error_m2ps2": 188.51,
       "max_airspeed_mps": 22.907,
       "max_altitude_m": 177.453,
+      "max_load_factor": 1.1749,
       "min_airspeed_mps": 17.548,
       "min_altitude_m": 99.446,
+      "min_lower_specific_energy_margin_m2ps2": 1068.489,
+      "min_stall_margin_mps": 6.206,
+      "min_surface_margin_fraction": 0.3497,
+      "min_upper_specific_energy_margin_m2ps2": 28484.773,
       "outcome": "complete",
       "samples": 3606
     }
@@ -42,15 +49,22 @@
       "implementation": "InternalFixedWingBackend"
     },
     "summary": {
+      "actuator_saturation_samples": 2,
       "completed": true,
       "duration_s": 247.25,
       "final_cross_track_m": 0.077,
       "final_state": "mission_complete",
       "max_abs_cross_track_m": 151.714,
+      "max_abs_total_energy_error_m2ps2": 92.65,
       "max_airspeed_mps": 24.073,
       "max_altitude_m": 179.928,
+      "max_load_factor": 1.2208,
       "min_airspeed_mps": 19.65,
       "min_altitude_m": 100.0,
+      "min_lower_specific_energy_margin_m2ps2": 1052.717,
+      "min_stall_margin_mps": 7.65,
+      "min_surface_margin_fraction": 0.3112,
+      "min_upper_specific_energy_margin_m2ps2": 28378.228,
       "outcome": "complete",
       "samples": 4945
     }

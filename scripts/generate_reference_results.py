@@ -86,6 +86,10 @@ from aerognc.verification.waypoint_backends import (
     compare_waypoint_vehicle_models,
     write_waypoint_cross_model_comparison,
 )
+from aerognc.verification.waypoint_control import (
+    run_waypoint_control_campaign,
+    write_waypoint_control_campaign,
+)
 from aerognc.verification.waypoint_navigation import (
     run_waypoint_navigation_campaign,
     write_waypoint_navigation_campaign,
@@ -155,6 +159,17 @@ def main() -> int:
     write_waypoint_navigation_campaign(
         navigation_campaign,
         output / "waypoint_navigation_dropout.json",
+    )
+    tecs_waypoint = load_waypoint_runtime_configuration(root / "configs" / "waypoint_gnc_tecs.yaml")
+    control_campaign = run_waypoint_control_campaign(
+        load_mission(tecs_waypoint.mission_path),
+        tecs_waypoint.build_mission_config(),
+    )
+    if not control_campaign.passed:
+        raise RuntimeError("waypoint trim/TECS/path reference failed acceptance")
+    write_waypoint_control_campaign(
+        control_campaign,
+        output / "waypoint_control_campaign.json",
     )
     orbit_sandbox_configuration = load_orbit_sandbox_configuration(
         root / "configs" / "orbit_sandbox.yaml"

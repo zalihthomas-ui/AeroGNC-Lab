@@ -24,14 +24,24 @@ import numpy as np
 from aerognc.configuration.aircraft_loader import AircraftSandboxConfiguration
 from aerognc.gnc.fixedwing_autopilot import (
     AutopilotGains,
+    AutopilotOutput,
+    AutopilotTrim,
     FixedWingAutopilot,
+    LongitudinalControlMode,
+    TotalEnergyControlGains,
 )
-from aerognc.gnc.path_manager import LineSegment, PathManager
+from aerognc.gnc.path_manager import LineSegment, PathManager, PathManagerConfig
+from aerognc.gnc.waypoint_envelope import (
+    WaypointEnvelopeMargins,
+    WaypointEnvelopeReference,
+    evaluate_waypoint_envelope,
+)
 from aerognc.gnc.waypoint_guidance import (
     GuidanceCommand,
     GuidanceGains,
     GuidanceMode,
     PathFollowingGuidance,
+    wind_corrected_heading_rad,
 )
 from aerognc.mission.mission import Mission
 from aerognc.mission.mission_manager import MissionManager, MissionState
@@ -44,6 +54,15 @@ from aerognc.simulation.waypoint_backends import (
     ReducedFixedWingParams,
     VehicleBackend,
     VehicleBackendKind,
+)
+from aerognc.simulation.waypoint_trim import (
+    TrimConvergenceError,
+    TrimFailurePolicy,
+    WaypointTrimOptions,
+    WaypointTrimResult,
+    configuration_with_resolved_trim,
+    solve_coefficient_waypoint_trim,
+    solve_reduced_waypoint_trim,
 )
 from aerognc.vehicle.control_surfaces import (
     ControlSurface,
@@ -74,7 +93,11 @@ class WaypointMissionConfig:
     initial_airspeed_mps: float = 20.0
     guidance_mode: GuidanceMode = GuidanceMode.VECTOR_FIELD
     guidance_gains: GuidanceGains = field(default_factory=GuidanceGains)
+    path_manager_config: PathManagerConfig = field(default_factory=PathManagerConfig)
     autopilot_gains: AutopilotGains = field(default_factory=AutopilotGains)
+    longitudinal_control_mode: LongitudinalControlMode = LongitudinalControlMode.ALTITUDE_AIRSPEED
+    total_energy_gains: TotalEnergyControlGains = field(default_factory=TotalEnergyControlGains)
+    trim_options: WaypointTrimOptions = field(default_factory=WaypointTrimOptions)
     safety_limits: SafetyLimits = field(default_factory=SafetyLimits)
     vehicle_backend: VehicleBackendKind = VehicleBackendKind.INTERNAL_REDUCED
     reduced_params: ReducedFixedWingParams = field(default_factory=ReducedFixedWingParams)
@@ -118,6 +141,12 @@ class WaypointMissionConfig:
             raise ValueError(f"unknown surface_failures channels: {sorted(unknown)}")
         if not isinstance(self.vehicle_backend, VehicleBackendKind):
             raise ValueError("vehicle_backend must be a VehicleBackendKind")
+        if not isinstance(self.longitudinal_control_mode, LongitudinalControlMode):
+            raise ValueError("longitudinal_control_mode must be a LongitudinalControlMode")
+        if not isinstance(self.path_manager_config, PathManagerConfig):
+            raise ValueError("path_manager_config must be a PathManagerConfig")
+        if not isinstance(self.trim_options, WaypointTrimOptions):
+            raise ValueError("trim_options must be a WaypointTrimOptions")
         if (
             self.vehicle_backend is VehicleBackendKind.INTERNAL_COEFFICIENT
             and self.coefficient_configuration is None
@@ -192,6 +221,7 @@ class MissionSample:
     course_command_rad: float
     altitude_command_m: float
     airspeed_command_mps: float
+    climb_rate_command_mps: float
     aileron: float
     elevator: float
     rudder: float
@@ -199,6 +229,22 @@ class MissionSample:
     cross_track_error_m: float
     distance_to_waypoint_m: float
     active_waypoint_id: int
+    segment_kind: str
+    longitudinal_mode: str
+    potential_energy_error_m2ps2: float
+    kinetic_energy_error_m2ps2: float
+    total_energy_error_m2ps2: float
+    energy_balance_error_m2ps2: float
+    stall_speed_reference_mps: float
+    stall_margin_mps: float
+    load_factor: float
+    bank_margin_rad: float
+    pitch_margin_rad: float
+    minimum_surface_margin_fraction: float
+    throttle_margin_fraction: float
+    lower_specific_energy_margin_m2ps2: float
+    upper_specific_energy_margin_m2ps2: float
+    actuator_saturated: bool
     mission_state: str
     safety_response: str
 
@@ -220,6 +266,7 @@ class MissionSample:
             "course_command_rad": self.course_command_rad,
             "altitude_command_m": self.altitude_command_m,
             "airspeed_command_mps": self.airspeed_command_mps,
+            "climb_rate_command_mps": self.climb_rate_command_mps,
             "aileron": self.aileron,
             "elevator": self.elevator,
             "rudder": self.rudder,
@@ -227,6 +274,22 @@ class MissionSample:
             "cross_track_error_m": self.cross_track_error_m,
             "distance_to_waypoint_m": self.distance_to_waypoint_m,
             "active_waypoint_id": self.active_waypoint_id,
+            "segment_kind": self.segment_kind,
+            "longitudinal_mode": self.longitudinal_mode,
+            "potential_energy_error_m2ps2": self.potential_energy_error_m2ps2,
+            "kinetic_energy_error_m2ps2": self.kinetic_energy_error_m2ps2,
+            "total_energy_error_m2ps2": self.total_energy_error_m2ps2,
+            "energy_balance_error_m2ps2": self.energy_balance_error_m2ps2,
+            "stall_speed_reference_mps": self.stall_speed_reference_mps,
+            "stall_margin_mps": self.stall_margin_mps,
+            "load_factor": self.load_factor,
+            "bank_margin_rad": self.bank_margin_rad,
+            "pitch_margin_rad": self.pitch_margin_rad,
+            "minimum_surface_margin_fraction": self.minimum_surface_margin_fraction,
+            "throttle_margin_fraction": self.throttle_margin_fraction,
+            "lower_specific_energy_margin_m2ps2": self.lower_specific_energy_margin_m2ps2,
+            "upper_specific_energy_margin_m2ps2": self.upper_specific_energy_margin_m2ps2,
+            "actuator_saturated": self.actuator_saturated,
             "mission_state": self.mission_state,
             "safety_response": self.safety_response,
         }
@@ -279,6 +342,12 @@ class WaypointMissionResult:
         cross_track = [abs(s.cross_track_error_m) for s in self.samples]
         altitude = [s.altitude_m for s in self.samples]
         airspeed = [s.airspeed_mps for s in self.samples]
+        stall_margin = [s.stall_margin_mps for s in self.samples]
+        load_factor = [s.load_factor for s in self.samples]
+        surface_margin = [s.minimum_surface_margin_fraction for s in self.samples]
+        lower_energy_margin = [s.lower_specific_energy_margin_m2ps2 for s in self.samples]
+        upper_energy_margin = [s.upper_specific_energy_margin_m2ps2 for s in self.samples]
+        total_energy_error = [abs(s.total_energy_error_m2ps2) for s in self.samples]
         return {
             "outcome": self.outcome,
             "completed": self.completed,
@@ -291,11 +360,27 @@ class WaypointMissionResult:
             "max_altitude_m": round(max(altitude), 3),
             "min_airspeed_mps": round(min(airspeed), 3),
             "max_airspeed_mps": round(max(airspeed), 3),
+            "min_stall_margin_mps": round(min(stall_margin), 3),
+            "max_load_factor": round(max(load_factor), 4),
+            "min_surface_margin_fraction": round(min(surface_margin), 4),
+            "min_lower_specific_energy_margin_m2ps2": round(min(lower_energy_margin), 3),
+            "min_upper_specific_energy_margin_m2ps2": round(min(upper_energy_margin), 3),
+            "max_abs_total_energy_error_m2ps2": round(max(total_energy_error), 3),
+            "actuator_saturation_samples": sum(s.actuator_saturated for s in self.samples),
         }
 
 
-def _build_surfaces(config: WaypointMissionConfig) -> ControlSurfaceSet:
-    def make(channel: str, limit_rad: float) -> ControlSurface:
+def _build_surfaces(
+    config: WaypointMissionConfig,
+    trim: AutopilotTrim,
+    trim_result: WaypointTrimResult | None,
+) -> ControlSurfaceSet:
+    def make(
+        channel: str,
+        limit_rad: float,
+        *,
+        initial_position_rad: float | None = None,
+    ) -> ControlSurface:
         return ControlSurface(
             ControlSurfaceConfig(
                 max_deflection_rad=limit_rad,
@@ -303,39 +388,160 @@ def _build_surfaces(config: WaypointMissionConfig) -> ControlSurfaceSet:
                 rate_limit_radps=config.surface_rate_limit_radps,
             ),
             failure=config.surface_failures.get(channel, SurfaceFailureMode.NONE),
+            initial_position_rad=initial_position_rad,
         )
 
     coefficient_configuration = config.coefficient_configuration
     initial_throttle = (
-        coefficient_configuration.initial_throttle if coefficient_configuration is not None else 0.0
+        trim.throttle
+        if trim_result is not None
+        else (
+            coefficient_configuration.initial_throttle
+            if coefficient_configuration is not None
+            else 0.0
+        )
+    )
+    initial_elevator_rad = (
+        trim.elevator_command * config.elevator_limit_rad if trim_result is not None else None
     )
     return ControlSurfaceSet(
         make("aileron", config.aileron_limit_rad),
-        make("elevator", config.elevator_limit_rad),
+        make(
+            "elevator",
+            config.elevator_limit_rad,
+            initial_position_rad=initial_elevator_rad,
+        ),
         make("rudder", config.rudder_limit_rad),
         throttle_time_constant_s=config.throttle_time_constant_s,
         initial_throttle=initial_throttle,
     )
 
 
-def _initial_heading_rad(path_manager: PathManager) -> float:
+def _initial_heading_rad(
+    path_manager: PathManager,
+    *,
+    wind_ned_mps: tuple[float, float, float],
+    airspeed_mps: float,
+) -> float:
     first = path_manager.segments[0]
     if isinstance(first, LineSegment):
         direction = first.horizontal_direction_ne
-        return float(np.arctan2(direction[1], direction[0]))
+        course_rad = float(np.arctan2(direction[1], direction[0]))
+        return wind_corrected_heading_rad(
+            course_rad,
+            np.asarray(wind_ned_mps, dtype=np.float64),
+            airspeed_mps,
+        )
     return 0.0
 
 
-def _build_backend(config: WaypointMissionConfig) -> VehicleBackend:
+def _build_backend(
+    config: WaypointMissionConfig,
+    coefficient_configuration: AircraftSandboxConfiguration | None = None,
+) -> VehicleBackend:
     if config.vehicle_backend is VehicleBackendKind.INTERNAL_REDUCED:
         return InternalFixedWingBackend(config.reduced_params)
-    coefficient_configuration = config.coefficient_configuration
-    if coefficient_configuration is None:  # pragma: no cover - dataclass invariant
+    selected_configuration = coefficient_configuration or config.coefficient_configuration
+    if selected_configuration is None:  # pragma: no cover - dataclass invariant
         raise ValueError("coefficient backend has no aircraft configuration")
     return InternalCoefficientFixedWingBackend(
-        coefficient_configuration,
+        selected_configuration,
         steady_wind_ned_mps=config.wind_ned_mps,
         wind_horizon_s=config.max_time_s + config.dt_s,
+    )
+
+
+def _resolve_trim(
+    config: WaypointMissionConfig,
+    *,
+    heading_rad: float,
+) -> tuple[
+    AutopilotTrim,
+    WaypointTrimResult | None,
+    AircraftSandboxConfiguration | None,
+]:
+    configured_trim = AutopilotTrim(
+        pitch_rad=0.0,
+        elevator_command=config.autopilot_gains.elevator_trim,
+        throttle=config.autopilot_gains.throttle_trim,
+    )
+    if not config.trim_options.enabled:
+        return configured_trim, None, None
+    if config.vehicle_backend is VehicleBackendKind.INTERNAL_REDUCED:
+        result = solve_reduced_waypoint_trim(
+            config.reduced_params,
+            airspeed_mps=config.initial_airspeed_mps,
+        )
+        if not result.converged:
+            if config.trim_options.failure_policy is TrimFailurePolicy.REJECT:
+                raise TrimConvergenceError(
+                    "reduced waypoint trim failed because requested airspeed is outside "
+                    "the analytic throttle equilibrium"
+                )
+            speed_range = (
+                config.reduced_params.airspeed_at_full_throttle_mps
+                - config.reduced_params.airspeed_at_zero_throttle_mps
+            )
+            achieved_airspeed_mps = (
+                config.reduced_params.airspeed_at_zero_throttle_mps
+                + configured_trim.throttle * speed_range
+            )
+            residual = achieved_airspeed_mps - config.initial_airspeed_mps
+            fallback = WaypointTrimResult(
+                backend=result.backend,
+                source="configured_reduced_fallback_after_failure",
+                converged=False,
+                used_fallback=True,
+                angle_of_attack_rad=0.0,
+                pitch_rad=configured_trim.pitch_rad,
+                elevator_deflection_rad=(
+                    configured_trim.elevator_command * config.elevator_limit_rad
+                ),
+                elevator_command=configured_trim.elevator_command,
+                throttle=configured_trim.throttle,
+                residual=(residual, 0.0, 0.0),
+                residual_infinity_norm=abs(residual),
+                iterations=result.iterations,
+            )
+            return configured_trim, fallback, None
+        return result.autopilot_trim, result, None
+
+    coefficient_configuration = config.coefficient_configuration
+    if coefficient_configuration is None:  # pragma: no cover - dataclass invariant
+        raise RuntimeError("coefficient trim requires an aircraft configuration")
+    result = solve_coefficient_waypoint_trim(
+        coefficient_configuration,
+        altitude_m=config.initial_altitude_m,
+        airspeed_mps=config.initial_airspeed_mps,
+        heading_rad=heading_rad,
+        steady_wind_ned_mps=config.wind_ned_mps,
+        elevator_command_limit_rad=config.elevator_limit_rad,
+        options=config.trim_options,
+    )
+    resolved_configuration = configuration_with_resolved_trim(
+        coefficient_configuration,
+        result,
+    )
+    return result.autopilot_trim, result, resolved_configuration
+
+
+def _build_envelope_reference(
+    config: WaypointMissionConfig,
+    coefficient_configuration: AircraftSandboxConfiguration | None,
+) -> WaypointEnvelopeReference:
+    limits = config.safety_limits
+    return WaypointEnvelopeReference(
+        minimum_altitude_m=limits.min_altitude_m,
+        maximum_altitude_m=limits.max_altitude_m,
+        minimum_airspeed_mps=limits.min_airspeed_mps,
+        maximum_airspeed_mps=limits.max_airspeed_mps,
+        maximum_bank_rad=limits.max_bank_rad,
+        maximum_pitch_rad=limits.max_pitch_rad,
+        aileron_limit_rad=config.aileron_limit_rad,
+        elevator_limit_rad=config.elevator_limit_rad,
+        rudder_limit_rad=config.rudder_limit_rad,
+        gravity_mps2=config.gravity_mps2,
+        coefficient_configuration=coefficient_configuration,
     )
 
 
@@ -350,13 +556,32 @@ def run_waypoint_mission(
     path_manager = PathManager.from_mission(
         mission,
         frame=frame,
+        config=cfg.path_manager_config,
         initial_position_ned_m=initial_position_ned_m,
     )
     manager = MissionManager(mission, path_manager)
     guidance = PathFollowingGuidance(cfg.guidance_mode, cfg.guidance_gains)
-    autopilot = FixedWingAutopilot(cfg.autopilot_gains)
-    surfaces = _build_surfaces(cfg)
-    backend = _build_backend(cfg)
+    initial_heading_rad = _initial_heading_rad(
+        path_manager,
+        wind_ned_mps=cfg.wind_ned_mps,
+        airspeed_mps=cfg.initial_airspeed_mps,
+    )
+    trim, trim_result, resolved_coefficient_configuration = _resolve_trim(
+        cfg,
+        heading_rad=initial_heading_rad,
+    )
+    autopilot = FixedWingAutopilot(
+        cfg.autopilot_gains,
+        longitudinal_mode=cfg.longitudinal_control_mode,
+        total_energy_gains=cfg.total_energy_gains,
+        trim=trim,
+    )
+    surfaces = _build_surfaces(cfg, trim, trim_result)
+    backend = _build_backend(cfg, resolved_coefficient_configuration)
+    envelope_reference = _build_envelope_reference(
+        cfg,
+        resolved_coefficient_configuration or cfg.coefficient_configuration,
+    )
     provider = cfg.provider or PerfectStateProvider()
     provider.reset()
     safety = SafetyManager(cfg.safety_limits)
@@ -364,7 +589,7 @@ def run_waypoint_mission(
 
     backend.initialize(
         position_ned_m=initial_position_ned_m,
-        heading_rad=_initial_heading_rad(path_manager),
+        heading_rad=initial_heading_rad,
         airspeed_mps=cfg.initial_airspeed_mps,
     )
     manager.arm()
@@ -400,6 +625,7 @@ def run_waypoint_mission(
             autopilot_output.actuator.throttle,
             cfg.dt_s,
         )
+        envelope_margins = evaluate_waypoint_envelope(nav, deflections, envelope_reference)
         backend.send_actuator_commands(deflections)
         try:
             backend.step(cfg.dt_s, environment)
@@ -413,9 +639,12 @@ def run_waypoint_mission(
                 time_s,
                 nav,
                 guidance_command,
+                autopilot_output,
                 deflections,
+                envelope_margins,
                 manager_status.state,
                 segment.waypoint_id,
+                segment.kind.value,
                 verdict.response.value,
             )
         )
@@ -426,6 +655,31 @@ def run_waypoint_mission(
 
     metadata: dict[str, object] = {
         "guidance_mode": cfg.guidance_mode.value,
+        "path_geometry": {
+            "fillet_count": len(path_manager.fillet_arcs()),
+            "fillet_bank_rad": cfg.path_manager_config.fillet_bank_rad,
+            "fillet_max_radius_m": cfg.path_manager_config.fillet_max_radius_m,
+            "fillet_leg_fraction": cfg.path_manager_config.fillet_leg_fraction,
+            "tangent_orbit_transitions": cfg.path_manager_config.tangent_orbit_transitions,
+            "course_command_rate_limit_radps": (cfg.guidance_gains.course_command_rate_limit_radps),
+            "roll_feedforward_rate_limit_radps": (
+                cfg.guidance_gains.roll_feedforward_rate_limit_radps
+            ),
+        },
+        "autopilot": dict(autopilot.provenance()),
+        "trim": (
+            trim_result.summary()
+            if trim_result is not None
+            else {"enabled": False, "source": "configured_autopilot_feedforward"}
+        ),
+        "envelope_reference": {
+            "stall_source": (
+                "coefficient_cl_max_at_estimated_altitude_and_load"
+                if envelope_reference.coefficient_configuration is not None
+                else "declared_reduced_model_minimum_airspeed"
+            ),
+            "controller_facing_state_only": True,
+        },
         "navigation_provider": type(provider).__name__,
         "navigation_provider_details": dict(provider.provenance()),
         "navigation_diagnostics": dict(provider.diagnostics()),
@@ -473,9 +727,12 @@ def _make_sample(
     time_s: float,
     nav: NavigationState,
     guidance: GuidanceCommand,
+    autopilot: AutopilotOutput,
     deflections: SurfaceDeflections,
+    envelope: WaypointEnvelopeMargins,
     state: MissionState,
     active_waypoint_id: int,
+    segment_kind: str,
     safety_response: str,
 ) -> MissionSample:
     roll, pitch, yaw = nav.euler_rad
@@ -490,11 +747,12 @@ def _make_sample(
         pitch_rad=pitch,
         yaw_rad=yaw,
         course_rad=nav.course_rad,
-        roll_command_rad=guidance.roll_feedforward_rad,
-        pitch_command_rad=guidance.climb_rate_command_mps,
+        roll_command_rad=autopilot.control.roll_command_rad,
+        pitch_command_rad=autopilot.control.pitch_command_rad,
         course_command_rad=guidance.course_command_rad,
         altitude_command_m=guidance.altitude_command_m,
         airspeed_command_mps=guidance.airspeed_command_mps,
+        climb_rate_command_mps=guidance.climb_rate_command_mps,
         aileron=deflections.aileron_rad,
         elevator=deflections.elevator_rad,
         rudder=deflections.rudder_rad,
@@ -502,6 +760,22 @@ def _make_sample(
         cross_track_error_m=guidance.cross_track_error_m,
         distance_to_waypoint_m=guidance.distance_to_waypoint_m,
         active_waypoint_id=active_waypoint_id,
+        segment_kind=segment_kind,
+        longitudinal_mode=autopilot.longitudinal.mode,
+        potential_energy_error_m2ps2=autopilot.longitudinal.potential_energy_error_m2ps2,
+        kinetic_energy_error_m2ps2=autopilot.longitudinal.kinetic_energy_error_m2ps2,
+        total_energy_error_m2ps2=autopilot.longitudinal.total_energy_error_m2ps2,
+        energy_balance_error_m2ps2=autopilot.longitudinal.energy_balance_error_m2ps2,
+        stall_speed_reference_mps=envelope.stall_speed_reference_mps,
+        stall_margin_mps=envelope.stall_margin_mps,
+        load_factor=envelope.load_factor,
+        bank_margin_rad=envelope.bank_margin_rad,
+        pitch_margin_rad=envelope.pitch_margin_rad,
+        minimum_surface_margin_fraction=envelope.minimum_surface_margin_fraction,
+        throttle_margin_fraction=envelope.throttle_margin_fraction,
+        lower_specific_energy_margin_m2ps2=envelope.lower_specific_energy_margin_m2ps2,
+        upper_specific_energy_margin_m2ps2=envelope.upper_specific_energy_margin_m2ps2,
+        actuator_saturated=deflections.saturated,
         mission_state=state.value,
         safety_response=safety_response,
     )

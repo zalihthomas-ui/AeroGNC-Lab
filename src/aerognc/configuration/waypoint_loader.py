@@ -28,7 +28,12 @@ from aerognc.configuration.loader import (
 )
 from aerognc.gnc.delayed_error_state_ekf import InnovationGateConfiguration
 from aerognc.gnc.error_state_ekf import ErrorStateFilterTuning
-from aerognc.gnc.fixedwing_autopilot import AutopilotGains
+from aerognc.gnc.fixedwing_autopilot import (
+    AutopilotGains,
+    LongitudinalControlMode,
+    TotalEnergyControlGains,
+)
+from aerognc.gnc.path_manager import PathManagerConfig
 from aerognc.gnc.waypoint_guidance import GuidanceGains, GuidanceMode
 from aerognc.mission.safety import SafetyLimits
 from aerognc.navigation.estimated_provider import (
@@ -45,6 +50,7 @@ from aerognc.simulation.waypoint_backends import (
     VehicleBackendKind,
 )
 from aerognc.simulation.waypoint_mission import WaypointMissionConfig
+from aerognc.simulation.waypoint_trim import TrimFailurePolicy, WaypointTrimOptions
 from aerognc.vehicle.control_surfaces import SurfaceFailureMode
 from aerognc.vehicle.sensors import SensorErrorParameters
 
@@ -126,7 +132,9 @@ class WaypointRuntimeConfiguration:
         )
 
 
-def _guidance_configuration(value: object) -> tuple[GuidanceMode, GuidanceGains]:
+def _guidance_configuration(
+    value: object,
+) -> tuple[GuidanceMode, GuidanceGains, PathManagerConfig]:
     data = _mapping(value, "waypoint.guidance")
     _keys(
         data,
@@ -140,6 +148,15 @@ def _guidance_configuration(value: object) -> tuple[GuidanceMode, GuidanceGains]
             "altitude_error_to_climb_rate_per_s",
             "max_climb_rate_mps",
             "max_roll_feedforward_deg",
+        },
+        optional={
+            "fillet_bank_deg",
+            "fillet_max_radius_m",
+            "fillet_leg_fraction",
+            "minimum_fillet_radius_m",
+            "tangent_orbit_transitions",
+            "course_command_rate_limit_degps",
+            "roll_feedforward_rate_limit_degps",
         },
     )
     mode_text = _string(data["mode"], "waypoint.guidance.mode")
@@ -184,11 +201,93 @@ def _guidance_configuration(value: object) -> tuple[GuidanceMode, GuidanceGains]
                 positive=True,
             )
         ),
+        course_command_rate_limit_radps=(
+            radians(
+                _number(
+                    data["course_command_rate_limit_degps"],
+                    "waypoint.guidance.course_command_rate_limit_degps",
+                    positive=True,
+                )
+            )
+            if "course_command_rate_limit_degps" in data
+            else None
+        ),
+        roll_feedforward_rate_limit_radps=(
+            radians(
+                _number(
+                    data["roll_feedforward_rate_limit_degps"],
+                    "waypoint.guidance.roll_feedforward_rate_limit_degps",
+                    positive=True,
+                )
+            )
+            if "roll_feedforward_rate_limit_degps" in data
+            else None
+        ),
     )
-    return mode, gains
+    try:
+        path_manager = PathManagerConfig(
+            fillet_bank_rad=(
+                radians(
+                    _number(
+                        data["fillet_bank_deg"],
+                        "waypoint.guidance.fillet_bank_deg",
+                        positive=True,
+                    )
+                )
+                if "fillet_bank_deg" in data
+                else None
+            ),
+            fillet_max_radius_m=(
+                _number(
+                    data["fillet_max_radius_m"],
+                    "waypoint.guidance.fillet_max_radius_m",
+                    positive=True,
+                )
+                if "fillet_max_radius_m" in data
+                else 200.0
+            ),
+            fillet_leg_fraction=(
+                _number(
+                    data["fillet_leg_fraction"],
+                    "waypoint.guidance.fillet_leg_fraction",
+                    positive=True,
+                )
+                if "fillet_leg_fraction" in data
+                else 0.45
+            ),
+            minimum_fillet_radius_m=(
+                _number(
+                    data["minimum_fillet_radius_m"],
+                    "waypoint.guidance.minimum_fillet_radius_m",
+                    positive=True,
+                )
+                if "minimum_fillet_radius_m" in data
+                else 5.0
+            ),
+            tangent_orbit_transitions=(
+                _boolean(
+                    data["tangent_orbit_transitions"],
+                    "waypoint.guidance.tangent_orbit_transitions",
+                )
+                if "tangent_orbit_transitions" in data
+                else False
+            ),
+        )
+    except ValueError as error:
+        raise ConfigurationError(f"waypoint.guidance: {error}") from error
+    return mode, gains, path_manager
 
 
-def _autopilot_configuration(value: object) -> AutopilotGains:
+def _autopilot_configuration(
+    value: object,
+    *,
+    gravity_mps2: float,
+) -> tuple[
+    AutopilotGains,
+    LongitudinalControlMode,
+    TotalEnergyControlGains,
+    WaypointTrimOptions,
+]:
     data = _mapping(value, "waypoint.autopilot")
     keys = {
         "course_kp",
@@ -210,12 +309,17 @@ def _autopilot_configuration(value: object) -> AutopilotGains:
         "throttle_delta_limit",
         "elevator_trim",
     }
-    _keys(data, "waypoint.autopilot", required=keys)
+    _keys(
+        data,
+        "waypoint.autopilot",
+        required=keys,
+        optional={"longitudinal_mode", "total_energy", "trim"},
+    )
 
     def gain(name: str) -> float:
         return _number(data[name], f"waypoint.autopilot.{name}", nonnegative=True)
 
-    return AutopilotGains(
+    gains = AutopilotGains(
         course_kp=gain("course_kp"),
         course_ki=gain("course_ki"),
         altitude_kp_rad_per_m=gain("altitude_kp_rad_per_m"),
@@ -257,6 +361,139 @@ def _autopilot_configuration(value: object) -> AutopilotGains:
         ),
         elevator_trim=_number(data["elevator_trim"], "waypoint.autopilot.elevator_trim"),
     )
+
+    mode_text = (
+        _string(data["longitudinal_mode"], "waypoint.autopilot.longitudinal_mode")
+        if "longitudinal_mode" in data
+        else LongitudinalControlMode.ALTITUDE_AIRSPEED.value
+    )
+    try:
+        mode = LongitudinalControlMode(mode_text)
+    except ValueError as error:
+        choices = ", ".join(item.value for item in LongitudinalControlMode)
+        raise ConfigurationError(
+            f"waypoint.autopilot.longitudinal_mode: expected one of {choices}"
+        ) from error
+
+    total_energy = TotalEnergyControlGains(gravity_mps2=gravity_mps2)
+    if "total_energy" in data:
+        context = "waypoint.autopilot.total_energy"
+        energy_data = _mapping(data["total_energy"], context)
+        energy_keys = {
+            "total_energy_kp",
+            "total_energy_ki",
+            "energy_balance_kp",
+            "energy_balance_ki",
+            "altitude_reference_rate_limit_mps",
+            "airspeed_reference_rate_limit_mps2",
+            "climb_rate_throttle_feedforward_per_mps",
+            "flight_path_angle_feedforward_gain",
+        }
+        _keys(energy_data, context, required=energy_keys)
+        try:
+            total_energy = TotalEnergyControlGains(
+                total_energy_kp=_number(
+                    energy_data["total_energy_kp"],
+                    f"{context}.total_energy_kp",
+                    nonnegative=True,
+                ),
+                total_energy_ki=_number(
+                    energy_data["total_energy_ki"],
+                    f"{context}.total_energy_ki",
+                    nonnegative=True,
+                ),
+                energy_balance_kp=_number(
+                    energy_data["energy_balance_kp"],
+                    f"{context}.energy_balance_kp",
+                    nonnegative=True,
+                ),
+                energy_balance_ki=_number(
+                    energy_data["energy_balance_ki"],
+                    f"{context}.energy_balance_ki",
+                    nonnegative=True,
+                ),
+                altitude_reference_rate_limit_mps=_number(
+                    energy_data["altitude_reference_rate_limit_mps"],
+                    f"{context}.altitude_reference_rate_limit_mps",
+                    positive=True,
+                ),
+                airspeed_reference_rate_limit_mps2=_number(
+                    energy_data["airspeed_reference_rate_limit_mps2"],
+                    f"{context}.airspeed_reference_rate_limit_mps2",
+                    positive=True,
+                ),
+                climb_rate_throttle_feedforward_per_mps=_number(
+                    energy_data["climb_rate_throttle_feedforward_per_mps"],
+                    f"{context}.climb_rate_throttle_feedforward_per_mps",
+                    nonnegative=True,
+                ),
+                flight_path_angle_feedforward_gain=_number(
+                    energy_data["flight_path_angle_feedforward_gain"],
+                    f"{context}.flight_path_angle_feedforward_gain",
+                    nonnegative=True,
+                ),
+                gravity_mps2=gravity_mps2,
+            )
+        except ValueError as error:
+            raise ConfigurationError(f"{context}: {error}") from error
+    elif mode is LongitudinalControlMode.TOTAL_ENERGY:
+        raise ConfigurationError(
+            "waypoint.autopilot.total_energy: section is required in total_energy mode"
+        )
+
+    trim_options = WaypointTrimOptions()
+    if "trim" in data:
+        context = "waypoint.autopilot.trim"
+        trim_data = _mapping(data["trim"], context)
+        _keys(
+            trim_data,
+            context,
+            required={
+                "enabled",
+                "failure_policy",
+                "tolerance",
+                "maximum_iterations",
+                "minimum_angle_of_attack_deg",
+                "maximum_angle_of_attack_deg",
+            },
+        )
+        policy_text = _string(trim_data["failure_policy"], f"{context}.failure_policy")
+        try:
+            policy = TrimFailurePolicy(policy_text)
+        except ValueError as error:
+            choices = ", ".join(item.value for item in TrimFailurePolicy)
+            raise ConfigurationError(
+                f"{context}.failure_policy: expected one of {choices}"
+            ) from error
+        try:
+            trim_options = WaypointTrimOptions(
+                enabled=_boolean(trim_data["enabled"], f"{context}.enabled"),
+                failure_policy=policy,
+                tolerance=_number(
+                    trim_data["tolerance"],
+                    f"{context}.tolerance",
+                    positive=True,
+                ),
+                maximum_iterations=_integer(
+                    trim_data["maximum_iterations"],
+                    f"{context}.maximum_iterations",
+                ),
+                minimum_angle_of_attack_rad=radians(
+                    _number(
+                        trim_data["minimum_angle_of_attack_deg"],
+                        f"{context}.minimum_angle_of_attack_deg",
+                    )
+                ),
+                maximum_angle_of_attack_rad=radians(
+                    _number(
+                        trim_data["maximum_angle_of_attack_deg"],
+                        f"{context}.maximum_angle_of_attack_deg",
+                    )
+                ),
+            )
+        except ValueError as error:
+            raise ConfigurationError(f"{context}: {error}") from error
+    return gains, mode, total_energy, trim_options
 
 
 def _safety_configuration(value: object) -> SafetyLimits:
@@ -963,7 +1200,13 @@ def load_waypoint_runtime_configuration(path: str | Path) -> WaypointRuntimeConf
         tuple[float, float, float],
         _number_tuple(environment["wind_ned_mps"], "waypoint.environment.wind_ned_mps", length=3),
     )
-    guidance_mode, guidance_gains = _guidance_configuration(root["guidance"])
+    guidance_mode, guidance_gains, path_manager_config = _guidance_configuration(root["guidance"])
+    (
+        autopilot_gains,
+        longitudinal_control_mode,
+        total_energy_gains,
+        trim_options,
+    ) = _autopilot_configuration(root["autopilot"], gravity_mps2=gravity_mps2)
     navigation = _navigation_configuration(
         root["navigation"],
         step_s=step_s,
@@ -999,7 +1242,11 @@ def load_waypoint_runtime_configuration(path: str | Path) -> WaypointRuntimeConf
         ),
         guidance_mode=guidance_mode,
         guidance_gains=guidance_gains,
-        autopilot_gains=_autopilot_configuration(root["autopilot"]),
+        path_manager_config=path_manager_config,
+        autopilot_gains=autopilot_gains,
+        longitudinal_control_mode=longitudinal_control_mode,
+        total_energy_gains=total_energy_gains,
+        trim_options=trim_options,
         safety_limits=_safety_configuration(root["safety"]),
         vehicle_backend=vehicle_backend,
         reduced_params=reduced_params,

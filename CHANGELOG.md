@@ -20,6 +20,11 @@ and the project uses Semantic Versioning.
   barometric, and airspeed sensors; fixed-lag 15-state ESKF replay; covariance,
   latency, NIS-gate, and sensor-health diagnostics; plus a deterministic 20-second
   GNSS-outage/recovery acceptance campaign.
+- Bounded coefficient/reduced waypoint trim with explicit failure policy, bumpless
+  trim-aware actuator initialization, selectable total-energy altitude/airspeed
+  control, tangent line fillets and loiter transitions, command slew limits,
+  estimated-state envelope margins, and a deterministic crosswind two-plant
+  acceptance campaign with configuration/mission provenance.
 
 - Mission-planner **flight simulation playback** (Simulate/Play/Pause/Reset) that
   animates the aircraft flying the mission with a heading glyph and a live HUD,
@@ -91,9 +96,10 @@ and the project uses Semantic Versioning.
 
 ### Verification
 
-- The current suite passes 641 deterministic tests with 80.86% branch-aware package
+- The current suite passes 668 deterministic tests with 81.15% branch-aware package
   coverage against the enforced 75% floor. Ruff lint/format and strict MyPy checks
-  pass on Python 3.13, the workflow definitions pass actionlint 1.7.12, the built
+  pass on Python 3.13; 54 reference artifacts are byte-identical across consecutive
+  full generations; the workflow definitions pass actionlint 1.7.12; and the built
   distributions pass Twine and clean-install validation, and the installed
   dependency set has no known vulnerabilities reported by `pip-audit`.
 

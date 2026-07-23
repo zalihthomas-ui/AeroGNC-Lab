@@ -27,11 +27,17 @@ python -m aerognc.cli waypoint --config configs/waypoint_gnc_coefficient.yaml
 # Fly with delayed synthetic sensors and fixed-lag ESKF navigation
 python -m aerognc.cli waypoint --config configs/waypoint_gnc_estimated.yaml
 
+# Fly with solved trim, total-energy control, tangent fillets, and envelope margins
+python -m aerognc.cli waypoint --config configs/waypoint_gnc_tecs.yaml
+
 # Reproduce the reduced-versus-coefficient acceptance evidence
 python scripts/compare_waypoint_backends.py
 
 # Reproduce the independent GNSS-outage/recovery navigation evidence
 python scripts/verify_waypoint_navigation.py
+
+# Reproduce the trim/TECS/path campaign on both internal plants
+python scripts/verify_waypoint_control.py
 
 # The concise mission-only form remains available
 python -m aerognc.cli waypoint --mission missions/waypoint_demo.mission.yaml \
@@ -57,7 +63,8 @@ the mission and explicitly records:
 - wind and gravity;
 - perfect, seeded noisy, or truth-isolated estimated navigation;
 - guidance mode and gains;
-- cascaded-autopilot gains, limits, and trim;
+- path fillets/orbit tangencies and command-rate limits;
+- cascaded-autopilot gains, selectable longitudinal mode, TECS tuning, and trim policy;
 - safety envelope and geofence;
 - either reduced internal-vehicle parameters or a strict fictional-aircraft
   configuration reference;
@@ -124,6 +131,24 @@ current evidence measures 9.109 m maximum position error during the 20 s outage,
 0.355 m recovery RMS, and 0.061 m/s recovery velocity RMS, with valid estimates and
 positive-semidefinite covariance throughout. See the
 [estimated-navigation design and evidence](estimated_navigation.md).
+
+### Solved trim, total-energy control, and continuous paths
+
+`configs/waypoint_gnc_tecs.yaml` selects strict nonlinear trim, the total-energy
+longitudinal mode, coordinated-turn fillets, direction-consistent loiter tangencies,
+course/roll-feedforward slew limits, and controller-facing envelope telemetry. Trim
+failure either rejects the run or uses an explicitly marked configured fallback;
+the reference runtime rejects. The first controller and actuator samples match the
+resolved pitch/elevator/throttle state, avoiding an initialization command step.
+
+`scripts/verify_waypoint_control.py` repeats the same 1 m/s-crosswind mission on the
+coefficient and reduced plants. Both complete with no safety events or actuator
+saturation; maximum cross-track is 10.673/20.831 m, minimum stall margin is
+8.224/8.000 m/s, minimum surface margin is 71.66%/70.14%, and terminal separation is
+1.346 m. Exact limits and configuration/mission SHA-256 provenance are stored in
+[`waypoint_control_campaign.json`](../../results/reference/waypoint_control_campaign.json).
+See the [design and evidence note](trim_tecs_path_control.md) for equations, failure
+semantics, geometry, telemetry definitions, and limitations.
 
 ## Mission file format (schema version 1)
 
@@ -231,9 +256,10 @@ flowchart TD
 |---|---|
 | Mission models & I/O | `aerognc.mission` (`waypoint`, `mission`, `mission_io`) |
 | Geometry | `aerognc.mathematics.local_frame` |
-| Planning | `aerognc.gnc.path_manager` |
+| Planning | `aerognc.gnc.path_manager` (lines, fillets, tangent loiter orbits) |
 | Guidance | `aerognc.gnc.waypoint_guidance` |
-| Control | `aerognc.gnc.fixedwing_autopilot` |
+| Control | `aerognc.gnc.fixedwing_autopilot`, `aerognc.gnc.total_energy_control` |
+| Trim / envelope | `aerognc.simulation.waypoint_trim`, `aerognc.gnc.waypoint_envelope` |
 | Actuators | `aerognc.vehicle.control_surfaces` |
 | Navigation | `aerognc.navigation` (`state`, `providers`, `estimated_provider`) |
 | Mission state / safety | `aerognc.mission.mission_manager`, `aerognc.mission.safety` |
@@ -256,6 +282,7 @@ flowchart TD
 python -m pytest tests/unit tests/integration/test_waypoint_mission.py
 python scripts/compare_waypoint_backends.py
 python scripts/verify_waypoint_navigation.py
+python scripts/verify_waypoint_control.py
 ```
 
 ## Known limitations
@@ -264,6 +291,6 @@ python scripts/verify_waypoint_navigation.py
   18-state backend adds coefficient-driven nonlinear dynamics, rotating-planet
   kinematics, propulsion, fuel mass, atmosphere, wind, and stall behavior. Both use
   synthetic fictional inputs and neither is a validated real-aircraft model.
-- Takeoff, autonomous landing, TECS, magnetometer/terrain aiding, and the SITL/MAVLink
+- Takeoff, autonomous landing, magnetometer/terrain aiding, and the SITL/MAVLink
   backends are scoped but deferred — see
   `../../TODO.md` and `sitl_hardware_roadmap.md`.

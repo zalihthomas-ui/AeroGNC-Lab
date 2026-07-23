@@ -23,3 +23,27 @@ def test_pid_derivative_filter_and_reset() -> None:
     assert controller.integral_state == 0.0
     with pytest.raises(ValueError):
         controller.update(0.0, 0.0)
+
+
+def test_pid_tracks_output_for_bumpless_transfer() -> None:
+    controller = PIDController(
+        PIDGains(
+            proportional=2.0,
+            integral=0.5,
+            derivative=1.0,
+            output_min=-10.0,
+            output_max=10.0,
+            integral_min=-20.0,
+            integral_max=20.0,
+        )
+    )
+
+    assert controller.track_output(error=3.0, output=4.0) == pytest.approx(4.0)
+    assert controller.previous_error == pytest.approx(3.0)
+    assert controller.filtered_derivative == 0.0
+    assert controller.update(3.0, 0.1) == pytest.approx(4.15)
+
+    assert controller.track_output(error=0.0, output=99.0) == pytest.approx(10.0)
+    assert controller.saturated
+    with pytest.raises(ValueError, match="finite"):
+        controller.track_output(float("nan"), 0.0)

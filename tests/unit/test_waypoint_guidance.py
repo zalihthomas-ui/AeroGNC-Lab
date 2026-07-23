@@ -3,8 +3,9 @@
 import numpy as np
 import pytest
 
-from aerognc.gnc.path_manager import LineSegment, OrbitSegment
+from aerognc.gnc.path_manager import FilletSegment, LineSegment, OrbitSegment
 from aerognc.gnc.waypoint_guidance import (
+    GuidanceGains,
     GuidanceMode,
     PathFollowingGuidance,
     wind_corrected_heading_rad,
@@ -129,3 +130,48 @@ def test_orbit_outside_circle_steers_inward() -> None:
     command = guidance.update(outside, orbit, CALM, dt_s=0.1)
     # Command course should have an inward (toward-centre) component vs pure tangent.
     assert command.cross_track_error_m == pytest.approx(50.0)
+
+
+def test_fillet_guidance_is_tangent_and_interpolates_speed_altitude() -> None:
+    fillet = FilletSegment(
+        1,
+        center_ne_m=np.array([0.0, 0.0]),
+        radius_m=100.0,
+        direction=1,
+        entry_ned_m=np.array([100.0, 0.0, -100.0]),
+        exit_ned_m=np.array([0.0, 100.0, -120.0]),
+        turn_angle_rad=0.5 * np.pi,
+        entry_airspeed_mps=20.0,
+        exit_airspeed_mps=24.0,
+    )
+    midpoint = fillet.sample_ned(3)[1]
+    command = PathFollowingGuidance().update(_state(midpoint), fillet, CALM, 0.1)
+
+    assert command.along_track_fraction == pytest.approx(0.5)
+    assert command.altitude_command_m == pytest.approx(110.0)
+    assert command.airspeed_command_mps == pytest.approx(22.0)
+    assert command.roll_feedforward_rad > 0.0
+
+
+def test_course_and_roll_slew_limits_bound_segment_transition() -> None:
+    guidance = PathFollowingGuidance(
+        gains=GuidanceGains(
+            course_command_rate_limit_radps=1.0,
+            roll_feedforward_rate_limit_radps=0.5,
+        )
+    )
+    state = _state([100.0, 0.0, -100.0])
+    guidance.update(state, _north_line(), CALM, 0.1)
+    orbit = OrbitSegment(2, np.array([0.0, 0.0, -100.0]), 100.0, 1, 20.0)
+    transitioned = guidance.update(state, orbit, CALM, 0.1)
+    assert transitioned.course_command_rad == pytest.approx(0.1)
+    assert transitioned.roll_feedforward_rad == pytest.approx(0.05)
+
+    guidance.reset()
+    reset = guidance.update(state, orbit, CALM, 0.1)
+    assert reset.course_command_rad == pytest.approx(0.5 * np.pi)
+
+
+def test_guidance_rejects_invalid_slew_rate() -> None:
+    with pytest.raises(ValueError, match="course_command_rate"):
+        GuidanceGains(course_command_rate_limit_radps=0.0)

@@ -21,8 +21,10 @@ from aerognc.gnc.fixedwing_autopilot import (
     ActuatorCommand,
     AutopilotGains,
     AutopilotOutput,
+    AutopilotTrim,
     ControlCommand,
     FixedWingAutopilot,
+    LongitudinalControlDiagnostics,
 )
 from aerognc.gnc.flight_analysis import (
     DynamicMode,
@@ -58,6 +60,7 @@ from aerognc.gnc.flight_envelope import (
 from aerognc.gnc.guidance import AttitudeReferenceSchedule
 from aerognc.gnc.path_manager import (
     FilletGeometry,
+    FilletSegment,
     LineSegment,
     MissionPhase,
     OrbitSegment,
@@ -77,6 +80,17 @@ from aerognc.gnc.strapdown_ins import (
     compensate_two_sample_imu,
     propagate_rotating_strapdown,
 )
+from aerognc.gnc.total_energy_control import (
+    LongitudinalControlMode,
+    TotalEnergyControlGains,
+    TotalEnergyController,
+    TotalEnergyControlOutput,
+)
+from aerognc.gnc.waypoint_envelope import (
+    WaypointEnvelopeMargins,
+    WaypointEnvelopeReference,
+    evaluate_waypoint_envelope,
+)
 from aerognc.gnc.waypoint_guidance import (
     GuidanceCommand,
     GuidanceGains,
@@ -94,6 +108,7 @@ __all__ = [
     "AttitudeReferenceSchedule",
     "AutopilotGains",
     "AutopilotOutput",
+    "AutopilotTrim",
     "ConstraintAwareAscentGuidance",
     "ControlCommand",
     "DelayedRotatingNavigationESKF",
@@ -103,6 +118,7 @@ __all__ = [
     "ErrorStateFilterTuning",
     "ErrorStateNavigationEKF",
     "FilletGeometry",
+    "FilletSegment",
     "FixedWingAutopilot",
     "FlightEnvelopeResult",
     "GuidanceCommand",
@@ -114,6 +130,8 @@ __all__ = [
     "LQRDesign",
     "LineSegment",
     "LinearModel",
+    "LongitudinalControlDiagnostics",
+    "LongitudinalControlMode",
     "MeasurementUpdateResult",
     "MissionPhase",
     "NavigationNominalState",
@@ -135,7 +153,12 @@ __all__ = [
     "SensorIntegritySummary",
     "StabilityMargins",
     "SystemIdentificationResult",
+    "TotalEnergyControlGains",
+    "TotalEnergyControlOutput",
+    "TotalEnergyController",
     "TrimResult",
+    "WaypointEnvelopeMargins",
+    "WaypointEnvelopeReference",
     "analyze_flight_envelope",
     "analyze_modes",
     "benchmark_controller_sil",
@@ -144,6 +167,7 @@ __all__ = [
     "continuous_lqr",
     "controllability_matrix",
     "coordinated_turn_radius_m",
+    "evaluate_waypoint_envelope",
     "fillet_geometry",
     "finite_difference_jacobian",
     "frequency_response",

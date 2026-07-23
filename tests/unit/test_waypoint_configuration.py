@@ -4,6 +4,7 @@ from collections.abc import Callable
 from dataclasses import replace
 from pathlib import Path
 
+import numpy as np
 import pytest
 import yaml
 
@@ -13,6 +14,7 @@ from aerognc.configuration.waypoint_loader import (
     WaypointNavigationMode,
     load_waypoint_runtime_configuration,
 )
+from aerognc.gnc.total_energy_control import LongitudinalControlMode
 from aerognc.gnc.waypoint_guidance import GuidanceMode
 from aerognc.mission import load_mission
 from aerognc.navigation.estimated_provider import EstimatedNavigationProvider
@@ -24,6 +26,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 BUNDLED = REPO_ROOT / "configs" / "waypoint_gnc.yaml"
 COEFFICIENT = REPO_ROOT / "configs" / "waypoint_gnc_coefficient.yaml"
 ESTIMATED = REPO_ROOT / "configs" / "waypoint_gnc_estimated.yaml"
+TECS = REPO_ROOT / "configs" / "waypoint_gnc_tecs.yaml"
 MISSION = REPO_ROOT / "missions" / "waypoint_demo.mission.yaml"
 
 
@@ -141,6 +144,28 @@ def test_estimated_runtime_builds_fresh_filter_and_rejects_bad_sensor_cadence(
     invalid = tmp_path / "invalid-estimated.yaml"
     invalid.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
     with pytest.raises(ConfigurationError, match="sample period must be an integer"):
+        load_waypoint_runtime_configuration(invalid)
+
+
+def test_trim_tecs_fillet_configuration_loads_and_requires_tuning(tmp_path: Path) -> None:
+    runtime = load_waypoint_runtime_configuration(TECS)
+    config = runtime.build_mission_config()
+    assert config.longitudinal_control_mode is LongitudinalControlMode.TOTAL_ENERGY
+    assert config.trim_options.enabled
+    assert config.path_manager_config.tangent_orbit_transitions
+    assert config.path_manager_config.fillet_bank_rad == pytest.approx(np.deg2rad(25.0))
+    assert config.guidance_gains.course_command_rate_limit_radps == pytest.approx(np.deg2rad(60.0))
+    assert config.total_energy_gains.total_energy_kp == pytest.approx(0.0015)
+
+    payload: dict[str, object] = yaml.safe_load(TECS.read_text(encoding="utf-8"))
+    payload["mission_file"] = str(MISSION)
+    cast_mapping(payload["vehicle"])["aircraft_config"] = str(
+        REPO_ROOT / "configs" / "aircraft_waypoint_uav.yaml"
+    )
+    cast_mapping(payload["autopilot"]).pop("total_energy")
+    invalid = tmp_path / "invalid-tecs.yaml"
+    invalid.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+    with pytest.raises(ConfigurationError, match="section is required"):
         load_waypoint_runtime_configuration(invalid)
 
 

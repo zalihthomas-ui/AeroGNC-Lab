@@ -83,6 +83,16 @@ def test_trim_offset_shifts_neutral() -> None:
     assert _settle(surface, 0.0) == pytest.approx(np.deg2rad(2.0), abs=1e-3)
 
 
+def test_surface_can_start_and_reset_at_resolved_trim_position() -> None:
+    surface = ControlSurface(CONFIG, initial_position_rad=0.12)
+    assert surface.deflection_rad == pytest.approx(0.12)
+    surface.update(-1.0, 0.1)
+    surface.reset()
+    assert surface.deflection_rad == pytest.approx(0.12)
+    with pytest.raises(ValueError, match="initial surface position"):
+        ControlSurface(CONFIG, initial_position_rad=99.0)
+
+
 def test_surface_set_maps_all_channels() -> None:
     surfaces = ControlSurfaceSet.from_limits(
         aileron_limit_rad=np.deg2rad(22.0),
