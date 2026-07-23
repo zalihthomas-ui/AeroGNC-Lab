@@ -3,6 +3,7 @@
 **A modular, verification-first flight dynamics, guidance, navigation, and control platform.**
 
 [![CI](https://github.com/zalihthomas-ui/AeroGNC-Lab/actions/workflows/ci.yml/badge.svg)](https://github.com/zalihthomas-ui/AeroGNC-Lab/actions/workflows/ci.yml)
+[![Security](https://github.com/zalihthomas-ui/AeroGNC-Lab/actions/workflows/security.yml/badge.svg)](https://github.com/zalihthomas-ui/AeroGNC-Lab/actions/workflows/security.yml)
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status: Alpha](https://img.shields.io/badge/Status-Alpha-orange.svg)](#status)
@@ -16,7 +17,7 @@ traceable from equation to test.
 **Explore:** [Quick start](#installation-and-quick-start) ·
 [Architecture](docs/architecture.md) · [Validation](docs/validation_report.md) ·
 [Requirements](requirements/system_requirements.md) · [Contributing](CONTRIBUTING.md) ·
-[Citation](CITATION.cff)
+[Roadmap](ROADMAP.md) · [Citation](CITATION.cff)
 
 ![AeroGNC-Lab interplanetary mission-control dashboard](results/reference/interplanetary_mission_control.png)
 
@@ -25,7 +26,7 @@ traceable from equation to test.
 | Core domains | Flight dynamics, GNC, astrodynamics, simulation, and verification |
 | Models | 3-DOF and 6-DOF flight, rotating planets, fixed-wing aircraft, and orbital missions |
 | Interfaces | Python API, command-line tools, YAML projects, and a desktop engineering workbench |
-| Evidence | 610 deterministic tests and 80.62% branch-aware coverage on the current branch |
+| Evidence | 622 deterministic tests and 80.62% branch-aware coverage on the current branch |
 | Runtime | Python 3.12 or newer |
 | License | MIT |
 
@@ -72,11 +73,14 @@ telemetry boundaries, robust experiment design, a project-aware eight-page deskt
 workbench, localhost UDP packet verification, and an actionable one-click diagnostic.
 The checksummed snapshot contains all 6,324 NASA-confirmed exoplanets available at
 retrieval, explicitly as observational context rather than transfer ephemerides.
-Automated lint, strict typing, 610 tests, and 80.62% branch-aware coverage pass; two
+Automated lint, strict typing, 622 tests, and 80.62% branch-aware coverage pass; two
 MATLAB benchmarks were executed independently. No FMU binary was built or imported,
 and GMAT, SPICE, Simulink, and physical HIL remain explicitly unexecuted where
 unavailable. Build and generation commands remain local-only and never publish or
-modify remote repositories.
+modify remote repositories during normal use. Publication is isolated to the
+tag-triggered release workflow, requires protected-environment approval and a
+short-lived trusted publishing identity, and follows the documented
+[release process](docs/release_process.md).
 
 ## Capabilities
 
@@ -579,7 +583,7 @@ acceptance. Evidence is mapped in
 
 | Evidence | Executed result |
 |---|---|
-| Python suite | 610 deterministic unit, integration, and validation tests pass |
+| Python suite | 622 deterministic unit, integration, and validation tests pass |
 | Coverage | 80.62% branch-aware core/package coverage; enforced threshold 75% |
 | RK4 | Fourth-order convergence and independent SciPy agreement below \(10^{-6}\) |
 | Adaptive numerics | Dormand--Prince convergence/reference agreement, dense events, checkpoints, scheduler order, and variational derivatives pass |
@@ -669,7 +673,8 @@ complete planetary phases nor enables physically meaningful interstellar transfe
 Future work may add flexible-body/canopy coupling, calibrated/lever-arm navigation
 states, variance-based global sensitivity indices, and an executed Simulink
 comparison. Hardware selection remains deferred until controller timing and target
-I/O requirements are measured; see the [future HIL plan](docs/future_hil.md).
+I/O requirements are measured; see the [project roadmap](ROADMAP.md) and
+[future HIL plan](docs/future_hil.md).
 
 ## Author, licence and citation
 

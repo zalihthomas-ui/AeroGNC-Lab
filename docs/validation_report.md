@@ -2,7 +2,7 @@
 
 **Release candidate:** 0.8.0
 
-**Evidence date:** 2026-07-22
+**Evidence date:** 2026-07-23
 
 **Local environment:** Windows, CPython 3.13.1, NumPy 2.5.1, SciPy 1.18.0,
 MATLAB R2024a Update 3
@@ -39,7 +39,7 @@ validation.
 
 | Area | Executed result | Acceptance |
 |---|---|---|
-| Automated suite | 610 deterministic tests | All pass |
+| Automated suite | 622 deterministic tests | All pass |
 | Branch coverage | 80.62% core/package coverage | Enforced minimum 75% |
 | Adaptive numerical core | DP5(4) convergence/reference cases, dense directed events, checkpoint hashes, deterministic task order, and finite-difference sensitivities | Every numerical/tolerance/integrity assertion passes |
 | Nominal 3-DOF | Burnout 3.350 s; apogee 1101.49 m at 15.569 s; impact 31.794 s | Ordered events and bounded mass |
@@ -181,9 +181,13 @@ The reference-generation entry point now produces 51 compact PNG/JSON artifacts,
 including the v0.3 through v0.8 workflows. Two consecutive complete generations
 produced identical SHA-256 hashes for all 51 artifacts. Numerical reference records
 omit measured runtime and workspace-dependent paths. GitHub Actions is configured to
-repeat installation,
-lint, type, coverage, tests, and a no-plot smoke simulation on Python 3.12 and 3.13;
-it cannot be claimed as remotely executed until publication.
+repeat lint, formatting, strict typing, one canonical branch-aware coverage run,
+deterministic unit and CLI smoke tests on Python 3.12, 3.13, and 3.14 plus Windows,
+and a clean install of the typed wheel. Separate automation performs CodeQL,
+dependency review, Python dependency auditing, pinned dependency maintenance,
+tag/version checks, release acceptance, and provenance-attested trusted publication.
+Local syntax validation has passed; each remote job is reported as executed only
+after its corresponding GitHub check completes.
 
 Every supplied MATLAB and Simulink-interface `.m` file passed the MATLAB R2024a code
 analyzer with zero findings. The constant-force RK4 case and an independent adaptive

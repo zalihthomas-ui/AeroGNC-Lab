@@ -18,7 +18,9 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering",
+  "Typing :: Typed",
 ]
 dependencies = [
   "matplotlib>=3.9,<4",
@@ -31,7 +33,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "mypy>=1.11,<2",
-  "pytest>=8.3,<9",
+  "pytest>=9.0.3,<10",
   "pytest-cov>=5,<7",
   "ruff>=0.6,<1",
   "types-PyYAML>=6.0,<7",
@@ -39,6 +41,13 @@ dev = [
 
 [project.scripts]
 aerognc = "aerognc.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/zalihthomas-ui/AeroGNC-Lab"
+Documentation = "https://github.com/zalihthomas-ui/AeroGNC-Lab/tree/main/docs"
+Repository = "https://github.com/zalihthomas-ui/AeroGNC-Lab.git"
+Issues = "https://github.com/zalihthomas-ui/AeroGNC-Lab/issues"
+Changelog = "https://github.com/zalihthomas-ui/AeroGNC-Lab/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/aerognc"]

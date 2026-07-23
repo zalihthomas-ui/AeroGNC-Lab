@@ -1,7 +1,7 @@
 # AeroGNC-Lab System Requirements Specification
 
 **Baseline:** 0.8  
-**Date:** 2026-07-20  
+**Date:** 2026-07-23
 **Scope:** fictional civilian research/sounding-rocket simulation and verification
 
 `Shall` denotes a binding first-release requirement. Verification method codes are
@@ -429,8 +429,8 @@ defined in `verification_plan.md`.
 
 ## Software quality
 
-- **SYS-SWQ-001 (T):** The package shall support clean editable installation on
-  Python 3.12 and 3.13 with declared bounded dependencies.
+- **SYS-SWQ-001 (T):** The package shall support clean installation on Python 3.12,
+  3.13, and 3.14 with declared bounded dependencies and distributed typing metadata.
 - **SYS-SWQ-002 (T):** Ruff checks, strict practical mypy checks, and pytest with at
   least 75% branch-aware coverage shall pass in CI.
 - **SYS-SWQ-003 (A,T):** Public numerical APIs shall use type hints, unit-bearing
@@ -547,3 +547,20 @@ defined in `verification_plan.md`.
   launchers shall resolve the repository-local virtual-environment interpreter,
   preserve a readable setup failure, and open the unified workbench without requiring
   the user to type a command.
+- **SYS-SWQ-012 (T,A):** Continuous integration shall avoid duplicate feature-branch
+  push and pull-request runs, enforce lint/format/typing once, execute one canonical
+  branch-aware coverage run, exercise supported Python versions plus Windows, and
+  clean-install the built typed wheel before it can be released.
+- **SYS-SWQ-013 (T):** Every baselined system requirement identifier shall be unique
+  and have exactly one traceability row whose implementation and verification paths
+  exist and whose declared verification methods are recognized.
+- **SYS-SWQ-014 (T,A):** Repository automation shall pin external GitHub Actions to
+  immutable commits, monitor Python and workflow dependencies, scan Python code and
+  installed dependencies, review pull-request dependency changes, and create release
+  distributions through provenance-attested, short-lived-identity workflows.
+- **SYS-SWQ-015 (T):** A release tag shall use semantic `vX.Y.Z` form, exactly match
+  the package and citation versions, and pass the complete quality and branch-aware
+  acceptance suite before distribution artifacts can be published.
+- **SYS-SWQ-016 (T):** Repository checkout attributes shall preserve LF bytes for
+  checksummed text data and provenance records on every supported operating system,
+  while retaining conventional CRLF endings for native Windows launchers.

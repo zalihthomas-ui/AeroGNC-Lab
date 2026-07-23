@@ -7,6 +7,13 @@ and the project uses Semantic Versioning.
 
 ### Added
 
+- Production-oriented repository governance: one canonical coverage job, Python
+  3.12/3.13/3.14 and Windows compatibility checks, clean wheel installation, typed
+  package metadata, immutable Action pins, CodeQL, dependency review, `pip-audit`,
+  Dependabot, CODEOWNERS, release provenance, and trusted-publishing automation.
+- An auditable release process, public roadmap, and automated requirement-to-
+  traceability integrity checks.
+
 - Mission-planner **flight simulation playback** (Simulate/Play/Pause/Reset) that
   animates the aircraft flying the mission with a heading glyph and a live HUD,
   a steady-wind input, and a **3D** planned-vs-actual dashboard (the waypoint
@@ -53,6 +60,12 @@ and the project uses Semantic Versioning.
 
 ### Changed
 
+- Raised the development test floor to the security-fixed pytest 9 line and made the
+  security workflow audit both runtime and development dependencies with a
+  security-fixed packaging toolchain.
+- Made repository line endings explicit so checksummed CSV/JSON provenance remains
+  byte-identical on Linux and Windows while native Windows launchers retain CRLF.
+
 - Prepared the project for its public GitHub publication with a concise README
   overview, repository links, citation metadata, a security policy, structured issue
   forms, and a pull-request checklist.
@@ -68,9 +81,11 @@ and the project uses Semantic Versioning.
 
 ### Verification
 
-- The current suite passes 610 deterministic tests with 80.62% branch-aware package
+- The current suite passes 622 deterministic tests with 80.62% branch-aware package
   coverage against the enforced 75% floor. Ruff lint/format and strict MyPy checks
-  pass on Python 3.13.
+  pass on Python 3.13, the workflow definitions pass actionlint 1.7.12, the built
+  distributions pass Twine and clean-install validation, and the installed
+  dependency set has no known vulnerabilities reported by `pip-audit`.
 
 ## [0.8.0] - 2026-07-20
 

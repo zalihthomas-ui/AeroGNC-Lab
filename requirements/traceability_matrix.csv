@@ -52,10 +52,10 @@ SYS-VER-003,Verification,src/aerognc/mathematics/quaternion.py,tests/unit/test_q
 SYS-VER-004,Verification,src/aerognc/verification/flight_test.py,tests/integration/test_flight_test.py,T/D,Verified
 SYS-VER-005,Verification,src/aerognc/verification/cross_language.py; matlab_validation/validate_constant_acceleration.m,docs/matlab_validation.md,C,Verified
 SYS-VER-006,Verification,requirements/traceability_matrix.csv,tests/unit/test_traceability.py,T/A,Verified
-SYS-SWQ-001,Software quality,pyproject.toml; requirements/lock-py313-windows.txt,docs/validation_report.md,T/D,Verified
+SYS-SWQ-001,Software quality,pyproject.toml; requirements/lock-py313-windows.txt; src/aerognc/py.typed; .github/workflows/ci.yml,tests/unit/test_repository_policy.py; docs/validation_report.md,T/D,Verified
 SYS-SWQ-002,Software quality,pyproject.toml; .github/workflows/ci.yml,docs/validation_report.md,T,Verified
 SYS-SWQ-003,Software quality,src/aerognc,ruff check .; mypy src; pytest,T/A,Verified
-SYS-SWQ-004,Software quality,.github/workflows/ci.yml,.github/workflows/ci.yml,A,Implemented
+SYS-SWQ-004,Software quality,.github/workflows/ci.yml,tests/unit/test_repository_policy.py; .github/workflows/ci.yml,T/A,Verified
 SYS-SWQ-005,Software quality,README.md; docs,tests/unit/test_documentation.py,T/A,Verified
 SYS-SWQ-006,Software quality,scripts/generate_reference_results.py; .gitignore,tests/integration/test_reference_generation.py,T/A,Verified
 SYS-NAV-005,Navigation,src/aerognc/gnc/error_state_ekf.py; docs/error_state_navigation.md,tests/unit/test_error_state_ekf.py,T/A,Verified
@@ -145,3 +145,8 @@ SYS-AST-024,Astrodynamics,src/aerognc/simulation/orbit_sandbox.py; src/aerognc/v
 SYS-AST-025,Astrodynamics,src/aerognc/astrodynamics/dynamics.py; src/aerognc/astrodynamics/full_n_body.py; src/aerognc/simulation/orbit_sandbox.py,tests/integration/test_orbit_sandbox.py,T/C,Verified
 SYS-AST-026,Astrodynamics,src/aerognc/simulation/orbit_sandbox.py; src/aerognc/environment/orbital_atmosphere.py; docs/orbit_sandbox.md,tests/unit/test_orbital_atmosphere.py; tests/integration/test_orbit_sandbox.py,T/D/A,Verified
 SYS-SWQ-011,Software quality,run_solver.bat; run_aerognc.bat; docs/simulation_workbench.md,tests/unit/test_windows_launchers.py; tests/integration/test_cli.py,T/D,Verified
+SYS-SWQ-012,Software quality,.github/workflows/ci.yml; pyproject.toml; src/aerognc/py.typed,tests/unit/test_repository_policy.py,T/A,Verified
+SYS-SWQ-013,Software quality,requirements/system_requirements.md; requirements/traceability_matrix.csv,tests/unit/test_repository_policy.py,T,Verified
+SYS-SWQ-014,Software quality,.github/workflows/security.yml; .github/workflows/release.yml; .github/dependabot.yml; .github/CODEOWNERS,tests/unit/test_repository_policy.py,T/A,Verified
+SYS-SWQ-015,Software quality,scripts/check_release_version.py; .github/workflows/release.yml,tests/unit/test_release_version.py; tests/unit/test_repository_policy.py,T,Verified
+SYS-SWQ-016,Software quality,.gitattributes; data/catalogs/nasa_confirmed_exoplanets.metadata.json,tests/unit/test_repository_policy.py; tests/unit/test_catalogs.py,T,Verified

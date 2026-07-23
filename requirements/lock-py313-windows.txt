@@ -20,7 +20,7 @@ pillow==12.3.0
 pluggy==1.6.0
 Pygments==2.20.0
 pyparsing==3.3.2
-pytest==8.4.2
+pytest==9.0.3
 pytest-cov==6.3.0
 python-dateutil==2.9.0.post0
 PyYAML==6.0.3
