@@ -59,6 +59,7 @@ def test_compact_reference_artifacts_and_regeneration_entry_point_are_present() 
         "orbit_sandbox_report.json",
         "aircraft_model_report.json",
         "waypoint_backend_comparison.json",
+        "waypoint_navigation_dropout.json",
     }
     for name in image_names:
         data = (reference / name).read_bytes()
@@ -71,6 +72,10 @@ def test_compact_reference_artifacts_and_regeneration_entry_point_are_present() 
         (reference / "waypoint_backend_comparison.json").read_text(encoding="utf-8")
     )
     assert waypoint_comparison["passed"] is True
+    navigation_campaign = json.loads(
+        (reference / "waypoint_navigation_dropout.json").read_text(encoding="utf-8")
+    )
+    assert navigation_campaign["passed"] is True
 
     assert Path("scripts/generate_reference_results.py").is_file()
     ignored = Path(".gitignore").read_text(encoding="utf-8")

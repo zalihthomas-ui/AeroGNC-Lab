@@ -102,6 +102,16 @@ defined in `verification_plan.md`.
   and barometric measurements at fixed-lag snapshots, replay later accepted records,
   reject stale/outlying innovations, and expose deterministic sensor-health
   degradation and recovery.
+- **SYS-NAV-009 (T,C,D,A):** Estimated waypoint navigation shall isolate controller-
+  facing state from simulator truth behind seeded timestamped gyroscope,
+  accelerometer, civilian-GNSS-like, barometric, and airspeed sensor contracts;
+  propagate the fixed-lag 15-state ESKF; expose covariance, latency, innovation-gate,
+  and health diagnostics without truth scores; complete the bundled coefficient-
+  plant mission without safety intervention; and pass the 20 s GNSS-outage campaign
+  with pre-outage position RMS at most 3 m, outage error at most 15 m, recovery
+  position RMS at most 3 m, recovery velocity RMS at most 0.5 m/s, observed GNSS age
+  from 19.5 through 21 s, valid estimates throughout, and positive-semidefinite
+  covariance.
 
 ## Control
 

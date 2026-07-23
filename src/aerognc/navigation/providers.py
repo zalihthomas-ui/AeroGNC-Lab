@@ -1,8 +1,8 @@
-"""Navigation state providers: perfect-truth and seeded noisy estimation.
+"""Navigation-provider contract plus perfect and seeded-noisy implementations.
 
 The GNC loop reads its state through a :class:`NavigationProvider` so the
-controller never touches simulator truth directly in estimated mode. Two
-providers are supplied here:
+controller never touches simulator truth directly in estimated mode. This module
+supplies the lightweight providers:
 
 * :class:`PerfectStateProvider` — passes truth through unchanged (debugging,
   controller bring-up).
@@ -10,12 +10,12 @@ providers are supplied here:
   and can model a GPS dropout window (position/velocity marked invalid), which is
   enough to exercise the safety manager's navigation-validity logic.
 
-Wiring the project's existing EKF / error-state INS filters
-(`gnc/error_state_ekf.py`, `gnc/strapdown_ins.py`) as a full estimated backend is
-tracked separately (TODO 7.3).
+The sampled-sensor, strapdown, fixed-lag ESKF implementation lives in
+``navigation/estimated_provider.py`` so this foundational interface stays small.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 
 import numpy as np
 
@@ -32,12 +32,23 @@ class NavigationProvider(ABC):
     def reset(self) -> None:  # noqa: B027 - intentional no-op default
         """Reset internal state (no-op for memoryless providers)."""
 
+    def provenance(self) -> Mapping[str, object]:
+        """Return JSON-compatible provider configuration identity."""
+        return {"implementation": type(self).__name__}
+
+    def diagnostics(self) -> Mapping[str, object]:
+        """Return estimator-only runtime health without simulator-truth scores."""
+        return {}
+
 
 class PerfectStateProvider(NavigationProvider):
     """Ideal navigation: returns the truth state verbatim."""
 
     def update(self, truth: NavigationState, dt_s: float) -> NavigationState:
         return truth
+
+    def provenance(self) -> Mapping[str, object]:
+        return {**super().provenance(), "mode": "perfect"}
 
 
 class NoisyStateProvider(NavigationProvider):
@@ -97,3 +108,15 @@ class NoisyStateProvider(NavigationProvider):
             airspeed_mps=airspeed,
             valid=not dropped,
         )
+
+    def provenance(self) -> Mapping[str, object]:
+        """Return seeded noise/dropout settings for reproducible run metadata."""
+        return {
+            **super().provenance(),
+            "mode": "noisy",
+            "seed": self._seed,
+            "position_sigma_m": self.position_sigma_m,
+            "velocity_sigma_mps": self.velocity_sigma_mps,
+            "airspeed_sigma_mps": self.airspeed_sigma_mps,
+            "gps_dropout_window_s": self.gps_dropout_window_s,
+        }

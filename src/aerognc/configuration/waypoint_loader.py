@@ -23,11 +23,18 @@ from aerognc.configuration.loader import (
     _mapping,
     _number,
     _number_tuple,
+    _sequence,
     _string,
 )
+from aerognc.gnc.delayed_error_state_ekf import InnovationGateConfiguration
+from aerognc.gnc.error_state_ekf import ErrorStateFilterTuning
 from aerognc.gnc.fixedwing_autopilot import AutopilotGains
 from aerognc.gnc.waypoint_guidance import GuidanceGains, GuidanceMode
 from aerognc.mission.safety import SafetyLimits
+from aerognc.navigation.estimated_provider import (
+    EstimatedNavigationParameters,
+    EstimatedNavigationProvider,
+)
 from aerognc.navigation.providers import (
     NavigationProvider,
     NoisyStateProvider,
@@ -39,6 +46,7 @@ from aerognc.simulation.waypoint_backends import (
 )
 from aerognc.simulation.waypoint_mission import WaypointMissionConfig
 from aerognc.vehicle.control_surfaces import SurfaceFailureMode
+from aerognc.vehicle.sensors import SensorErrorParameters
 
 WAYPOINT_CONFIGURATION_VERSION = 1
 
@@ -48,11 +56,12 @@ class WaypointNavigationMode(StrEnum):
 
     PERFECT = "perfect"
     NOISY = "noisy"
+    ESTIMATED = "estimated"
 
 
 @dataclass(frozen=True, slots=True)
 class WaypointNavigationConfiguration:
-    """Provider selection and reproducible noisy-navigation settings."""
+    """Provider selection and reproducible navigation settings."""
 
     mode: WaypointNavigationMode
     seed: int
@@ -60,11 +69,26 @@ class WaypointNavigationConfiguration:
     velocity_sigma_mps: float
     airspeed_sigma_mps: float
     gps_dropout_window_s: tuple[float, float] | None
+    estimated_parameters: EstimatedNavigationParameters | None = None
+
+    def __post_init__(self) -> None:
+        if self.mode is WaypointNavigationMode.ESTIMATED and self.estimated_parameters is None:
+            raise ValueError("estimated navigation mode requires estimated parameters")
+        if (
+            self.mode is not WaypointNavigationMode.ESTIMATED
+            and self.estimated_parameters is not None
+        ):
+            raise ValueError("non-estimated navigation cannot carry estimated parameters")
 
     def build_provider(self) -> NavigationProvider:
         """Return a fresh provider so repeated runs start from identical state."""
         if self.mode is WaypointNavigationMode.PERFECT:
             return PerfectStateProvider()
+        if self.mode is WaypointNavigationMode.ESTIMATED:
+            parameters = self.estimated_parameters
+            if parameters is None:  # pragma: no cover - dataclass invariant
+                raise RuntimeError("estimated navigation parameters are unavailable")
+            return EstimatedNavigationProvider(parameters)
         return NoisyStateProvider(
             seed=self.seed,
             position_sigma_m=self.position_sigma_m,
@@ -354,62 +378,430 @@ def _vehicle_configuration(
     return kind, reduced, None
 
 
-def _navigation_configuration(value: object) -> WaypointNavigationConfiguration:
+def _dropout_intervals(value: object, context: str) -> tuple[tuple[float, float], ...]:
+    intervals: list[tuple[float, float]] = []
+    for index, item in enumerate(_sequence(value, context)):
+        pair = _number_tuple(item, f"{context}[{index}]", length=2)
+        if pair[0] < 0.0 or pair[1] <= pair[0]:
+            raise ConfigurationError(f"{context}[{index}]: expected 0 <= start < end")
+        intervals.append((pair[0], pair[1]))
+    return tuple(intervals)
+
+
+def _estimated_sensor_configuration(
+    value: object,
+    context: str,
+    dimension: int,
+) -> SensorErrorParameters:
+    data = _mapping(value, context)
+    _keys(
+        data,
+        context,
+        required={
+            "sample_rate_hz",
+            "noise_std",
+            "constant_bias",
+            "bias_drift_std_per_sqrt_s",
+            "quantisation",
+            "delay_s",
+            "dropout_probability",
+            "dropout_intervals_s",
+        },
+    )
+    try:
+        return SensorErrorParameters(
+            sample_rate_hz=_number(
+                data["sample_rate_hz"], f"{context}.sample_rate_hz", positive=True
+            ),
+            noise_std=_number_tuple(data["noise_std"], f"{context}.noise_std", length=dimension),
+            constant_bias=_number_tuple(
+                data["constant_bias"], f"{context}.constant_bias", length=dimension
+            ),
+            bias_drift_std_per_sqrt_s=_number_tuple(
+                data["bias_drift_std_per_sqrt_s"],
+                f"{context}.bias_drift_std_per_sqrt_s",
+                length=dimension,
+            ),
+            quantisation=_number_tuple(
+                data["quantisation"], f"{context}.quantisation", length=dimension
+            ),
+            delay_s=_number(data["delay_s"], f"{context}.delay_s", nonnegative=True),
+            dropout_probability=_number(
+                data["dropout_probability"],
+                f"{context}.dropout_probability",
+                nonnegative=True,
+            ),
+            dropout_intervals_s=_dropout_intervals(
+                data["dropout_intervals_s"], f"{context}.dropout_intervals_s"
+            ),
+        )
+    except ValueError as error:
+        raise ConfigurationError(f"{context}: {error}") from error
+
+
+def _estimated_navigation_configuration(
+    value: object,
+    *,
+    step_s: float,
+    gravity_mps2: float,
+) -> EstimatedNavigationParameters:
+    context = "waypoint.navigation.estimated"
+    data = _mapping(value, context)
+    _keys(
+        data,
+        context,
+        required={"seed", "initialization", "sensors", "filter", "health"},
+    )
+    initialization = _mapping(data["initialization"], f"{context}.initialization")
+    _keys(
+        initialization,
+        f"{context}.initialization",
+        required={
+            "position_error_std_m",
+            "velocity_error_std_mps",
+            "attitude_error_std_deg",
+            "gyro_bias_estimate_radps",
+            "accelerometer_bias_estimate_mps2",
+        },
+    )
+    sensors = _mapping(data["sensors"], f"{context}.sensors")
+    _keys(
+        sensors,
+        f"{context}.sensors",
+        required={"gyroscope", "accelerometer", "gnss", "barometer", "airspeed"},
+    )
+    gyroscope = _estimated_sensor_configuration(
+        sensors["gyroscope"], f"{context}.sensors.gyroscope", 3
+    )
+    accelerometer = _estimated_sensor_configuration(
+        sensors["accelerometer"], f"{context}.sensors.accelerometer", 3
+    )
+    gnss = _estimated_sensor_configuration(sensors["gnss"], f"{context}.sensors.gnss", 6)
+    barometer = _estimated_sensor_configuration(
+        sensors["barometer"], f"{context}.sensors.barometer", 1
+    )
+    airspeed = _estimated_sensor_configuration(
+        sensors["airspeed"], f"{context}.sensors.airspeed", 1
+    )
+
+    filter_data = _mapping(data["filter"], f"{context}.filter")
+    _keys(
+        filter_data,
+        f"{context}.filter",
+        required={
+            "initial_standard_deviation",
+            "process_noise",
+            "fixed_lag_s",
+            "innovation_gate",
+        },
+    )
+    initial_std = _mapping(
+        filter_data["initial_standard_deviation"],
+        f"{context}.filter.initial_standard_deviation",
+    )
+    _keys(
+        initial_std,
+        f"{context}.filter.initial_standard_deviation",
+        required={
+            "position_m",
+            "velocity_mps",
+            "attitude_deg",
+            "gyro_bias_radps",
+            "accelerometer_bias_mps2",
+        },
+    )
+    process = _mapping(filter_data["process_noise"], f"{context}.filter.process_noise")
+    _keys(
+        process,
+        f"{context}.filter.process_noise",
+        required={
+            "gyro_noise_std_radps_per_sqrt_hz",
+            "accelerometer_noise_std_mps2_per_sqrt_hz",
+            "gyro_bias_random_walk_std_radps2_per_sqrt_hz",
+            "accelerometer_bias_random_walk_std_mps3_per_sqrt_hz",
+        },
+    )
+    gate_data = _mapping(filter_data["innovation_gate"], f"{context}.filter.innovation_gate")
+    _keys(
+        gate_data,
+        f"{context}.filter.innovation_gate",
+        required={
+            "gnss_nis_threshold",
+            "barometer_nis_threshold",
+            "degraded_after_rejections",
+            "failed_after_rejections",
+        },
+    )
+    health = _mapping(data["health"], f"{context}.health")
+    _keys(
+        health,
+        f"{context}.health",
+        required={
+            "maximum_imu_age_s",
+            "maximum_gnss_age_s",
+            "maximum_airspeed_age_s",
+            "maximum_horizontal_position_std_m",
+            "maximum_vertical_position_std_m",
+        },
+    )
+
+    position_std = _number_tuple(
+        initial_std["position_m"],
+        f"{context}.filter.initial_standard_deviation.position_m",
+        length=3,
+    )
+    velocity_std = _number_tuple(
+        initial_std["velocity_mps"],
+        f"{context}.filter.initial_standard_deviation.velocity_mps",
+        length=3,
+    )
+    attitude_std_deg = _number_tuple(
+        initial_std["attitude_deg"],
+        f"{context}.filter.initial_standard_deviation.attitude_deg",
+        length=3,
+    )
+    gyro_bias_std = _number_tuple(
+        initial_std["gyro_bias_radps"],
+        f"{context}.filter.initial_standard_deviation.gyro_bias_radps",
+        length=3,
+    )
+    accelerometer_bias_std = _number_tuple(
+        initial_std["accelerometer_bias_mps2"],
+        f"{context}.filter.initial_standard_deviation.accelerometer_bias_mps2",
+        length=3,
+    )
+    initial_standard_deviation = (
+        *position_std,
+        *velocity_std,
+        *(radians(item) for item in attitude_std_deg),
+        *gyro_bias_std,
+        *accelerometer_bias_std,
+    )
+    try:
+        return EstimatedNavigationParameters(
+            step_s=step_s,
+            seed=_integer(data["seed"], f"{context}.seed", nonnegative=True),
+            gravity_mps2=gravity_mps2,
+            gyroscope=gyroscope,
+            accelerometer=accelerometer,
+            gnss=gnss,
+            barometer=barometer,
+            airspeed=airspeed,
+            initial_position_error_std_m=cast(
+                tuple[float, float, float],
+                _number_tuple(
+                    initialization["position_error_std_m"],
+                    f"{context}.initialization.position_error_std_m",
+                    length=3,
+                ),
+            ),
+            initial_velocity_error_std_mps=cast(
+                tuple[float, float, float],
+                _number_tuple(
+                    initialization["velocity_error_std_mps"],
+                    f"{context}.initialization.velocity_error_std_mps",
+                    length=3,
+                ),
+            ),
+            initial_attitude_error_std_rad=cast(
+                tuple[float, float, float],
+                tuple(
+                    radians(item)
+                    for item in _number_tuple(
+                        initialization["attitude_error_std_deg"],
+                        f"{context}.initialization.attitude_error_std_deg",
+                        length=3,
+                    )
+                ),
+            ),
+            initial_gyro_bias_estimate_radps=cast(
+                tuple[float, float, float],
+                _number_tuple(
+                    initialization["gyro_bias_estimate_radps"],
+                    f"{context}.initialization.gyro_bias_estimate_radps",
+                    length=3,
+                ),
+            ),
+            initial_accelerometer_bias_estimate_mps2=cast(
+                tuple[float, float, float],
+                _number_tuple(
+                    initialization["accelerometer_bias_estimate_mps2"],
+                    f"{context}.initialization.accelerometer_bias_estimate_mps2",
+                    length=3,
+                ),
+            ),
+            initial_standard_deviation=initial_standard_deviation,
+            filter_tuning=ErrorStateFilterTuning(
+                _number(
+                    process["gyro_noise_std_radps_per_sqrt_hz"],
+                    f"{context}.filter.process_noise.gyro_noise_std_radps_per_sqrt_hz",
+                    positive=True,
+                ),
+                _number(
+                    process["accelerometer_noise_std_mps2_per_sqrt_hz"],
+                    f"{context}.filter.process_noise.accelerometer_noise_std_mps2_per_sqrt_hz",
+                    positive=True,
+                ),
+                _number(
+                    process["gyro_bias_random_walk_std_radps2_per_sqrt_hz"],
+                    f"{context}.filter.process_noise.gyro_bias_random_walk_std_radps2_per_sqrt_hz",
+                    positive=True,
+                ),
+                _number(
+                    process["accelerometer_bias_random_walk_std_mps3_per_sqrt_hz"],
+                    f"{context}.filter.process_noise.accelerometer_bias_random_walk_std_mps3_per_sqrt_hz",
+                    positive=True,
+                ),
+            ),
+            fixed_lag_s=_number(
+                filter_data["fixed_lag_s"], f"{context}.filter.fixed_lag_s", positive=True
+            ),
+            innovation_gate=InnovationGateConfiguration(
+                gnss_nis_threshold=_number(
+                    gate_data["gnss_nis_threshold"],
+                    f"{context}.filter.innovation_gate.gnss_nis_threshold",
+                    positive=True,
+                ),
+                barometer_nis_threshold=_number(
+                    gate_data["barometer_nis_threshold"],
+                    f"{context}.filter.innovation_gate.barometer_nis_threshold",
+                    positive=True,
+                ),
+                degraded_after_rejections=_integer(
+                    gate_data["degraded_after_rejections"],
+                    f"{context}.filter.innovation_gate.degraded_after_rejections",
+                    nonnegative=True,
+                ),
+                failed_after_rejections=_integer(
+                    gate_data["failed_after_rejections"],
+                    f"{context}.filter.innovation_gate.failed_after_rejections",
+                    nonnegative=True,
+                ),
+            ),
+            maximum_imu_age_s=_number(
+                health["maximum_imu_age_s"],
+                f"{context}.health.maximum_imu_age_s",
+                positive=True,
+            ),
+            maximum_gnss_age_s=_number(
+                health["maximum_gnss_age_s"],
+                f"{context}.health.maximum_gnss_age_s",
+                positive=True,
+            ),
+            maximum_airspeed_age_s=_number(
+                health["maximum_airspeed_age_s"],
+                f"{context}.health.maximum_airspeed_age_s",
+                positive=True,
+            ),
+            maximum_horizontal_position_std_m=_number(
+                health["maximum_horizontal_position_std_m"],
+                f"{context}.health.maximum_horizontal_position_std_m",
+                positive=True,
+            ),
+            maximum_vertical_position_std_m=_number(
+                health["maximum_vertical_position_std_m"],
+                f"{context}.health.maximum_vertical_position_std_m",
+                positive=True,
+            ),
+        )
+    except ValueError as error:
+        raise ConfigurationError(f"{context}: {error}") from error
+
+
+def _navigation_configuration(
+    value: object,
+    *,
+    step_s: float,
+    gravity_mps2: float,
+) -> WaypointNavigationConfiguration:
     data = _mapping(value, "waypoint.navigation")
-    _keys(data, "waypoint.navigation", required={"mode", "noisy"})
+    _keys(
+        data,
+        "waypoint.navigation",
+        required={"mode"},
+        optional={"noisy", "estimated"},
+    )
     mode_text = _string(data["mode"], "waypoint.navigation.mode")
     try:
         mode = WaypointNavigationMode(mode_text)
     except ValueError as error:
-        raise ConfigurationError("waypoint.navigation.mode: expected perfect or noisy") from error
-    noisy = _mapping(data["noisy"], "waypoint.navigation.noisy")
-    _keys(
-        noisy,
-        "waypoint.navigation.noisy",
-        required={
-            "seed",
-            "position_sigma_m",
-            "velocity_sigma_mps",
-            "airspeed_sigma_mps",
-            "gps_dropout_window_s",
-        },
-    )
-    seed = _integer(noisy["seed"], "waypoint.navigation.noisy.seed", nonnegative=True)
-    if seed >= 2**32:
-        raise ConfigurationError("waypoint.navigation.noisy.seed: must be below 2^32")
-    dropout_value = noisy["gps_dropout_window_s"]
+        raise ConfigurationError(
+            "waypoint.navigation.mode: expected perfect, noisy, or estimated"
+        ) from error
+
+    seed = 0
+    position_sigma_m = 0.0
+    velocity_sigma_mps = 0.0
+    airspeed_sigma_mps = 0.0
     dropout: tuple[float, float] | None = None
-    if dropout_value is not None:
-        parsed = _number_tuple(
-            dropout_value,
-            "waypoint.navigation.noisy.gps_dropout_window_s",
-            length=2,
+    if "noisy" in data:
+        noisy = _mapping(data["noisy"], "waypoint.navigation.noisy")
+        _keys(
+            noisy,
+            "waypoint.navigation.noisy",
+            required={
+                "seed",
+                "position_sigma_m",
+                "velocity_sigma_mps",
+                "airspeed_sigma_mps",
+                "gps_dropout_window_s",
+            },
         )
-        dropout = cast(tuple[float, float], parsed)
-        if dropout[0] < 0.0 or dropout[1] <= dropout[0]:
-            raise ConfigurationError(
-                "waypoint.navigation.noisy.gps_dropout_window_s: "
-                "expected nonnegative increasing times"
+        seed = _integer(noisy["seed"], "waypoint.navigation.noisy.seed", nonnegative=True)
+        if seed >= 2**32:
+            raise ConfigurationError("waypoint.navigation.noisy.seed: must be below 2^32")
+        dropout_value = noisy["gps_dropout_window_s"]
+        if dropout_value is not None:
+            parsed = _number_tuple(
+                dropout_value,
+                "waypoint.navigation.noisy.gps_dropout_window_s",
+                length=2,
             )
-    return WaypointNavigationConfiguration(
-        mode=mode,
-        seed=seed,
-        position_sigma_m=_number(
+            dropout = cast(tuple[float, float], parsed)
+            if dropout[0] < 0.0 or dropout[1] <= dropout[0]:
+                raise ConfigurationError(
+                    "waypoint.navigation.noisy.gps_dropout_window_s: "
+                    "expected nonnegative increasing times"
+                )
+        position_sigma_m = _number(
             noisy["position_sigma_m"],
             "waypoint.navigation.noisy.position_sigma_m",
             nonnegative=True,
-        ),
-        velocity_sigma_mps=_number(
+        )
+        velocity_sigma_mps = _number(
             noisy["velocity_sigma_mps"],
             "waypoint.navigation.noisy.velocity_sigma_mps",
             nonnegative=True,
-        ),
-        airspeed_sigma_mps=_number(
+        )
+        airspeed_sigma_mps = _number(
             noisy["airspeed_sigma_mps"],
             "waypoint.navigation.noisy.airspeed_sigma_mps",
             nonnegative=True,
-        ),
+        )
+    elif mode is WaypointNavigationMode.NOISY:
+        raise ConfigurationError("waypoint.navigation.noisy: section is required in noisy mode")
+
+    estimated: EstimatedNavigationParameters | None = None
+    if "estimated" in data:
+        parsed_estimated = _estimated_navigation_configuration(
+            data["estimated"],
+            step_s=step_s,
+            gravity_mps2=gravity_mps2,
+        )
+        if mode is WaypointNavigationMode.ESTIMATED:
+            estimated = parsed_estimated
+    elif mode is WaypointNavigationMode.ESTIMATED:
+        raise ConfigurationError(
+            "waypoint.navigation.estimated: section is required in estimated mode"
+        )
+    return WaypointNavigationConfiguration(
+        mode=mode,
+        seed=seed,
+        position_sigma_m=position_sigma_m,
+        velocity_sigma_mps=velocity_sigma_mps,
+        airspeed_sigma_mps=airspeed_sigma_mps,
         gps_dropout_window_s=dropout,
+        estimated_parameters=estimated,
     )
 
 
@@ -561,12 +953,22 @@ def load_waypoint_runtime_configuration(path: str | Path) -> WaypointRuntimeConf
     )
     environment = _mapping(root["environment"], "waypoint.environment")
     _keys(environment, "waypoint.environment", required={"wind_ned_mps", "gravity_mps2"})
+    step_s = _number(simulation["dt_s"], "waypoint.simulation.dt_s", positive=True)
+    gravity_mps2 = _number(
+        environment["gravity_mps2"],
+        "waypoint.environment.gravity_mps2",
+        positive=True,
+    )
     wind = cast(
         tuple[float, float, float],
         _number_tuple(environment["wind_ned_mps"], "waypoint.environment.wind_ned_mps", length=3),
     )
     guidance_mode, guidance_gains = _guidance_configuration(root["guidance"])
-    navigation = _navigation_configuration(root["navigation"])
+    navigation = _navigation_configuration(
+        root["navigation"],
+        step_s=step_s,
+        gravity_mps2=gravity_mps2,
+    )
     (
         aileron_limit_rad,
         elevator_limit_rad,
@@ -581,7 +983,7 @@ def load_waypoint_runtime_configuration(path: str | Path) -> WaypointRuntimeConf
     )
 
     mission_config = WaypointMissionConfig(
-        dt_s=_number(simulation["dt_s"], "waypoint.simulation.dt_s", positive=True),
+        dt_s=step_s,
         max_time_s=_number(
             simulation["max_time_s"], "waypoint.simulation.max_time_s", positive=True
         ),
@@ -603,11 +1005,7 @@ def load_waypoint_runtime_configuration(path: str | Path) -> WaypointRuntimeConf
         reduced_params=reduced_params,
         coefficient_configuration=coefficient_configuration,
         wind_ned_mps=wind,
-        gravity_mps2=_number(
-            environment["gravity_mps2"],
-            "waypoint.environment.gravity_mps2",
-            positive=True,
-        ),
+        gravity_mps2=gravity_mps2,
         aileron_limit_rad=aileron_limit_rad,
         elevator_limit_rad=elevator_limit_rad,
         rudder_limit_rad=rudder_limit_rad,
