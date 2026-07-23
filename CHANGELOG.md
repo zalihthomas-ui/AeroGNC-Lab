@@ -16,6 +16,10 @@ and the project uses Semantic Versioning.
 - A selectable nonlinear coefficient-driven 18-state waypoint backend, the wholly
   synthetic Sparrow-X2 civilian research-UAV configuration, backend/aircraft SHA-256
   provenance, and a deterministic reduced-versus-coefficient acceptance report.
+- Truth-isolated estimated waypoint navigation using timestamped seeded IMU, GNSS,
+  barometric, and airspeed sensors; fixed-lag 15-state ESKF replay; covariance,
+  latency, NIS-gate, and sensor-health diagnostics; plus a deterministic 20-second
+  GNSS-outage/recovery acceptance campaign.
 
 - Mission-planner **flight simulation playback** (Simulate/Play/Pause/Reset) that
   animates the aircraft flying the mission with a heading glyph and a live HUD,
@@ -87,7 +91,7 @@ and the project uses Semantic Versioning.
 
 ### Verification
 
-- The current suite passes 635 deterministic tests with 80.66% branch-aware package
+- The current suite passes 641 deterministic tests with 80.86% branch-aware package
   coverage against the enforced 75% floor. Ruff lint/format and strict MyPy checks
   pass on Python 3.13, the workflow definitions pass actionlint 1.7.12, the built
   distributions pass Twine and clean-install validation, and the installed

@@ -427,6 +427,8 @@ def run_waypoint_mission(
     metadata: dict[str, object] = {
         "guidance_mode": cfg.guidance_mode.value,
         "navigation_provider": type(provider).__name__,
+        "navigation_provider_details": dict(provider.provenance()),
+        "navigation_diagnostics": dict(provider.diagnostics()),
         "vehicle_backend": type(backend).__name__,
         "vehicle_backend_details": dict(backend.provenance()),
         "dt_s": cfg.dt_s,

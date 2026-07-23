@@ -1,5 +1,6 @@
 """Integration and scenario tests for the end-to-end waypoint GNC loop."""
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +19,10 @@ from aerognc.vehicle.control_surfaces import SurfaceFailureMode
 from aerognc.verification.waypoint_backends import (
     compare_waypoint_vehicle_models,
     write_waypoint_cross_model_comparison,
+)
+from aerognc.verification.waypoint_navigation import (
+    run_waypoint_navigation_campaign,
+    write_waypoint_navigation_campaign,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -101,6 +106,45 @@ def test_coefficient_backend_completes_and_passes_cross_model_bounds(tmp_path: P
     assert len(str(backend_details["aircraft_configuration_sha256"])) == 64
     report = write_waypoint_cross_model_comparison(comparison, tmp_path / "comparison.json")
     assert '"passed": true' in report.read_text(encoding="utf-8")
+
+
+def test_estimated_navigation_completes_outage_and_recovers_with_bounded_error(
+    tmp_path: Path,
+) -> None:
+    from aerognc.mission import load_mission
+
+    runtime = load_waypoint_runtime_configuration(
+        REPO_ROOT / "configs" / "waypoint_gnc_estimated.yaml"
+    )
+    parameters = runtime.navigation.estimated_parameters
+    assert parameters is not None
+    campaign = run_waypoint_navigation_campaign(parameters)
+    assert campaign.passed
+    assert campaign.outage_maximum_position_error_m < 10.0
+    assert campaign.recovery_position_rms_m < 0.5
+    report = write_waypoint_navigation_campaign(campaign, tmp_path / "navigation.json")
+    assert '"passed": true' in report.read_text(encoding="utf-8")
+
+    result = run_waypoint_mission(
+        load_mission(runtime.mission_path),
+        runtime.build_mission_config(),
+    )
+    assert result.completed
+    assert result.metadata["safety_events"] == []
+    assert result.summary()["max_abs_cross_track_m"] < 120.0
+    details = result.metadata["navigation_provider_details"]
+    diagnostics = result.metadata["navigation_diagnostics"]
+    assert isinstance(details, dict) and details["mode"] == "estimated"
+    assert isinstance(diagnostics, dict)
+    assert diagnostics["maximum_gnss_age_s"] == pytest.approx(20.45)
+    assert diagnostics["imu_held_step_count"] == 0
+    assert (
+        "truth"
+        not in json.dumps(
+            {"details": details, "diagnostics": diagnostics},
+            allow_nan=False,
+        ).lower()
+    )
 
 
 @pytest.mark.parametrize("mode", list(GuidanceMode))

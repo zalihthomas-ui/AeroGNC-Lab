@@ -1,0 +1,93 @@
+{
+  "dropout_window_s": [
+    70.0,
+    90.0
+  ],
+  "estimator_diagnostics": {
+    "airspeed_age_s": 0.0,
+    "attitude_standard_deviation_rad": [
+      0.007386958633017694,
+      0.007363181111160695,
+      0.11223972290406257
+    ],
+    "barometer_integrity": {
+      "accepted_count": 1199,
+      "consecutive_rejections": 0,
+      "health": "healthy",
+      "rejected_count": 1
+    },
+    "covariance_minimum_eigenvalue": 9.382247234216105e-09,
+    "covariance_trace": 0.14605354041143254,
+    "gnss_age_s": 0.3499999999999943,
+    "gnss_integrity": {
+      "accepted_count": 200,
+      "consecutive_rejections": 0,
+      "health": "healthy",
+      "rejected_count": 0
+    },
+    "imu_age_s": 0.0,
+    "imu_held_step_count": 0,
+    "initialized": true,
+    "last_updates": {
+      "barometer": {
+        "accepted": true,
+        "health": "healthy",
+        "nis": 0.17106398154708305,
+        "processing_time_s": 120.0,
+        "reason": "accepted and replayed",
+        "replayed_step_count": 2,
+        "sample_time_s": 119.9,
+        "threshold": 12.0
+      },
+      "gnss": {
+        "accepted": true,
+        "health": "healthy",
+        "nis": 10.545183254948164,
+        "processing_time_s": 119.65,
+        "reason": "accepted and replayed",
+        "replayed_step_count": 3,
+        "sample_time_s": 119.5,
+        "threshold": 30.0
+      }
+    },
+    "maximum_airspeed_age_s": 0.05000000000001137,
+    "maximum_covariance_trace": 43.640604482185125,
+    "maximum_gnss_age_s": 20.450000000000003,
+    "maximum_horizontal_position_std_m": 4.727553650855054,
+    "maximum_imu_age_s": 0.0,
+    "maximum_velocity_std_mps": 0.8000440074896662,
+    "maximum_vertical_position_std_m": 4.0001999962815225,
+    "position_standard_deviation_m": [
+      0.22640432569015403,
+      0.22640101557527167,
+      0.1284596010355054
+    ],
+    "time_s": 120.0,
+    "velocity_standard_deviation_mps": [
+      0.04081763713757384,
+      0.041007038899219465,
+      0.02785721341746162
+    ]
+  },
+  "interpretation": "Truth is used only by this scoring campaign. The controller-facing provider receives delayed synthetic sensors and emits estimated state; passing is research evidence, not navigation certification.",
+  "limits": {
+    "maximum_observed_gnss_age_s": 21.0,
+    "maximum_outage_position_error_m": 15.0,
+    "maximum_pre_outage_position_rms_m": 3.0,
+    "maximum_recovery_position_rms_m": 3.0,
+    "maximum_recovery_velocity_rms_mps": 0.5,
+    "minimum_observed_gnss_age_s": 19.5
+  },
+  "metrics": {
+    "all_states_valid": true,
+    "maximum_observed_gnss_age_s": 20.450000000000003,
+    "minimum_covariance_eigenvalue": 9.381171759600539e-09,
+    "outage_maximum_position_error_m": 9.109019326352108,
+    "pre_outage_position_rms_m": 0.3762604993540337,
+    "recovery_position_rms_m": 0.3553481780181338,
+    "recovery_velocity_rms_mps": 0.06055223822593012
+  },
+  "passed": true,
+  "schema_version": "1.0",
+  "scope": "simulation-only truth-isolated estimated waypoint navigation"
+}

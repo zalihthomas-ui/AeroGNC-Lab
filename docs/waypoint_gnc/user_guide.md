@@ -24,8 +24,14 @@ python -m aerognc.cli waypoint --config configs/waypoint_gnc.yaml
 # Fly the same mission on the nonlinear coefficient-driven 18-state plant
 python -m aerognc.cli waypoint --config configs/waypoint_gnc_coefficient.yaml
 
+# Fly with delayed synthetic sensors and fixed-lag ESKF navigation
+python -m aerognc.cli waypoint --config configs/waypoint_gnc_estimated.yaml
+
 # Reproduce the reduced-versus-coefficient acceptance evidence
 python scripts/compare_waypoint_backends.py
+
+# Reproduce the independent GNSS-outage/recovery navigation evidence
+python scripts/verify_waypoint_navigation.py
 
 # The concise mission-only form remains available
 python -m aerognc.cli waypoint --mission missions/waypoint_demo.mission.yaml \
@@ -49,7 +55,7 @@ the mission and explicitly records:
 
 - solver step, time limit, initial altitude, and initial airspeed;
 - wind and gravity;
-- perfect or seeded noisy navigation, including an optional GPS-dropout window;
+- perfect, seeded noisy, or truth-isolated estimated navigation;
 - guidance mode and gains;
 - cascaded-autopilot gains, limits, and trim;
 - safety envelope and geofence;
@@ -100,6 +106,24 @@ below 5 m, and airspeed difference below 1 m/s. The current reference record is
 Passing these mission-level bounds demonstrates consistent behavior across two
 independently structured simulators; it is not aircraft certification or proof that
 the models are identical.
+
+### Estimated navigation and truth isolation
+
+`configs/waypoint_gnc_estimated.yaml` runs the coefficient-driven plant using a
+seeded 20 Hz IMU, delayed 2 Hz civilian-GNSS-like observations, delayed 10 Hz
+barometric altitude, sampled airspeed, and the fixed-lag rotating-NED 15-state ESKF.
+The configuration explicitly records sensor bias, noise, bias drift, quantization,
+latency, availability, initialization covariance, process noise, NIS gates, and
+health limits. GNSS is unavailable from 70 through 90 s to exercise inertial outage
+bridging and recovery.
+
+Truth enters only the synthetic sensor boundary. Guidance, control, mission
+management, safety, and runtime diagnostics receive the estimated `NavigationState`;
+truth errors are calculated only by the independent verification campaign. The
+current evidence measures 9.109 m maximum position error during the 20 s outage,
+0.355 m recovery RMS, and 0.061 m/s recovery velocity RMS, with valid estimates and
+positive-semidefinite covariance throughout. See the
+[estimated-navigation design and evidence](estimated_navigation.md).
 
 ## Mission file format (schema version 1)
 
@@ -211,7 +235,7 @@ flowchart TD
 | Guidance | `aerognc.gnc.waypoint_guidance` |
 | Control | `aerognc.gnc.fixedwing_autopilot` |
 | Actuators | `aerognc.vehicle.control_surfaces` |
-| Navigation | `aerognc.navigation` (`state`, `providers`) |
+| Navigation | `aerognc.navigation` (`state`, `providers`, `estimated_provider`) |
 | Mission state / safety | `aerognc.mission.mission_manager`, `aerognc.mission.safety` |
 | Backend / runner | `aerognc.simulation.waypoint_backends`, `aerognc.simulation.waypoint_mission` |
 | Visualization | `aerognc.visualisation.waypoint_mission` |
@@ -231,6 +255,7 @@ flowchart TD
 ```bash
 python -m pytest tests/unit tests/integration/test_waypoint_mission.py
 python scripts/compare_waypoint_backends.py
+python scripts/verify_waypoint_navigation.py
 ```
 
 ## Known limitations
@@ -239,6 +264,6 @@ python scripts/compare_waypoint_backends.py
   18-state backend adds coefficient-driven nonlinear dynamics, rotating-planet
   kinematics, propulsion, fuel mass, atmosphere, wind, and stall behavior. Both use
   synthetic fictional inputs and neither is a validated real-aircraft model.
-- Takeoff, autonomous landing, TECS, full EKF-estimated navigation, and the
-  SITL/MAVLink backends are scoped but deferred — see
+- Takeoff, autonomous landing, TECS, magnetometer/terrain aiding, and the SITL/MAVLink
+  backends are scoped but deferred — see
   `../../TODO.md` and `sitl_hardware_roadmap.md`.

@@ -2,8 +2,10 @@ import numpy as np
 import pytest
 
 from aerognc.vehicle.sensors import (
+    AirspeedSensor,
     BarometricAltimeter,
     SensorErrorParameters,
+    SensorMeasurement,
 )
 
 
@@ -55,3 +57,21 @@ def test_scheduled_dropout_and_reset() -> None:
     ).measure(0.0, [0.0])
     assert reset_first is not None and comparison is not None
     np.testing.assert_array_equal(reset_first.value, comparison.value)
+
+
+def test_measurement_contract_and_airspeed_dimension_are_validated() -> None:
+    measurement = SensorMeasurement(1.0, 1.2, np.array([20.0]))
+    assert measurement.value[0] == pytest.approx(20.0)
+    with pytest.raises(ValueError, match="availability cannot precede"):
+        SensorMeasurement(1.0, 0.9, np.array([20.0]))
+    with pytest.raises(ValueError, match="dimension 1"):
+        AirspeedSensor(
+            SensorErrorParameters(
+                sample_rate_hz=10.0,
+                noise_std=[0.1, 0.1],
+                constant_bias=[0.0, 0.0],
+                bias_drift_std_per_sqrt_s=[0.0, 0.0],
+                quantisation=[0.0, 0.0],
+            ),
+            seed=1,
+        )

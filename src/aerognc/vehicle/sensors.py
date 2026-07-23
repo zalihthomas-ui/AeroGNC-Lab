@@ -84,6 +84,19 @@ class SensorMeasurement:
     available_time_s: float
     value: FloatArray
 
+    def __post_init__(self) -> None:
+        times = np.asarray([self.sample_time_s, self.available_time_s], dtype=np.float64)
+        value = np.asarray(self.value, dtype=np.float64)
+        if not np.all(np.isfinite(times)) or self.sample_time_s < 0.0:
+            raise ValueError("sensor measurement times must be finite and nonnegative")
+        if self.available_time_s < self.sample_time_s:
+            raise ValueError("sensor availability cannot precede acquisition")
+        if value.ndim != 1 or value.size == 0 or not np.all(np.isfinite(value)):
+            raise ValueError("sensor measurement value must be a finite nonempty vector")
+        object.__setattr__(self, "sample_time_s", float(self.sample_time_s))
+        object.__setattr__(self, "available_time_s", float(self.available_time_s))
+        object.__setattr__(self, "value", value.copy())
+
 
 class SampledSensor:
     """Generic reproducible vector sensor evaluated on a supplied truth sequence."""
@@ -198,4 +211,13 @@ class CivilianGnssSensor(SampledSensor):
     def __init__(self, parameters: SensorErrorParameters, *, seed: int) -> None:
         if parameters.dimension != 6:
             raise ValueError("GNSS-like parameters must have dimension 6")
+        super().__init__(parameters, seed=seed)
+
+
+class AirspeedSensor(SampledSensor):
+    """Scalar pitot/air-data true-airspeed observation [m/s]."""
+
+    def __init__(self, parameters: SensorErrorParameters, *, seed: int) -> None:
+        if parameters.dimension != 1:
+            raise ValueError("airspeed-sensor parameters must have dimension 1")
         super().__init__(parameters, seed=seed)

@@ -86,6 +86,10 @@ from aerognc.verification.waypoint_backends import (
     compare_waypoint_vehicle_models,
     write_waypoint_cross_model_comparison,
 )
+from aerognc.verification.waypoint_navigation import (
+    run_waypoint_navigation_campaign,
+    write_waypoint_navigation_campaign,
+)
 from aerognc.visualisation import plot_three_dof_results
 from aerognc.visualisation.advanced_navigation import plot_advanced_navigation
 from aerognc.visualisation.aero_database import plot_aerodynamic_database
@@ -138,6 +142,19 @@ def main() -> int:
     write_waypoint_cross_model_comparison(
         waypoint_comparison,
         output / "waypoint_backend_comparison.json",
+    )
+    estimated_waypoint = load_waypoint_runtime_configuration(
+        root / "configs" / "waypoint_gnc_estimated.yaml"
+    )
+    estimated_parameters = estimated_waypoint.navigation.estimated_parameters
+    if estimated_parameters is None:
+        raise RuntimeError("waypoint estimated-navigation reference is not configured")
+    navigation_campaign = run_waypoint_navigation_campaign(estimated_parameters)
+    if not navigation_campaign.passed:
+        raise RuntimeError("waypoint estimated-navigation reference failed acceptance")
+    write_waypoint_navigation_campaign(
+        navigation_campaign,
+        output / "waypoint_navigation_dropout.json",
     )
     orbit_sandbox_configuration = load_orbit_sandbox_configuration(
         root / "configs" / "orbit_sandbox.yaml"

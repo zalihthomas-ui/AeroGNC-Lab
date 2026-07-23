@@ -165,6 +165,7 @@ def write_waypoint_cross_model_comparison(
     output.write_text(
         json.dumps(comparison.summary(), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     return output
 

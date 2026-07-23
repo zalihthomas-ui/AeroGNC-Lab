@@ -15,6 +15,7 @@ from aerognc.configuration.waypoint_loader import (
 )
 from aerognc.gnc.waypoint_guidance import GuidanceMode
 from aerognc.mission import load_mission
+from aerognc.navigation.estimated_provider import EstimatedNavigationProvider
 from aerognc.navigation.providers import NoisyStateProvider, PerfectStateProvider
 from aerognc.simulation.waypoint_backends import VehicleBackendKind
 from aerognc.verification.waypoint_backends import compare_waypoint_vehicle_models
@@ -22,6 +23,7 @@ from aerognc.verification.waypoint_backends import compare_waypoint_vehicle_mode
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BUNDLED = REPO_ROOT / "configs" / "waypoint_gnc.yaml"
 COEFFICIENT = REPO_ROOT / "configs" / "waypoint_gnc_coefficient.yaml"
+ESTIMATED = REPO_ROOT / "configs" / "waypoint_gnc_estimated.yaml"
 MISSION = REPO_ROOT / "missions" / "waypoint_demo.mission.yaml"
 
 
@@ -108,6 +110,38 @@ def test_coefficient_runtime_rejects_inconsistent_solver_and_actuator_contracts(
             reduced,
             replace(config, mission_sha256="0" * 64),
         )
+
+
+def test_estimated_runtime_builds_fresh_filter_and_rejects_bad_sensor_cadence(
+    tmp_path: Path,
+) -> None:
+    runtime = load_waypoint_runtime_configuration(ESTIMATED)
+    first = runtime.build_mission_config().provider
+    second = runtime.build_mission_config().provider
+
+    assert runtime.navigation.mode is WaypointNavigationMode.ESTIMATED
+    assert isinstance(first, EstimatedNavigationProvider)
+    assert isinstance(second, EstimatedNavigationProvider)
+    assert first is not second
+    parameters = runtime.navigation.estimated_parameters
+    assert parameters is not None
+    assert parameters.gnss.delay_s == pytest.approx(0.15)
+    assert parameters.gnss.dropout_intervals_s == ((70.0, 90.0),)
+
+    payload: dict[str, object] = yaml.safe_load(ESTIMATED.read_text(encoding="utf-8"))
+    payload["mission_file"] = str(MISSION)
+    cast_mapping(payload["vehicle"])["aircraft_config"] = str(
+        REPO_ROOT / "configs" / "aircraft_waypoint_uav.yaml"
+    )
+    navigation = cast_mapping(payload["navigation"])
+    estimated = cast_mapping(navigation["estimated"])
+    sensors = cast_mapping(estimated["sensors"])
+    gyroscope = cast_mapping(sensors["gyroscope"])
+    gyroscope["sample_rate_hz"] = 25.0
+    invalid = tmp_path / "invalid-estimated.yaml"
+    invalid.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+    with pytest.raises(ConfigurationError, match="sample period must be an integer"):
+        load_waypoint_runtime_configuration(invalid)
 
 
 @pytest.mark.parametrize(

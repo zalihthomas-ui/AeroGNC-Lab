@@ -144,18 +144,23 @@ _Module: `vehicle/control_surfaces.py`. 12 tests; ruff + mypy strict clean._
 
 ## Phase 7 — Navigation modes  (spec §9)
 
-_The frame-explicit `NavigationState`, perfect provider, seeded noisy provider, dropout
-validity, and truth-isolating provider boundary are implemented and tested. Geodetic,
-acceleration, air-data, granular health, and full filter-backed estimation remain._
+_The frame-explicit state, perfect/noisy providers, and truth-isolated estimated mode
+are implemented and tested. Estimated mode integrates sampled IMU/GNSS/barometer/
+airspeed, fixed-lag rotating-NED ESKF replay, NIS gating, covariance/latency health,
+and a deterministic 20 s GNSS-outage/recovery campaign. Geodetic/controller-facing
+acceleration, alpha/beta, magnetometer, and terrain aiding remain optional refinements._
 
 - [~] 7.1 `NavigationState` output struct (lat/lon/alt, NED pos/vel, groundspeed, airspeed,
   RPY, quaternion, rates, accel, course, heading, climb rate, α/β if available, validity).
 - [x] 7.2 **Perfect-state mode** (simulator truth passthrough).
-- [ ] 7.3 **Estimated-state mode** reusing existing filters (`gnc/ekf`, `error_state_ekf`,
-  `strapdown_ins`); IMU/GPS/mag/baro/pitot sim reusing `vehicle/sensors.py`.
-- [~] 7.4 GPS dropout behaviour, sensor validation, state-health flags.
+- [x] 7.3 **Estimated-state mode** reusing `delayed_error_state_ekf` and
+  `strapdown_ins`; timestamped IMU/GNSS/barometer/pitot simulation reuses
+  `vehicle/sensors.py`. Magnetometer remains optional.
+- [x] 7.4 GNSS dropout/recovery, startup/cadence validation, NIS sensor health,
+  measurement ages, and covariance-based validity.
 - [x] 7.5 Controller must not read truth in estimated mode (enforce via interface).
-- [~] 7.6 Unit/integration tests for both modes.
+- [x] 7.6 Deterministic reset, truth non-aliasing, innovation failure/recovery,
+  quantitative outage campaign, and full coefficient-plant mission tests.
 
 ---
 
@@ -293,7 +298,7 @@ _Unit + integration (full chain) + scenario tests (nominal, all 4 guidance modes
 - [x] 15.2 Integration tests along the full chain (planner→manager→guidance→control→
   actuator→dynamics→nav→guidance).
 - [~] 15.3 Scenario tests (17 scenarios in spec §26) with fixed seeds.
-- [x] 15.4 Keep coverage ≥ 75% (repo threshold); 635 tests pass with 80.66%
+- [x] 15.4 Keep coverage ≥ 75% (repo threshold); 641 tests pass with 80.86%
   branch-aware package coverage under pytest 9.0.3 on 2026-07-23.
 
 ---
@@ -359,6 +364,12 @@ _`aerognc.api.fly_mission` façade done (lazily exposed as `aerognc.fly_mission`
 ---
 
 ## Running log (newest first)
+
+- 2026-07-23 — Truth-isolated estimated waypoint navigation integrated with seeded
+  timestamped IMU/GNSS/barometer/airspeed, fixed-lag 15-state ESKF replay, NIS
+  health gates, covariance/latency diagnostics, a full coefficient-plant mission,
+  and a deterministic 20 s GNSS-outage/recovery campaign. **641 tests pass with
+  80.86% branch coverage; Ruff and strict MyPy pass.**
 
 - 2026-07-23 — Repository-hardening tranche implemented: nonduplicating cross-platform
   CI, typed clean-install distributions, immutable Action pins, CodeQL/dependency
