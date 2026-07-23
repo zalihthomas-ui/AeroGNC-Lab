@@ -63,6 +63,8 @@ and the project uses Semantic Versioning.
 - Raised the development test floor to the security-fixed pytest 9 line and made the
   security workflow audit both runtime and development dependencies with a
   security-fixed packaging toolchain.
+- Made repository line endings explicit so checksummed CSV/JSON provenance remains
+  byte-identical on Linux and Windows while native Windows launchers retain CRLF.
 
 - Prepared the project for its public GitHub publication with a concise README
   overview, repository links, citation metadata, a security policy, structured issue

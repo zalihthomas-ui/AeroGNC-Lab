@@ -149,3 +149,4 @@ SYS-SWQ-012,Software quality,.github/workflows/ci.yml; pyproject.toml; src/aerog
 SYS-SWQ-013,Software quality,requirements/system_requirements.md; requirements/traceability_matrix.csv,tests/unit/test_repository_policy.py,T,Verified
 SYS-SWQ-014,Software quality,.github/workflows/security.yml; .github/workflows/release.yml; .github/dependabot.yml; .github/CODEOWNERS,tests/unit/test_repository_policy.py,T/A,Verified
 SYS-SWQ-015,Software quality,scripts/check_release_version.py; .github/workflows/release.yml,tests/unit/test_release_version.py; tests/unit/test_repository_policy.py,T,Verified
+SYS-SWQ-016,Software quality,.gitattributes; data/catalogs/nasa_confirmed_exoplanets.metadata.json,tests/unit/test_repository_policy.py; tests/unit/test_catalogs.py,T,Verified

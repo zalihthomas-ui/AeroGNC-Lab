@@ -561,3 +561,6 @@ defined in `verification_plan.md`.
 - **SYS-SWQ-015 (T):** A release tag shall use semantic `vX.Y.Z` form, exactly match
   the package and citation versions, and pass the complete quality and branch-aware
   acceptance suite before distribution artifacts can be published.
+- **SYS-SWQ-016 (T):** Repository checkout attributes shall preserve LF bytes for
+  checksummed text data and provenance records on every supported operating system,
+  while retaining conventional CRLF endings for native Windows launchers.

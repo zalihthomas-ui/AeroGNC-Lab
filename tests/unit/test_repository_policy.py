@@ -85,6 +85,10 @@ def test_distribution_declares_typing_and_project_links() -> None:
         "Changelog",
     }
     assert (ROOT / "src" / "aerognc" / "py.typed").is_file()
+    attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
+    assert "*.csv text eol=lf" in attributes
+    assert "*.json text eol=lf" in attributes
+    assert "*.bat text eol=crlf" in attributes
 
 
 def test_every_requirement_has_one_valid_traceability_row() -> None:
