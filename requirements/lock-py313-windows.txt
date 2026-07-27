@@ -20,11 +20,11 @@ pillow==12.3.0
 pluggy==1.6.0
 Pygments==2.20.0
 pyparsing==3.3.2
-pytest==9.0.3
+pytest==9.1.1
 pytest-cov==6.3.0
 python-dateutil==2.9.0.post0
 PyYAML==6.0.3
-ruff==0.15.22
+ruff==0.16.0
 scipy==1.18.0
 six==1.17.0
 trove-classifiers==2026.6.1.19
